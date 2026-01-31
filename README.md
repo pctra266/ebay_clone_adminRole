@@ -43,6 +43,29 @@ dotnet watch run
 
 Navigate to https://localhost:5001
 
+**🌱 The database will automatically seed with sample data on first run!**
+
+📖 **See [README-SEED-DATA.md](./README-SEED-DATA.md) for details on seeded data**  
+📖 **See [README-SEEDERS.md](./README-SEEDERS.md) for seeder architecture**
+
+---
+
+## 🔐 Default Login Credentials
+
+After seeding, you can login with:
+
+**Admin Account:**
+```
+Email: administrator@localhost
+Password: Administrator1!
+```
+
+**Sample Seller Account:**
+```
+Username: tech_seller_pro
+Password: Password123!
+```
+
 ---
 
 ## Build

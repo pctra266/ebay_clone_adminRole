@@ -1,4 +1,5 @@
 ﻿using EbayClone.Domain.Constants;
+using EbayClone.Infrastructure.Data.Seeders;
 using EbayClone.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -27,21 +28,28 @@ public class ApplicationDbContextInitialiser
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IServiceProvider _serviceProvider;
 
-    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public ApplicationDbContextInitialiser(
+        ILogger<ApplicationDbContextInitialiser> logger,
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task InitialiseAsync()
     {
         try
         {
-            // Use Migrations instead of EnsureCreated
             await _context.Database.MigrateAsync();
+            _logger.LogInformation("Database migration completed successfully");
         }
         catch (Exception ex)
         {
@@ -65,23 +73,85 @@ public class ApplicationDbContextInitialiser
 
     public async Task TrySeedAsync()
     {
-        // Default roles
-        var administratorRole = new IdentityRole(Roles.Administrator);
+        _logger.LogInformation("Starting database seeding...");
 
+        // 1. Seed Identity Roles (Required for admin user)
+        await SeedIdentityRolesAsync();
+
+        // 2. Seed Default Admin User (Required first)
+        await SeedDefaultAdminAsync();
+
+        // 3. Execute all custom seeders in order
+        await ExecuteSeedersAsync();
+
+        _logger.LogInformation("Database seeding completed successfully");
+    }
+
+    private async Task SeedIdentityRolesAsync()
+    {
+        var administratorRole = new IdentityRole(Roles.Administrator);
         if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
         {
             await _roleManager.CreateAsync(administratorRole);
+            _logger.LogInformation("Seeded Identity Role: {Role}", Roles.Administrator);
         }
+    }
 
-        // Default users
-        var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
+    private async Task SeedDefaultAdminAsync()
+    {
+        var administrator = new ApplicationUser
+        {
+            UserName = "administrator@localhost",
+            Email = "administrator@localhost",
+            EmailConfirmed = true
+        };
 
         if (_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "Administrator1!");
-            if (!string.IsNullOrWhiteSpace(administratorRole.Name))
+            await _userManager.AddToRolesAsync(administrator, new[] { Roles.Administrator });
+            _logger.LogInformation("Seeded Default Admin User: {Email}", administrator.Email);
+        }
+    }
+
+    private async Task ExecuteSeedersAsync()
+    {
+        // Get all seeder types
+        var seederTypes = new List<Type>
+        {
+            typeof(AdminRolesSeeder),
+            typeof(CategoriesSeeder),
+            typeof(PlatformFeesSeeder),
+            typeof(UsersSeeder),
+            typeof(SellerWalletsSeeder),
+            typeof(ProductsSeeder),
+            typeof(StoresSeeder),
+            typeof(AddressesSeeder)
+        };
+
+        // Create seeder instances and sort by Order property
+        var seeders = seederTypes
+            .Select(type =>
             {
-                await _userManager.AddToRolesAsync(administrator, new [] { administratorRole.Name });
+                var logger = _serviceProvider.GetRequiredService(
+                    typeof(ILogger<>).MakeGenericType(type));
+                return (ISeeder)Activator.CreateInstance(type, _context, logger)!;
+            })
+            .OrderBy(s => s.Order)
+            .ToList();
+
+        // Execute seeders in order
+        foreach (var seeder in seeders)
+        {
+            try
+            {
+                _logger.LogInformation("Executing seeder: {SeederName}", seeder.GetType().Name);
+                await seeder.SeedAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing seeder: {SeederName}", seeder.GetType().Name);
+                throw;
             }
         }
     }
