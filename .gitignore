@@ -33,6 +33,16 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# =========================================
+# CUSTOM: Protect sensitive configuration
+# =========================================
+# Ignore appsettings with real connection strings
+**/appsettings.Development.json
+# Keep the example file as reference
+!**/appsettings.Development.json.example
+
+# =========================================
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot

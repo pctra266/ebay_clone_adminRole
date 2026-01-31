@@ -2,6 +2,49 @@
 
 The project was generated using the [Clean.Architecture.Solution.Template](https://github.com/jasontaylordev/CleanArchitecture) version 10.0.0-preview.
 
+## 🚀 Quick Start
+
+### Known Issues
+
+⚠️ **NSwag Compatibility:** NSwag code generation is currently disabled due to .NET 10 compatibility issues. Swagger UI is still available at `/swagger` endpoint.
+
+### 1. Setup Database Connection
+
+**Option A: Automated Setup (Recommended)**
+```powershell
+# Run the setup script (Windows)
+.\setup-database.ps1
+```
+
+**Option B: Manual Setup with User Secrets**
+```powershell
+cd src/Web
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:EbayCloneDb" "Server=(localdb)\mssqllocaldb;Database=CloneEbayDB;Trusted_Connection=True;TrustServerCertificate=True"
+```
+
+**Option C: Edit Configuration File**
+- Copy `src/Web/appsettings.Development.json.example` to `src/Web/appsettings.Development.json`
+- Update the connection string with your SQL Server details
+
+📖 **For detailed database setup instructions, see [README-DATABASE.md](./README-DATABASE.md)**
+
+### 2. Create Database
+```bash
+cd src/Infrastructure
+dotnet ef database update --context ApplicationDbContext --startup-project ../Web
+```
+
+### 3. Run the Application
+```bash
+cd src/Web
+dotnet watch run
+```
+
+Navigate to https://localhost:5001
+
+---
+
 ## Build
 
 Run `dotnet build -tl` to build the solution.
@@ -16,6 +59,45 @@ dotnet watch run
 ```
 
 Navigate to https://localhost:5001. The application will automatically reload if you change any of the source files.
+
+## 🗄️ Database Configuration
+
+### Connection String Examples
+
+**LocalDB (Default):**
+```
+Server=(localdb)\mssqllocaldb;Database=CloneEbayDB;Trusted_Connection=True;TrustServerCertificate=True
+```
+
+**SQL Server Express:**
+```
+Server=.\SQLEXPRESS;Database=CloneEbayDB;Trusted_Connection=True;TrustServerCertificate=True
+```
+
+**SQL Server with SQL Authentication:**
+```
+Server=localhost;uid=sa;password=YourPassword;Database=CloneEbayDB;Encrypt=True;TrustServerCertificate=True
+```
+
+### Database Migrations
+
+**Create a new migration:**
+```bash
+cd src/Infrastructure
+dotnet ef migrations add MigrationName --context ApplicationDbContext --startup-project ../Web
+```
+
+**Apply migrations:**
+```bash
+dotnet ef database update --context ApplicationDbContext --startup-project ../Web
+```
+
+**Rollback migration:**
+```bash
+dotnet ef database update PreviousMigrationName --context ApplicationDbContext --startup-project ../Web
+```
+
+---
 
 ## Code Styles & Formatting
 
@@ -66,6 +148,30 @@ Then, in a new console, run the tests:
 cd .\src\Web\
 dotnet test
 ```
+
+## 📁 Project Structure
+
+```
+├── src/
+│   ├── Web/                    # Razor Pages Web Application
+│   ├── Application/            # Business Logic & CQRS
+│   ├── Domain/                 # Domain Entities & Events
+│   └── Infrastructure/         # Data Access & External Services
+├── tests/
+│   ├── Application.UnitTests/
+│   ├── Application.FunctionalTests/
+│   └── Web.AcceptanceTests/
+├── setup-database.ps1          # Database setup script
+├── README-DATABASE.md          # Detailed database guide
+└── README.md                   # This file
+```
+
+## 🔒 Security Notes
+
+- **Never commit passwords** in `appsettings.json` or `appsettings.Development.json`
+- Use **User Secrets** for development environments
+- Use **Environment Variables** or **Azure Key Vault** for production
+- The `.gitignore` is configured to protect sensitive configuration files
 
 ## Help
 To learn more about the template go to the [project website](https://github.com/jasontaylordev/CleanArchitecture). Here you can find additional guidance, request new features, report a bug, and discuss the template with other users.

@@ -54,6 +54,8 @@
   </Target>
 
   <!-- Auto-generated Open API specification and Angular TypeScript clients -->
+  <!-- DISABLED: NSwag not fully compatible with .NET 10 yet -->
+  <!--
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
@@ -67,6 +69,8 @@
     <Message Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' == '0'" Importance="low" />
     <Error Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' != '0'" />
   </Target>
+  -->
+
 
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
