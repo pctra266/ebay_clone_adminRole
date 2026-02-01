@@ -15,7 +15,7 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("EbayCloneDb");
+        var connectionString = builder.Configuration.GetConnectionString("MyCnn");
         Guard.Against.Null(connectionString, message: "Connection string 'EbayCloneDb' not found.");
 
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();

@@ -20,7 +20,7 @@ public class SqlTestDatabase : ITestDatabase
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionString("EbayCloneDb");
+        var connectionString = configuration.GetConnectionString("MyCnn");
 
         Guard.Against.Null(connectionString);
 
