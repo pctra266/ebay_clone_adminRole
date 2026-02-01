@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EbayClone.Infrastructure;
 
-public partial class Product
+public class Product
 {
     public int Id { get; set; }
 
