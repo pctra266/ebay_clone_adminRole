@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EbayClone.Infrastructure;
+namespace EbayClone.Domain.Entities;
 
 public partial class FinancialTransaction
 {

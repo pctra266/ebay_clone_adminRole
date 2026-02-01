@@ -1,6 +1,6 @@
 using System;
 
-namespace EbayClone.Infrastructure;
+namespace EbayClone.Domain.Entities;
 
 public partial class SellerWallet
 {
