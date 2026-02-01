@@ -5,6 +5,7 @@ using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using EbayClone.Domain.Entities;
 
 namespace EbayClone.Infrastructure.Data;
 
