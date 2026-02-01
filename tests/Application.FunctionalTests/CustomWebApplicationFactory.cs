@@ -28,7 +28,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder
             .UseEnvironment("Testing")
-            .UseSetting("ConnectionStrings:EbayCloneDb", _connectionString);
+            .UseSetting("ConnectionStrings:MyCnn", _connectionString);
 
         builder.ConfigureTestServices(services =>
         {
