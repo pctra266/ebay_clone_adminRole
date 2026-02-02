@@ -23,8 +23,10 @@ public static class WebApplicationExtensions
         var endpointGroupTypes = assembly.GetExportedTypes()
             .Where(t => t.IsSubclassOf(endpointGroupType));
 
+        Console.WriteLine($"[DEBUG] Found {endpointGroupTypes.Count()} endpoint groups:");
         foreach (var type in endpointGroupTypes)
         {
+            Console.WriteLine($"[DEBUG] - Registering endpoint group: {type.Name}");
             if (Activator.CreateInstance(type) is EndpointGroupBase instance)
             {
                 instance.Map(app.MapGroup(instance));

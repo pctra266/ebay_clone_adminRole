@@ -1,35 +1,36 @@
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EbayClone.Domain.Common;
 
 namespace EbayClone.Domain.Entities;
 
-public partial class ProductReport
+public class ProductReport : BaseAuditableEntity
 {
-    public int Id { get; set; }
-
     public int ProductId { get; set; }
 
-    public int? ReporterUserId { get; set; } // NULL for VeRO reports
+    // Người báo cáo (Nếu là Guest/Anonymous thì null, nếu là Brand Owner thì bắt buộc có acc)
+    public int? ReporterUserId { get; set; }
 
-    public string ReporterType { get; set; } = "User"; // 'User' or 'BrandOwner' (VeRO)
+    // Phân loại: 'User' (người mua báo cáo hàng đểu), 'VeRO' (chủ thương hiệu báo cáo bản quyền), 'System' (AI quét)
+    public string ReporterType { get; set; } = "User";
 
-    public string? Reason { get; set; }
+    public string? Reason { get; set; } // VD: "Hàng giả", "Ảnh mờ"
 
-    public string? EvidenceFiles { get; set; } // JSON: URLs of images/PDFs
+    public string? Description { get; set; } // Mô tả chi tiết
 
-    public string Status { get; set; } = "Pending"; // 'Pending', 'Resolved', 'Rejected'
+    public string? EvidenceFiles { get; set; } // JSON: URLs ảnh/PDF bằng chứng (Quan trọng cho VeRO)
 
-    public string Priority { get; set; } = "Medium"; // 'Low', 'Medium', 'High', 'VeRO'
+    // Status: 'Pending' (Chờ xử lý), 'Approved' (Đúng là vi phạm -> Đã xóa SP), 'Rejected' (Báo cáo sai -> Bỏ qua)
+    public string Status { get; set; } = "Pending";
 
-    public int? ResolvedBy { get; set; } // Admin ID
+    // Mức độ ưu tiên để Admin lọc: 'Low', 'High', 'Critical' (VeRO luôn là Critical)
+    public string Priority { get; set; } = "Low";
 
+    // --- ADMIN XỬ LÝ ---
+    public int? ResolvedBy { get; set; } // Admin ID nào xử lý
     public DateTime? ResolvedAt { get; set; }
+    public string? AdminReply { get; set; } // Admin trả lời lại người báo cáo (nếu cần)
 
-    public string? Resolution { get; set; } // Admin's decision
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    // Navigation properties
+    // --- NAVIGATION PROPERTIES ---
     [ForeignKey(nameof(ProductId))]
     public virtual Product? Product { get; set; }
 

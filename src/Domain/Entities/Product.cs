@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
 
-public class Product
+public class Product : BaseAuditableEntity
 {
-    public int Id { get; set; }
-
     public string? Title { get; set; }
 
     public string? Description { get; set; }
@@ -55,4 +53,7 @@ public class Product
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual User? Seller { get; set; }
+
+    public virtual ICollection<ProductReport> Reports { get; set; } = new List<ProductReport>();
 }
+

@@ -32,7 +32,7 @@ public static class DependencyInjection
         builder.Services.AddOpenApiDocument((configure, sp) =>
         {
             configure.Title = "EbayClone API";
-
+            configure.Version = "v1";   
         });
     }
 
