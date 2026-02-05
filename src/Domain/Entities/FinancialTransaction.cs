@@ -7,9 +7,9 @@ public partial class FinancialTransaction
 {
     public int Id { get; set; }
 
-    public int UserId { get; set; }
+    public int SellerId { get; set; } // Renamed/Mapped from UserId context
 
-    public string Type { get; set; } = string.Empty; // 'OrderPayment', 'Refund', 'Withdrawal', 'PlatformFee'
+    public string Type { get; set; } = string.Empty; // 'OrderPayment', 'Refund', 'Withdrawal', 'PlatformFee', 'FeeDeduction'
 
     public decimal Amount { get; set; }
 
@@ -21,11 +21,11 @@ public partial class FinancialTransaction
 
     public string? Description { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime Date { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
-    [ForeignKey(nameof(UserId))]
-    public virtual User? User { get; set; }
+    [ForeignKey(nameof(SellerId))]
+    public virtual User? Seller { get; set; }
 
     [ForeignKey(nameof(OrderId))]
     public virtual OrderTable? Order { get; set; }

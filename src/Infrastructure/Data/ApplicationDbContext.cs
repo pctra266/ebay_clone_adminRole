@@ -46,6 +46,8 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<AdminUserRole> AdminUserRoles { get; set; }
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
 
+
+
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return base.SaveChangesAsync(cancellationToken);

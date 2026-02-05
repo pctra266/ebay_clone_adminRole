@@ -6,7 +6,11 @@ public partial class PlatformFee
 {
     public int Id { get; set; }
 
-    public string FeeType { get; set; } = "FinalValueFee"; // 'ListingFee', 'FinalValueFee', 'SubscriptionFee'
+    public const string TypeFinalValueFee = "FinalValueFee";
+    public const string TypeListingFee = "ListingFee";
+    public const string TypeSubscriptionFee = "SubscriptionFee";
+
+    public string FeeType { get; set; } = TypeFinalValueFee; // 'ListingFee', 'FinalValueFee', 'SubscriptionFee'
 
     public int? CategoryId { get; set; } // NULL = applies to all
 
