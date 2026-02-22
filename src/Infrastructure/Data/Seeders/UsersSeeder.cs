@@ -28,6 +28,19 @@ public class UsersSeeder : ISeeder
         {
             new User
             {
+                Username = "system",
+                Email = "system@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("SystemAccount123!"),
+                Role = "System",
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
+            },
+            new User
+            {
                 Username = "john_buyer",
                 Email = "john@example.com",
                 Password = BCrypt.Net.BCrypt.HashPassword("Password123!"),
