@@ -29,6 +29,7 @@ public static class WebApplicationExtensions
             {
                 instance.Map(app.MapGroup(instance));
             }
+            Console.WriteLine(type.Name);
         }
 
         return app;

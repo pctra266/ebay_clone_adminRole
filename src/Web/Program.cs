@@ -1,5 +1,6 @@
 using System;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.AddKeyVaultIfConfigured();
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
+builder.Services.Configure<SecuritySettings>(
+    builder.Configuration.GetSection("Security"));
 
 var app = builder.Build();
 
@@ -26,6 +29,9 @@ else
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSwaggerUi(settings =>
 {

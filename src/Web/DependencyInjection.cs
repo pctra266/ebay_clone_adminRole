@@ -1,8 +1,12 @@
-﻿using Azure.Identity;
+using System.Text;
+using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Web.Options;
 using EbayClone.Web.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -14,6 +18,34 @@ public static class DependencyInjection
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddScoped<IUser, CurrentUser>();
+        builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+        builder.Services.Configure<EbayClone.Web.Options.JwtSettings>(
+            builder.Configuration.GetSection(JwtSettings.SectionName));
+
+        var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
+        if (jwtSettings is { Secret.Length: > 0 })
+        {
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+        }
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks()
