@@ -18,10 +18,9 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
 
     public async Task<List<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        // Lấy dữ liệu và map thủ công sang DTO (hoặc dùng AutoMapper nếu đã cài)
         return await _context.Products
-            .AsNoTracking() // Tăng tốc độ đọc
-            .Include(p => p.Seller) // Join bảng User để lấy tên Seller
+            .AsNoTracking() 
+            .Include(p => p.Seller)
             .Select(p => new ProductDto
             {
                 Id = p.Id,

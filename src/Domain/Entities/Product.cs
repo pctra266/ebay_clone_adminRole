@@ -26,10 +26,6 @@ public class Product : BaseAuditableEntity
     
     public int ReportCount { get; set; } = 0;
     
-    public string? ReportedBy { get; set; } // JSON array of user IDs
-    
-    public string? ReportReason { get; set; }
-    
     public bool IsVerified { get; set; } = false; // Admin approved
     
     public int? VerifiedBy { get; set; } // Admin ID

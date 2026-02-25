@@ -2,9 +2,11 @@
 using EbayClone.Application.Common.Models;
 using EbayClone.Application.Products.Commands.CreateProduct;
 using EbayClone.Application.Products.Commands.DeleteProduct;
+using EbayClone.Application.Products.Commands.ResolveProductViolation;
 using EbayClone.Application.Products.Commands.UpdateProduct;
 using EbayClone.Application.Products.Queries.DTOs;
 using EbayClone.Application.Products.Queries.GetProducts;
+using EbayClone.Application.Products.Queries.GetViolationDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,26 +23,24 @@ public class Products : EndpointGroupBase
         group.MapPost(CreateProduct);           // Tự động thành: POST /api/products
         group.MapPut("{id}", UpdateProduct);
         group.MapDelete("{id}", DeleteProduct);
+        group.MapGet("managed/{id}/violation-details", GetViolationDetails);
+        group.MapPost("managed/{id}/resolve-violation", ResolveViolation);
 
-      
 
         // [MỚI] Màn hình 5: Lấy danh sách quản lý (có Lọc/Tab)
         group.MapGet("managed", GetManagedProducts); // GET /api/products/managed
 
     }
-    // 1. Hàm xử lý GET
     public async Task<List<ProductDto>> GetProducts(ISender sender)
     {
         return await sender.Send(new GetProductsQuery());
     }
 
-    // 2. Hàm xử lý POST (Create)
     public async Task<int> CreateProduct(ISender sender, CreateProductCommand command)
     {
         return await sender.Send(command);
     }
 
-    // 3. Hàm xử lý PUT (Update)
     public async Task<IResult> UpdateProduct(ISender sender, int id, UpdateProductCommand command)
     {
         if (id != command.Id) return Results.BadRequest();
@@ -50,7 +50,6 @@ public class Products : EndpointGroupBase
         return Results.NoContent();
     }
 
-    // 4. Hàm xử lý DELETE
     public async Task<IResult> DeleteProduct(ISender sender, int id)
     {
         await sender.Send(new DeleteProductCommand(id));
@@ -65,5 +64,15 @@ public class Products : EndpointGroupBase
         return await sender.Send(query);
     }
 
+    public async Task<ViolationDetailDto> GetViolationDetails(ISender sender, int id)
+    {
+        return await sender.Send(new GetViolationDetailsQuery(id));
+    }
 
+    public async Task<IResult> ResolveViolation(ISender sender, int id, ResolveProductViolationCommand command)
+    {
+        if (id != command.ProductId) return Results.BadRequest();
+        await sender.Send(command);
+        return Results.NoContent();
+    }
 }

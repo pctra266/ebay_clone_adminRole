@@ -32,8 +32,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand>
         // 2. Kiểm tra nếu không tồn tại
         if (entity == null)
         {
-            // NotFoundException thường có sẵn trong template Clean Architecture
-            // Nếu chưa có, bạn có thể throw new Exception("Not Found");
             throw new NotFoundException(nameof(Product), $"{request.Id}");
         }
 

@@ -51,11 +51,11 @@ public class GetManagedProductsQueryHandler : IRequestHandler<GetManagedProducts
         {
             query = query.OrderByDescending(p => p.Reports.Any(r => r.ReporterType == "VeRO" && r.Status == "Pending")) // VeRO ưu tiên số 1
                          .ThenByDescending(p => p.ReportCount)
-                         .ThenByDescending(p => p.Created); // Created từ BaseAuditableEntity
+                         .ThenByDescending(p => p.CreatedAt); // Created từ BaseAuditableEntity
         }
         else
         {
-            query = query.OrderByDescending(p => p.Created);
+            query = query.OrderByDescending(p => p.CreatedAt);
         }
 
         // 4. Map sang DTO
@@ -65,7 +65,7 @@ public class GetManagedProductsQueryHandler : IRequestHandler<GetManagedProducts
             Title = p.Title,
             Price = p.Price ?? 0,
             ImageUrl = p.Images,
-            CategoryName = p.Category != null ? p.Category.Name : null, // FIX: Remove null-propagating operator
+            CategoryName = p.Category != null ? p.Category.Name : null, 
             ShopName = p.Seller != null ? p.Seller.Username : null,
             Status = p.Status,
             ReportCount = p.ReportCount,
