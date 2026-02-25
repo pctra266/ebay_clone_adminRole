@@ -25,21 +25,22 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseSwaggerUi(settings =>
-{
-    settings.Path = "/api";
-    settings.DocumentPath = "/api/specification.json";
-});
+app.UseExceptionHandler(options => { });
 
 app.MapRazorPages();
 
-app.MapFallbackToFile("index.html");
-
-app.UseExceptionHandler(options => { });
-
-
+// Register your endpoint groups
 app.MapEndpoints();
 
-app.Run();
+// NSwag OpenAPI and Swagger UI
+app.UseOpenApi();
+app.UseSwaggerUi(settings =>
+{
+    settings.Path = "/api";
+});
 
+// Keep fallback last so it doesn't catch API routes
+app.MapFallbackToFile("index.html");
+
+app.Run();
 public partial class Program { }
