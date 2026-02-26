@@ -45,5 +45,6 @@ public static class DependencyInjection
         builder.Services.AddAuthorization(options =>
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
         builder.Services.AddTransient<IEmailService, EmailService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
     }
 }
