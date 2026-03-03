@@ -32,9 +32,13 @@ public static class DependencyInjection
 
         builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddOpenApiDocument((configure, sp) =>
+        // Configure NSwag to generate OpenAPI from Minimal API endpoints
+        builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "EbayClone API";
+<<<<<<< HEAD
+            configure.Version = "v1";
+=======
             configure.Version = "v1";   
         });
 
@@ -58,6 +62,7 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings["Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
+>>>>>>> main
         });
     }
 

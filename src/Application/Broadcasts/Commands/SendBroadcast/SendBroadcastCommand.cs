@@ -1,0 +1,98 @@
+using EbayClone.Application.Common.Interfaces;
+using EbayClone.Infrastructure;
+using System.Text.Json;
+
+namespace EbayClone.Application.Broadcasts.Commands.SendBroadcast;
+
+public record SendBroadcastCommand : IRequest<int>
+{
+    public string Title { get; init; } = string.Empty;
+    public string Content { get; init; } = string.Empty;
+    public string TargetAudience { get; init; } = "All"; // All, Seller, Buyer, Group
+    public string? TargetGroup { get; init; } // Used when TargetAudience = Group
+    public List<string> Channels { get; init; } = new() { "InApp" }; // Email, InApp, SMS
+    public DateTime? ScheduleAt { get; init; }
+    public int CreatedBy { get; init; }
+}
+
+public class SendBroadcastCommandHandler : IRequestHandler<SendBroadcastCommand, int>
+{
+    private readonly IApplicationDbContext _context;
+
+    public SendBroadcastCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<int> Handle(SendBroadcastCommand request, CancellationToken cancellationToken)
+    {
+        var validChannels = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Email", "InApp", "SMS" };
+        if (request.Channels.Count == 0 || request.Channels.Any(c => !validChannels.Contains(c)))
+        {
+            throw new ArgumentException("Invalid channel. Valid values: Email, InApp, SMS");
+        }
+
+        var validAudiences = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "All", "Seller", "Buyer", "Group" };
+        if (!validAudiences.Contains(request.TargetAudience))
+        {
+            throw new ArgumentException("Invalid target audience. Valid values: All, Seller, Buyer, Group");
+        }
+
+        if (string.Equals(request.TargetAudience, "Group", StringComparison.OrdinalIgnoreCase) &&
+            string.IsNullOrWhiteSpace(request.TargetGroup))
+        {
+            throw new ArgumentException("TargetGroup is required when TargetAudience is Group.");
+        }
+
+        var now = DateTime.UtcNow;
+        var targetRole = string.Equals(request.TargetAudience, "All", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : string.Equals(request.TargetAudience, "Group", StringComparison.OrdinalIgnoreCase)
+                ? $"Group:{request.TargetGroup}"
+                : request.TargetAudience;
+
+        // Create notification for each channel
+        foreach (var channel in request.Channels)
+        {
+            var notification = new Notification
+            {
+                UserId = null, // Broadcast to all matching users
+                UserRole = targetRole,
+                Title = request.Title,
+                Content = request.Content,
+                Type = channel,
+                Status = request.ScheduleAt.HasValue ? "Scheduled" : "Sent",
+                ScheduledAt = request.ScheduleAt,
+                SentAt = request.ScheduleAt.HasValue ? null : now,
+                CreatedBy = request.CreatedBy,
+                CreatedAt = now
+            };
+
+            _context.Notifications.Add(notification);
+        }
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.CreatedBy,
+            Action = request.ScheduleAt.HasValue ? "ScheduleBroadcast" : "SendBroadcast",
+            TargetType = "Broadcast",
+            Details = JsonSerializer.Serialize(new
+            {
+                after = new
+                {
+                    request.Title,
+                    request.Content,
+                    request.TargetAudience,
+                    request.TargetGroup,
+                    request.Channels,
+                    request.ScheduleAt
+                }
+            }),
+            CreatedAt = now
+        });
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return request.Channels.Count; // Return number of notifications created
+    }
+}
