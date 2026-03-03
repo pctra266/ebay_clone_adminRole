@@ -1,4 +1,6 @@
+using System;
 using EbayClone.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+<<<<<<< HEAD
 app.UseExceptionHandler(options => { });
 app.UseAuthentication();
 app.UseAuthorization();
@@ -32,6 +35,25 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 // Register your endpoint groups
+=======
+app.UseOpenApi();
+
+app.UseSwaggerUi(settings =>
+{
+    settings.Path = "/api";
+});
+
+app.MapRazorPages();
+
+app.MapFallbackToFile("index.html");
+
+app.UseExceptionHandler(options => { });
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+>>>>>>> main
 app.MapEndpoints();
 
 // NSwag OpenAPI and Swagger UI

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace EbayClone.Infrastructure;
+namespace EbayClone.Domain.Entities;
 
 public partial class AdminRole
 {

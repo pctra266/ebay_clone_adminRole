@@ -3,6 +3,7 @@ using EbayClone.Domain.Constants;
 using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Data.Interceptors;
 using EbayClone.Infrastructure.Identity;
+using EbayClone.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -15,8 +16,8 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("EbayCloneDb");
-        Guard.Against.Null(connectionString, message: "Connection string 'EbayCloneDb' not found.");
+        var connectionString = builder.Configuration.GetConnectionString("MyCnn");
+        Guard.Against.Null(connectionString, message: "Connection string 'MyCnn' not found.");
 
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
@@ -42,6 +43,7 @@ public static class DependencyInjection
         builder.Services.AddTransient<IIdentityService, IdentityService>();
 
         builder.Services.AddAuthorization(options =>
+<<<<<<< HEAD
         {
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
@@ -75,5 +77,10 @@ public static class DependencyInjection
             options.AddPolicy(Policies.ViewAuditLogs, policy =>
                 policy.RequireRole(Roles.SuperAdmin));
         });
+=======
+            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        builder.Services.AddTransient<IEmailService, EmailService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+>>>>>>> main
     }
 }

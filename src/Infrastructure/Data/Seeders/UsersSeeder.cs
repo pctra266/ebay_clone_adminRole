@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using EbayClone.Domain.Entities;
 
 namespace EbayClone.Infrastructure.Data.Seeders;
 
@@ -25,6 +26,19 @@ public class UsersSeeder : ISeeder
 
         var users = new List<User>
         {
+            new User
+            {
+                Username = "system",
+                Email = "system@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("SystemAccount123!"),
+                Role = "System",
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
+            },
             new User
             {
                 Username = "john_buyer",

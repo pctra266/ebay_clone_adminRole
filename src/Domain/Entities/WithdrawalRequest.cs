@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EbayClone.Infrastructure;
+namespace EbayClone.Domain.Entities;
 
 public partial class WithdrawalRequest
 {
@@ -17,7 +17,12 @@ public partial class WithdrawalRequest
 
     public string? BankAccountName { get; set; }
 
-    public string Status { get; set; } = "Pending"; // 'Pending', 'Processing', 'Approved', 'Rejected'
+    public const string StatusPending = "Pending";
+    public const string StatusProcessing = "Processing"; // Money locked
+    public const string StatusApproved = "Approved";
+    public const string StatusRejected = "Rejected";
+
+    public string Status { get; set; } = StatusPending;
 
     public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 

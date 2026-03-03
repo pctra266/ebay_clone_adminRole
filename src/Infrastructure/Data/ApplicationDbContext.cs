@@ -5,6 +5,7 @@ using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using EbayClone.Domain.Entities;
 
 namespace EbayClone.Infrastructure.Data;
 
@@ -44,6 +45,9 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<AdminRole> AdminRoles { get; set; }
     public virtual DbSet<AdminUserRole> AdminUserRoles { get; set; }
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+    public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
+
+
 
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -149,7 +153,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
             entity.Property(e => e.RaisedBy).HasColumnName("raisedBy");
             entity.Property(e => e.Resolution).HasColumnName("resolution");
             entity.Property(e => e.Status)
-                .HasMaxLength(20)
+                .HasMaxLength(30)
                 .HasColumnName("status");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Disputes)

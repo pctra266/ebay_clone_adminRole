@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using EbayClone.Domain.Entities;
 
 namespace EbayClone.Infrastructure.Data.Seeders;
 

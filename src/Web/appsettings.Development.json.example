@@ -1,6 +1,6 @@
 {
   "ConnectionStrings": {
-    "EbayCloneDb": "Server=(localdb)\\mssqllocaldb;Database=CloneEbayDB;Trusted_Connection=True;TrustServerCertificate=True"
+    "MyCnn": "Server=(localdb)\\mssqllocaldb;Database=CloneEbayDB;Trusted_Connection=True;TrustServerCertificate=True"
   },
   "Logging": {
     "LogLevel": {
