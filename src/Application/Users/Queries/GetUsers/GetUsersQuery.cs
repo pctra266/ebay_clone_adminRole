@@ -9,6 +9,7 @@ public record GetUsersQuery : IRequest<PaginatedList<UserBriefDto>>
 {
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;
+    public string? Tab { get; init; } // All, PendingApproval, Banned
     public string? Status { get; init; }
     public string? ApprovalStatus { get; init; }
     public string? Role { get; init; }
@@ -29,6 +30,16 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedList
     public async Task<PaginatedList<UserBriefDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Tab))
+        {
+            query = request.Tab.Trim().ToLowerInvariant() switch
+            {
+                "pendingapproval" or "pending" => query.Where(u => u.ApprovalStatus == "PendingApproval" || u.Status == "Pending"),
+                "banned" => query.Where(u => u.Status == "Banned"),
+                _ => query
+            };
+        }
 
         // Apply filters
         if (!string.IsNullOrEmpty(request.Status))

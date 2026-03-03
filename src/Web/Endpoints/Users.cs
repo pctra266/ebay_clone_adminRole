@@ -7,6 +7,7 @@ using EbayClone.Application.Users.Commands.UnbanUser;
 using EbayClone.Application.Users.Commands.UpdateUserStatus;
 using EbayClone.Application.Users.Queries.GetUserById;
 using EbayClone.Application.Users.Queries.GetUsers;
+using EbayClone.Domain.Constants;
 using EbayClone.Web.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +18,7 @@ public class Users : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        // TODO: Uncomment in production
-        // groupBuilder.RequireAuthorization();
+        groupBuilder.RequireAuthorization(Policies.ManageUsers);
 
         groupBuilder.MapGet("", GetUsers);
         groupBuilder.MapGet("{id:int}", GetUserById);
@@ -61,7 +61,8 @@ public class Users : EndpointGroupBase
             var result = await sender.Send(new UpdateUserStatusCommand
             {
                 UserId = id,
-                Status = request.Status
+                Status = request.Status,
+                AdminId = request.AdminId
             });
 
             if (!result)
@@ -99,9 +100,14 @@ public class Users : EndpointGroupBase
 
     public async Task<Results<Ok, NotFound>> UnbanUser(
         ISender sender,
-        int id)
+        int id,
+        [FromBody] UnbanUserRequest request)
     {
-        var result = await sender.Send(new UnbanUserCommand(id));
+        var result = await sender.Send(new UnbanUserCommand
+        {
+            UserId = id,
+            AdminId = request.AdminId
+        });
 
         if (!result)
         {
@@ -138,7 +144,8 @@ public class Users : EndpointGroupBase
         var result = await sender.Send(new RejectUserCommand
         {
             UserId = id,
-            Reason = request.Reason
+            Reason = request.Reason,
+            AdminId = request.AdminId
         });
 
         if (!result)
@@ -151,7 +158,8 @@ public class Users : EndpointGroupBase
 }
 
 // Request DTOs
-public record UpdateUserStatusRequest(string Status);
+public record UpdateUserStatusRequest(string Status, int AdminId);
 public record BanUserRequest(string Reason, int AdminId);
+public record UnbanUserRequest(int AdminId);
 public record ApproveUserRequest(int AdminId);
-public record RejectUserRequest(string Reason);
+public record RejectUserRequest(string Reason, int AdminId);

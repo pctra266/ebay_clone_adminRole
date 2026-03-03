@@ -1,6 +1,7 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace EbayClone.Application.AdminRoles.Commands.AssignRole;
 
@@ -36,6 +37,15 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, bool>
         var existingAssignment = await _context.AdminUserRoles
             .FirstOrDefaultAsync(aur => aur.UserId == request.UserId, cancellationToken);
 
+        var before = existingAssignment == null
+            ? null
+            : new
+            {
+                existingAssignment.RoleId,
+                existingAssignment.AssignedBy,
+                existingAssignment.AssignedAt
+            };
+
         if (existingAssignment != null)
         {
             // Update existing assignment
@@ -55,6 +65,37 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, bool>
             };
             _context.AdminUserRoles.Add(assignment);
         }
+
+        _context.Notifications.Add(new Notification
+        {
+            UserId = request.UserId,
+            Title = "Phan quyen admin da duoc cap nhat",
+            Content = $"Ban da duoc gan vai tro admin: {role.RoleName}.",
+            Type = "InApp",
+            Status = "Sent",
+            SentAt = DateTime.UtcNow,
+            CreatedBy = request.AssignedBy,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.AssignedBy,
+            Action = "AssignAdminRole",
+            TargetType = "User",
+            TargetId = request.UserId,
+            Details = JsonSerializer.Serialize(new
+            {
+                before,
+                after = new
+                {
+                    roleId = request.RoleId,
+                    roleName = role.RoleName,
+                    assignedBy = request.AssignedBy
+                }
+            }),
+            CreatedAt = DateTime.UtcNow
+        });
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;

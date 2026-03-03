@@ -1,4 +1,5 @@
 ﻿using EbayClone.Application.WeatherForecasts.Queries.GetWeatherForecasts;
+using EbayClone.Domain.Constants;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EbayClone.Web.Endpoints;
@@ -7,7 +8,7 @@ public class WeatherForecasts : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.RequireAuthorization();
+        groupBuilder.RequireAuthorization(Policies.ViewDashboard);
 
         groupBuilder.MapGet(GetWeatherForecasts);
     }

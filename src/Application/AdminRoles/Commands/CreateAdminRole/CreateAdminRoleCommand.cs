@@ -9,6 +9,7 @@ public record CreateAdminRoleCommand : IRequest<int>
     public string RoleName { get; init; } = string.Empty;
     public string? Description { get; init; }
     public List<string> Permissions { get; init; } = new();
+    public int CreatedBy { get; init; }
 }
 
 public class CreateAdminRoleCommandHandler : IRequestHandler<CreateAdminRoleCommand, int>
@@ -31,6 +32,24 @@ public class CreateAdminRoleCommandHandler : IRequestHandler<CreateAdminRoleComm
         };
 
         _context.AdminRoles.Add(role);
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.CreatedBy,
+            Action = "CreateAdminRole",
+            TargetType = "AdminRole",
+            Details = JsonSerializer.Serialize(new
+            {
+                after = new
+                {
+                    request.RoleName,
+                    request.Description,
+                    request.Permissions
+                }
+            }),
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return role.Id;

@@ -2,6 +2,7 @@ using EbayClone.Application.Broadcasts;
 using EbayClone.Application.Broadcasts.Commands.SendBroadcast;
 using EbayClone.Application.Broadcasts.Queries.GetBroadcasts;
 using EbayClone.Application.Common.Models;
+using EbayClone.Domain.Constants;
 using EbayClone.Web.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -12,8 +13,7 @@ public class Broadcasts : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        // Only authorized admins can access broadcasts
-        groupBuilder.RequireAuthorization();
+        groupBuilder.RequireAuthorization(Policies.ManageBroadcasts);
 
         groupBuilder.MapGet("", GetBroadcasts);
         groupBuilder.MapPost("", SendBroadcast);
@@ -28,38 +28,54 @@ public class Broadcasts : EndpointGroupBase
         return TypedResults.Ok(result);
     }
 
-    public async Task<Created<int>> SendBroadcast(
+    public async Task<Results<Created<int>, BadRequest<string>>> SendBroadcast(
         ISender sender,
         [FromBody] SendBroadcastRequest request)
     {
-        var count = await sender.Send(new SendBroadcastCommand
+        try
         {
-            Title = request.Title,
-            Content = request.Content,
-            TargetAudience = request.TargetAudience,
-            Channels = request.Channels,
-            ScheduleAt = null, // Send immediately
-            CreatedBy = request.CreatedBy
-        });
+            var count = await sender.Send(new SendBroadcastCommand
+            {
+                Title = request.Title,
+                Content = request.Content,
+                TargetAudience = request.TargetAudience,
+                TargetGroup = request.TargetGroup,
+                Channels = request.Channels,
+                ScheduleAt = null, // Send immediately
+                CreatedBy = request.CreatedBy
+            });
 
-        return TypedResults.Created($"/api/Broadcasts", count);
+            return TypedResults.Created($"/api/Broadcasts", count);
+        }
+        catch (ArgumentException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 
-    public async Task<Created<int>> ScheduleBroadcast(
+    public async Task<Results<Created<int>, BadRequest<string>>> ScheduleBroadcast(
         ISender sender,
         [FromBody] ScheduleBroadcastRequest request)
     {
-        var count = await sender.Send(new SendBroadcastCommand
+        try
         {
-            Title = request.Title,
-            Content = request.Content,
-            TargetAudience = request.TargetAudience,
-            Channels = request.Channels,
-            ScheduleAt = request.ScheduleAt,
-            CreatedBy = request.CreatedBy
-        });
+            var count = await sender.Send(new SendBroadcastCommand
+            {
+                Title = request.Title,
+                Content = request.Content,
+                TargetAudience = request.TargetAudience,
+                TargetGroup = request.TargetGroup,
+                Channels = request.Channels,
+                ScheduleAt = request.ScheduleAt,
+                CreatedBy = request.CreatedBy
+            });
 
-        return TypedResults.Created($"/api/Broadcasts", count);
+            return TypedResults.Created($"/api/Broadcasts", count);
+        }
+        catch (ArgumentException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 }
 
@@ -68,6 +84,7 @@ public record SendBroadcastRequest(
     string Title,
     string Content,
     string TargetAudience,
+    string? TargetGroup,
     List<string> Channels,
     int CreatedBy);
 
@@ -75,6 +92,7 @@ public record ScheduleBroadcastRequest(
     string Title,
     string Content,
     string TargetAudience,
+    string? TargetGroup,
     List<string> Channels,
     DateTime ScheduleAt,
     int CreatedBy);

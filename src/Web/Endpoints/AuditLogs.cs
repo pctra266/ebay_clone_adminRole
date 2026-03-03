@@ -1,6 +1,7 @@
 using EbayClone.Application.AuditLogs;
 using EbayClone.Application.AuditLogs.Queries.GetAuditLogs;
 using EbayClone.Application.Common.Models;
+using EbayClone.Domain.Constants;
 using EbayClone.Web.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -10,8 +11,7 @@ public class AuditLogs : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        // Only SuperAdmin can access audit logs
-        groupBuilder.RequireAuthorization();
+        groupBuilder.RequireAuthorization(Policies.ViewAuditLogs);
 
         groupBuilder.MapGet("", GetAuditLogs);
         groupBuilder.MapGet("admin/{adminId:int}", GetAuditLogsByAdmin);
@@ -51,6 +51,7 @@ public class AuditLogs : EndpointGroupBase
         var result = await sender.Send(new GetAuditLogsQuery
         {
             TargetType = targetType,
+            TargetId = targetId,
             PageNumber = pageNumber,
             PageSize = pageSize
         });
