@@ -31,6 +31,7 @@ public interface IApplicationDbContext
     // Các bảng mới cho Admin
     DbSet<ProductReport> ProductReports { get; }
     DbSet<SellerWallet> SellerWallets { get; }
+
     DbSet<WithdrawalRequest> WithdrawalRequests { get; }
     DbSet<PlatformFee> PlatformFees { get; }
     DbSet<AdminAction> AdminActions { get; }
@@ -39,6 +40,7 @@ public interface IApplicationDbContext
     DbSet<AdminUserRole> AdminUserRoles { get; }
     DbSet<FinancialTransaction> FinancialTransactions { get; }
     DbSet<DisputeMessage> DisputeMessages { get; }
+
 
     // 2. Hàm lưu thay đổi (Quan trọng nhất)
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
