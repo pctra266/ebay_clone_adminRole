@@ -27,10 +27,11 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseOpenApi();
+
 app.UseSwaggerUi(settings =>
 {
     settings.Path = "/api";
-    settings.DocumentPath = "/api/specification.json";
 });
 
 app.MapRazorPages();
@@ -39,6 +40,9 @@ app.MapFallbackToFile("index.html");
 
 app.UseExceptionHandler(options => { });
 
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapEndpoints();
 
