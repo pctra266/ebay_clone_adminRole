@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const API_BASE = "/api";
 
 const endpoints = {
@@ -9,7 +8,7 @@ const endpoints = {
 };
 
 export default endpoints;
-=======
+
 // src/constants/endpoints.js
 
 export const ENDPOINTS = {
@@ -32,4 +31,3 @@ export const ENDPOINTS = {
     // USERS: { BASE: '/api/users', ... },
     // ORDERS: { ... }
 };
->>>>>>> main

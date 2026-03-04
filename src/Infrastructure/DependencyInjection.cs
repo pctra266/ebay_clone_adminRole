@@ -43,7 +43,6 @@ public static class DependencyInjection
         builder.Services.AddTransient<IIdentityService, IdentityService>();
 
         builder.Services.AddAuthorization(options =>
-<<<<<<< HEAD
         {
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
@@ -76,11 +75,11 @@ public static class DependencyInjection
 
             options.AddPolicy(Policies.ViewAuditLogs, policy =>
                 policy.RequireRole(Roles.SuperAdmin));
-        });
-=======
-            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        options.AddPolicy(Policies.CanPurge, policy => 
+        policy.RequireRole(Roles.Administrator));
+
+    });
         builder.Services.AddTransient<IEmailService, EmailService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
->>>>>>> main
     }
 }

@@ -27,15 +27,13 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-<<<<<<< HEAD
 app.UseExceptionHandler(options => { });
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
 
-// Register your endpoint groups
-=======
+
 app.UseOpenApi();
 
 app.UseSwaggerUi(settings =>
@@ -53,7 +51,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
->>>>>>> main
 app.MapEndpoints();
 
 // NSwag OpenAPI and Swagger UI

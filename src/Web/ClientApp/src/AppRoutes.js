@@ -1,16 +1,13 @@
-<<<<<<< HEAD
 import { DashboardPage } from "./pages/DashboardPage";
 import { UsersPage } from "./pages/UsersPage";
 import { UserDetailPage } from "./pages/UserDetailPage";
 import { BroadcastPage } from "./pages/BroadcastPage";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
-=======
 import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
->>>>>>> main
 
 const AppRoutes = [
   {
@@ -22,7 +19,6 @@ const AppRoutes = [
     element: <UsersPage />
   },
   {
-<<<<<<< HEAD
     path: "/users/:userId",
     element: <UserDetailPage />
   },
@@ -37,14 +33,14 @@ const AppRoutes = [
   {
     path: "/audit-logs",
     element: <AuditLogsPage />
-=======
+  },
+  {
     path: '/fetch-data',
     element: <FetchData />
   },
   {
     path: '/products',
     element: <ProductList />
->>>>>>> main
   }
 ];
 

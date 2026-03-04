@@ -1,5 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
-using EbayClone.Infrastructure;
+using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 

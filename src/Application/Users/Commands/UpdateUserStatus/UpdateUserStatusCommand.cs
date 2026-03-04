@@ -1,6 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
-using EbayClone.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+using EbayClone.Domain.Entities;
 using System.Text.Json;
 
 namespace EbayClone.Application.Users.Commands.UpdateUserStatus;

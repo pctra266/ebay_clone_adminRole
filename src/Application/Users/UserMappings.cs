@@ -1,4 +1,4 @@
-using EbayClone.Infrastructure;
+using EbayClone.Domain.Entities;
 
 namespace EbayClone.Application.Users;
 

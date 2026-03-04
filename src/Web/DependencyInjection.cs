@@ -36,9 +36,6 @@ public static class DependencyInjection
         builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "EbayClone API";
-<<<<<<< HEAD
-            configure.Version = "v1";
-=======
             configure.Version = "v1";   
         });
 
@@ -62,7 +59,6 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings["Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
->>>>>>> main
         });
     }
 
