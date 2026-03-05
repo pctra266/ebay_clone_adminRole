@@ -1,8 +1,11 @@
 using System;
+using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.AddKeyVaultIfConfigured();
@@ -29,23 +32,24 @@ app.UseStaticFiles();
 
 app.UseOpenApi();
 
+app.UseExceptionHandler(options => { });
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+// Register your endpoint groups
+app.MapEndpoints();
+
+// NSwag OpenAPI and Swagger UI
+app.UseOpenApi();
 app.UseSwaggerUi(settings =>
 {
     settings.Path = "/api";
 });
 
-app.MapRazorPages();
-
+// Keep fallback last so it doesn't catch API routes
 app.MapFallbackToFile("index.html");
 
-app.UseExceptionHandler(options => { });
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.MapEndpoints();
-
 app.Run();
-
 public partial class Program { }

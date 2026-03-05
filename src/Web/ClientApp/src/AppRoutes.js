@@ -2,6 +2,8 @@ import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
+import { UserList } from "./pages/Users";
+import { UserDetail } from "./pages/UserDetail";
 
 const AppRoutes = [
   {
@@ -19,6 +21,14 @@ const AppRoutes = [
   {
     path: '/products',
     element: <ProductList />
+  },
+  {
+    path: '/users',
+    element: <UserList />
+  },
+  {
+    path: '/users/:id',
+    element: <UserDetail />
   }
 ];
 

@@ -41,8 +41,11 @@ export class NavMenu extends Component {
               <NavItem>
                 <a className="nav-link text-dark" href="/Identity/Account/Manage">Account</a>
               </NavItem>
-                <NavItem>
+              <NavItem>
                 <a className="nav-link text-dark" href="/products">Products</a>
+              </NavItem>
+              <NavItem>
+                <a className="nav-link text-dark" href="/users">Users</a>
               </NavItem>
             </ul>
           </Collapse>
