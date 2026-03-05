@@ -27,7 +27,7 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-<<<<<<< HEAD
+
 app.UseExceptionHandler(options => { });
 app.UseAuthentication();
 app.UseAuthorization();
@@ -35,7 +35,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 // Register your endpoint groups
-=======
+
 app.UseOpenApi();
 
 app.UseSwaggerUi(settings =>
@@ -45,7 +45,7 @@ app.UseSwaggerUi(settings =>
 
 app.MapRazorPages();
 
-app.MapFallbackToFile("index.html");
+
 
 app.UseExceptionHandler(options => { });
 
@@ -53,15 +53,12 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
->>>>>>> main
+
 app.MapEndpoints();
 
 // NSwag OpenAPI and Swagger UI
 app.UseOpenApi();
-app.UseSwaggerUi(settings =>
-{
-    settings.Path = "/api";
-});
+
 
 // Keep fallback last so it doesn't catch API routes
 app.MapFallbackToFile("index.html");

@@ -6,7 +6,7 @@ namespace EbayClone.Domain.Entities;
 public partial class FinancialTransaction
 {
     public int Id { get; set; }
-
+    public int UserId { get; set; }
     public int SellerId { get; set; } // Renamed/Mapped from UserId context
 
     public string Type { get; set; } = string.Empty; // 'OrderPayment', 'Refund', 'Withdrawal', 'PlatformFee', 'FeeDeduction'

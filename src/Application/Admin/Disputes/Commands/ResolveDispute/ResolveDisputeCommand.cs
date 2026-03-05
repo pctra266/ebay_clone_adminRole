@@ -193,7 +193,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             Amount = refundAmount,
             Description = $"Refund for dispute {dispute.CaseId}",
             OrderId = dispute.OrderId,
-            CreatedAt = DateTime.UtcNow
+            Date = DateTime.UtcNow
         };
         _context.FinancialTransactions.Add(refundTransaction);
 
@@ -258,7 +258,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             Amount = refundAmount,
             Description = $"Partial refund for dispute {dispute.CaseId} (Split decision)",
             OrderId = dispute.OrderId,
-            CreatedAt = DateTime.UtcNow
+            Date = DateTime.UtcNow
         };
         _context.FinancialTransactions.Add(refundTransaction);
 

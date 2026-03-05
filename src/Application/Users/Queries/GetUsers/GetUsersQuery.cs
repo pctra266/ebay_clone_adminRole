@@ -1,6 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Application.Common.Models;
-using EbayClone.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Users.Queries.GetUsers;
