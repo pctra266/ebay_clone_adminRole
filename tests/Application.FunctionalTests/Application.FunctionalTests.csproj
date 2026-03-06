@@ -17,7 +17,6 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" />
       <PackageReference Include="nunit" />
@@ -33,6 +32,7 @@
       <PackageReference Include="Moq" />
       <PackageReference Include="Respawn" />
       <PackageReference Include="Shouldly" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
       <PackageReference Include="Testcontainers.MsSql" />
     </ItemGroup>
     
