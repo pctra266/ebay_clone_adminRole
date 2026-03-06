@@ -59,6 +59,18 @@ export const productService = {
         }
     },
 
+    reportProduct: async (id, payload) => {
+        try {
+            const response = await axios.post(
+                ENDPOINTS.PRODUCTS.BASE + '/reports',
+                payload
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi báo cáo sản phẩm:", error);
+            throw error;
+        }
+    },
 
     // ===============================
     // 2. Managed Products (Màn hình 5)

@@ -1,6 +1,7 @@
 ﻿
 using EbayClone.Application.Common.Models;
 using EbayClone.Application.Products.Commands.CreateProduct;
+using EbayClone.Application.Products.Commands.CreateProductReport;
 using EbayClone.Application.Products.Commands.DeleteProduct;
 using EbayClone.Application.Products.Commands.ResolveProductViolation;
 using EbayClone.Application.Products.Commands.UpdateProduct;
@@ -29,7 +30,7 @@ public class Products : EndpointGroupBase
 
         // [MỚI] Màn hình 5: Lấy danh sách quản lý (có Lọc/Tab)
         group.MapGet("managed", GetManagedProducts); // GET /api/products/managed
-
+        group.MapPost("reports", CreateProductReport);
     }
     public async Task<List<ProductDto>> GetProducts(ISender sender)
     {
@@ -54,6 +55,12 @@ public class Products : EndpointGroupBase
     {
         await sender.Send(new DeleteProductCommand(id));
 
+        return Results.NoContent();
+    }
+
+    public async Task<IResult> CreateProductReport(ISender sender, CreateProductReportCommand command)
+    {
+        await sender.Send(command);
         return Results.NoContent();
     }
 

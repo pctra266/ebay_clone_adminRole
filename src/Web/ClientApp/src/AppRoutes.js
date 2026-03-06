@@ -4,10 +4,9 @@ import { UserDetailPage } from "./pages/UserDetailPage";
 import { BroadcastPage } from "./pages/BroadcastPage";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
-import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
-import { Home } from "./components/Home";
-import { ProductList } from "./pages/Products";
+import { ProductList } from "./pages/Public/Home";
+import ProductModerationPage from "./pages/ProductModerationPage";
 
 const AppRoutes = [
   {
@@ -40,6 +39,10 @@ const AppRoutes = [
   },
   {
     path: '/products',
+    element: <ProductModerationPage />
+  },
+  {
+    path: '/home',
     element: <ProductList />
   }
 ];

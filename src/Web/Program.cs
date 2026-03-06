@@ -55,13 +55,6 @@ app.MapEndpoints();
 
 // NSwag OpenAPI and Swagger UI
 app.UseOpenApi();
-app.UseSwaggerUi(settings =>
-{
-    settings.Path = "/api";
-});
-
-// Keep fallback last so it doesn't catch API routes
-app.MapFallbackToFile("index.html");
 
 app.Run();
 public partial class Program { }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EbayClone.Application.Products.Queries.DTOs;
+﻿namespace EbayClone.Application.Products.Queries.DTOs;
 public class ManagedProductDto
 {
     public int Id { get; set; }
@@ -12,6 +8,8 @@ public class ManagedProductDto
     public string? CategoryName { get; set; }
     public string? ShopName { get; set; } // Tên người bán
     public string? Status { get; set; } // Active, Banned...
+
+    public List<string>? ReportReasons { get; set; }
 
     // --- Thông tin quản lý ---
     public int ReportCount { get; set; }

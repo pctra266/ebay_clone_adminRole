@@ -67,6 +67,10 @@ public class GetManagedProductsQueryHandler : IRequestHandler<GetManagedProducts
             ImageUrl = p.Images,
             CategoryName = p.Category != null ? p.Category.Name : null, 
             ShopName = p.Seller != null ? p.Seller.Username : null,
+            ReportReasons = p.Reports
+                         .Where(r => r.Status == "Pending" && r.Reason != null)
+                         .Select(r => r.Reason!)
+                         .ToList(),
             Status = p.Status,
             ReportCount = p.ReportCount,
             IsVeroViolation = p.Reports.Any(r => r.ReporterType == "VeRO" && r.Status == "Pending"),
