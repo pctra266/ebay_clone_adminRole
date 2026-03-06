@@ -8,6 +8,7 @@ import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
+import LoginPage from "./pages/LoginPage";
 
 const AppRoutes = [
   {
@@ -41,6 +42,10 @@ const AppRoutes = [
   {
     path: '/products',
     element: <ProductList />
+  },
+  {
+    path: '/login',
+    element: <LoginPage />
   }
 ];
 
