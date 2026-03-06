@@ -27,6 +27,13 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseExceptionHandler(options => { });
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+
 app.UseOpenApi();
 
 app.UseSwaggerUi(settings =>
@@ -46,6 +53,15 @@ app.UseAuthorization();
 
 app.MapEndpoints();
 
-app.Run();
+// NSwag OpenAPI and Swagger UI
+app.UseOpenApi();
+app.UseSwaggerUi(settings =>
+{
+    settings.Path = "/api";
+});
 
+// Keep fallback last so it doesn't catch API routes
+app.MapFallbackToFile("index.html");
+
+app.Run();
 public partial class Program { }

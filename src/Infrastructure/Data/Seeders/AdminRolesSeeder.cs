@@ -18,13 +18,7 @@ public class AdminRolesSeeder : ISeeder
 
     public async Task SeedAsync()
     {
-        if (_context.AdminRoles.Any())
-        {
-            _logger.LogInformation("AdminRoles already seeded, skipping...");
-            return;
-        }
-
-        var adminRoles = new List<AdminRole>
+        var requiredRoles = new List<AdminRole>
         {
             new AdminRole
             {
@@ -36,36 +30,43 @@ public class AdminRolesSeeder : ISeeder
             new AdminRole
             {
                 RoleName = "Monitor",
-                Description = "Read-only access to monitor system health and metrics",
-                Permissions = "[\"ViewDashboard\",\"ViewReports\",\"ViewUsers\",\"ViewProducts\",\"ViewOrders\",\"ViewAnalytics\"]",
+                Description = "Read-only access to dashboard and reports",
+                Permissions = "[\"ViewDashboard\",\"ViewReports\"]",
                 CreatedAt = DateTime.UtcNow
             },
             new AdminRole
             {
                 RoleName = "Support",
-                Description = "Customer support - Handle disputes, returns, and user issues",
-                Permissions = "[\"ViewDashboard\",\"ManageDisputes\",\"ManageReturns\",\"ViewUsers\",\"ViewOrders\",\"SendNotifications\"]",
-                CreatedAt = DateTime.UtcNow
-            },
-            new AdminRole
-            {
-                RoleName = "ContentModerator",
-                Description = "Moderate products, reviews, and handle reports",
-                Permissions = "[\"ViewDashboard\",\"ModerateProducts\",\"ModerateReviews\",\"HandleReports\",\"ViewUsers\"]",
-                CreatedAt = DateTime.UtcNow
-            },
-            new AdminRole
-            {
-                RoleName = "FinanceManager",
-                Description = "Manage platform fees and withdrawal requests",
-                Permissions = "[\"ViewDashboard\",\"ManagePlatformFees\",\"ProcessWithdrawals\",\"ViewFinancialReports\"]",
+                Description = "Customer support - manage users/orders/disputes/reviews and broadcast",
+                Permissions = "[\"ViewDashboard\",\"ManageUsers\",\"ManageProducts\",\"ManageOrders\",\"ManageDisputes\",\"ModerateReviews\",\"ManageBroadcasts\"]",
                 CreatedAt = DateTime.UtcNow
             }
         };
 
-        _context.AdminRoles.AddRange(adminRoles);
-        await _context.SaveChangesAsync();
+        var changed = false;
+        foreach (var role in requiredRoles)
+        {
+            var existingRole = _context.AdminRoles.FirstOrDefault(r => r.RoleName == role.RoleName);
+            if (existingRole == null)
+            {
+                _context.AdminRoles.Add(role);
+                changed = true;
+                continue;
+            }
 
-        _logger.LogInformation("Seeded {Count} Admin Roles", adminRoles.Count);
+            if (existingRole.Description != role.Description || existingRole.Permissions != role.Permissions)
+            {
+                existingRole.Description = role.Description;
+                existingRole.Permissions = role.Permissions;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        _logger.LogInformation("Ensured required admin roles are seeded: {Count}", requiredRoles.Count);
     }
 }

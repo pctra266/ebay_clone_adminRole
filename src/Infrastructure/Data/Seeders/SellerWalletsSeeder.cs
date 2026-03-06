@@ -35,15 +35,13 @@ public class SellerWalletsSeeder : ISeeder
         {
             if (!await _context.SellerWallets.AnyAsync(w => w.SellerId == seller.Id))
             {
-                _context.SellerWallets.Add(new SellerWallet
+                var wallet = new SellerWallet
                 {
                     SellerId = seller.Id,
-                    PendingBalance = 0,
-                    AvailableBalance = 0,
-                    TotalEarnings = 0,
-                    TotalWithdrawn = 0,
                     UpdatedAt = DateTime.UtcNow
-                });
+                };
+                
+                _context.SellerWallets.Add(wallet);
                 walletsCreated++;
             }
         }

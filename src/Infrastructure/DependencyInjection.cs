@@ -17,7 +17,7 @@ public static class DependencyInjection
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("MyCnn");
-        Guard.Against.Null(connectionString, message: "Connection string 'EbayCloneDb' not found.");
+        Guard.Against.Null(connectionString, message: "Connection string 'MyCnn' not found.");
 
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
@@ -43,7 +43,42 @@ public static class DependencyInjection
         builder.Services.AddTransient<IIdentityService, IdentityService>();
 
         builder.Services.AddAuthorization(options =>
-            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        {
+            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ViewDashboard, policy =>
+                policy.RequireRole(Roles.Monitor, Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ViewReports, policy =>
+                policy.RequireRole(Roles.Monitor, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageUsers, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageProducts, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageOrders, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageDisputes, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ModerateReviews, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageBroadcasts, policy =>
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ManageAdminRoles, policy =>
+                policy.RequireRole(Roles.SuperAdmin));
+
+            options.AddPolicy(Policies.ViewAuditLogs, policy =>
+                policy.RequireRole(Roles.SuperAdmin));
+        options.AddPolicy(Policies.CanPurge, policy => 
+        policy.RequireRole(Roles.Administrator));
+
+    });
         builder.Services.AddTransient<IEmailService, EmailService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
     }
