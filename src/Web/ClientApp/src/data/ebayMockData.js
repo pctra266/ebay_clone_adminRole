@@ -164,3 +164,13 @@ export const techDestinations = [
     alt: 'Camera lenses and optical filters'
   }
 ];
+
+export const loyaltyBanner = {
+  id: 'luxmar26',
+  title: 'Style worth keeping',
+  description: 'Get up to $140* off luxury that never fades.',
+  ctaLabel: 'Code: LUXMAR26',
+  ctaHref: 'https://www.ebay.com/e/row/luxmar26-eng',
+  termsLabel: 'Discounts in USD. *See terms.',
+  termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0'
+};

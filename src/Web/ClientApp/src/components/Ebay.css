@@ -474,15 +474,109 @@
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
 }
 
-.ebay-hero-carousel__control:focus-visible {
-    outline: 2px solid var(--ebay-blue);
-    outline-offset: 2px;
+/* Loyalty Banner */
+.ebay-loyalty-banner {
+    --ebay-loyalty-bg: #efe6ff;
+    --ebay-loyalty-fg: #2b0f4b;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 48px;
+    padding: 32px;
+    border-radius: var(--ebay-panel-radius);
+    background: var(--ebay-loyalty-bg);
+    color: var(--ebay-loyalty-fg);
+    border: 1px solid rgba(43, 15, 75, 0.15);
 }
 
-.ebay-hero-carousel__control--playback[aria-pressed="true"] {
-    background: var(--ebay-blue);
-    border-color: var(--ebay-blue);
-    color: #fff;
+@media (min-width: 768px) {
+    .ebay-loyalty-banner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 32px 48px;
+    }
+}
+
+.ebay-loyalty-banner__content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ebay-loyalty-banner__heading-link {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    text-decoration: none;
+    color: inherit;
+}
+
+.ebay-loyalty-banner__heading-link:hover {
+    text-decoration: underline;
+}
+
+.ebay-loyalty-banner__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+@media (min-width: 1024px) {
+    .ebay-loyalty-banner__body {
+        flex-direction: row;
+        align-items: center;
+        gap: 24px;
+    }
+}
+
+.ebay-loyalty-banner__body p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.ebay-loyalty-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--ebay-loyalty-fg);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(43, 15, 75, 0.2);
+    min-width: 120px;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.ebay-loyalty-banner__cta:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.ebay-loyalty-banner__cta--desktop {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .ebay-loyalty-banner__cta--mobile {
+        display: none;
+    }
+
+    .ebay-loyalty-banner__cta--desktop {
+        display: inline-flex;
+    }
+}
+
+.ebay-loyalty-banner__terms {
+    font-size: 14px;
+}
+
+.ebay-loyalty-banner__terms a {
+    color: inherit;
+    text-decoration: underline;
 }
 
 /* Tech Highlights */

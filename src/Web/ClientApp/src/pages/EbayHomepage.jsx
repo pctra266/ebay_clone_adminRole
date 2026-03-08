@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import HeroCarousel from '../components/HeroCarousel';
-import { categories, dailyDeals, heroSlides, techDestinations } from '../data/ebayMockData';
+import { dailyDeals, heroSlides, techDestinations, loyaltyBanner } from '../data/ebayMockData';
 import '../components/Ebay.css';
 
 const EbayHomepage = () => {
@@ -84,6 +84,54 @@ const EbayHomepage = () => {
                         </div>
                     </div>
                 </section>
+
+                {loyaltyBanner && (
+                    <section
+                        className="ebay-loyalty-banner"
+                        aria-labelledby="ebay-loyalty-banner-title"
+                    >
+                        <div className="ebay-loyalty-banner__content">
+                            <h2 id="ebay-loyalty-banner-title">
+                                <a
+                                    href={loyaltyBanner.ctaHref}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="ebay-loyalty-banner__heading-link"
+                                >
+                                    {loyaltyBanner.title}
+                                </a>
+                            </h2>
+
+                            <div className="ebay-loyalty-banner__body">
+                                <p>{loyaltyBanner.description}</p>
+
+                                <a
+                                    href={loyaltyBanner.ctaHref}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="ebay-loyalty-banner__cta ebay-loyalty-banner__cta--mobile"
+                                >
+                                    {loyaltyBanner.ctaLabel}
+                                </a>
+
+                                <span className="ebay-loyalty-banner__terms">
+                                    <a href={loyaltyBanner.termsHref} target="_blank" rel="noreferrer">
+                                        {loyaltyBanner.termsLabel}
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <a
+                            href={loyaltyBanner.ctaHref}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ebay-loyalty-banner__cta ebay-loyalty-banner__cta--desktop"
+                        >
+                            {loyaltyBanner.ctaLabel}
+                        </a>
+                    </section>
+                )}
 
                 <section className="ebay-deals-section">
                     <div className="ebay-deals-header">
