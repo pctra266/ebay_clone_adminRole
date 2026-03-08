@@ -2,11 +2,19 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import HeroCarousel from '../components/HeroCarousel';
-import { dailyDeals, heroSlides, techDestinations, loyaltyBanner, motorsBanner } from '../data/ebayMockData';
+import {
+    dailyDeals,
+    featuredDeals,
+    heroSlides,
+    techDestinations,
+    loyaltyBanner,
+    motorsBanner
+} from '../data/ebayMockData';
 import '../components/Ebay.css';
 
 const EbayHomepage = () => {
     const techCarouselRef = useRef(null);
+    const featuredCarouselRef = useRef(null);
 
     const handleTechScroll = (direction) => {
         if (!techCarouselRef.current) {
@@ -15,6 +23,18 @@ const EbayHomepage = () => {
 
         const scrollAmount = techCarouselRef.current.clientWidth * 0.8;
         techCarouselRef.current.scrollBy({
+            left: direction === 'next' ? scrollAmount : -scrollAmount,
+            behavior: 'smooth'
+        });
+    };
+
+    const handleFeaturedScroll = (direction) => {
+        if (!featuredCarouselRef.current) {
+            return;
+        }
+
+        const scrollAmount = featuredCarouselRef.current.clientWidth * 0.85;
+        featuredCarouselRef.current.scrollBy({
             left: direction === 'next' ? scrollAmount : -scrollAmount,
             behavior: 'smooth'
         });
@@ -172,32 +192,105 @@ const EbayHomepage = () => {
                     </aside>
                 )}
 
-                <section className="ebay-deals-section">
-                    <div className="ebay-deals-header">
-                        <h2>Today's Deals – All With Free Shipping</h2>
-                        <Link to="#">
-                            See all <i className="bi bi-arrow-right"></i>
-                        </Link>
-                    </div>
-                    <div className="ebay-deals-grid">
-                        {dailyDeals.map((deal) => (
-                            <Link to="#" key={deal.id} className="ebay-deal-card">
-                                <div className="ebay-deal-img-wrapper">
-                                    <img src={deal.image} alt={deal.title} />
-                                </div>
-                                <h3 className="ebay-deal-title">{deal.title}</h3>
-                                <div className="ebay-deal-price">{deal.price}</div>
-                                <div className="ebay-deal-meta">
-                                    {deal.originalPrice && (
-                                        <span className="ebay-deal-original">{deal.originalPrice}</span>
-                                    )}
-                                    {deal.discount && <span>{deal.discount}</span>}
-                                </div>
-                                {deal.sold && <div className="ebay-deal-sold">{deal.sold}</div>}
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                {featuredDeals.length > 0 && (
+                    <aside
+                        className="ebay-featured-deals"
+                        aria-labelledby="ebay-featured-deals-title"
+                        data-viewport='{"trackableId":"01KK5E6Y9EBQRDPZ9PB0VH9RFE"}'
+                    >
+                        <div className="ebay-featured-deals__header">
+                            <div>
+                                <h2 id="ebay-featured-deals-title">Today's Deals</h2>
+                                <p>All With Free Shipping</p>
+                            </div>
+                            <div className="ebay-featured-deals__spacer" aria-hidden="true" />
+                        </div>
+
+                        <div
+                            className="ebay-featured-deals__carousel"
+                            role="group"
+                            aria-roledescription="Carousel"
+                            aria-label="Featured deals carousel"
+                        >
+                            <button
+                                type="button"
+                                className="ebay-featured-deals__control"
+                                aria-label="Previous featured deal"
+                                onClick={() => handleFeaturedScroll('prev')}
+                            >
+                                <i className="bi bi-chevron-left" aria-hidden="true" />
+                            </button>
+
+                            <div className="ebay-featured-deals__viewport" ref={featuredCarouselRef}>
+                                <ul className="ebay-featured-deals__list" role="list">
+                                    {featuredDeals.map((deal) => (
+                                        <li key={deal.id} className="ebay-featured-card">
+                                            <article className="ebay-featured-card__article">
+                                                <div className="ebay-featured-card__media">
+                                                    <button
+                                                        type="button"
+                                                        className="ebay-featured-card__watchlist"
+                                                        aria-label={`Add ${deal.title} to Watchlist`}
+                                                    >
+                                                        <i className="bi bi-heart" aria-hidden="true" />
+                                                    </button>
+                                                    <a
+                                                        className="ebay-featured-card__image-link"
+                                                        href={deal.href}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                    >
+                                                        <img src={deal.image} alt={deal.title} loading="lazy" />
+                                                        <span className="ebay-featured-card__scrim" aria-hidden="true" />
+                                                    </a>
+                                                </div>
+
+                                                <a
+                                                    className="ebay-featured-card__info"
+                                                    href={deal.href}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    <span className="ebay-featured-card__title">{deal.title}</span>
+
+                                                    <div className="ebay-featured-card__pricing">
+                                                        <span className="ebay-featured-card__price">{deal.price}</span>
+                                                        {deal.originalPrice && (
+                                                            <span className="ebay-featured-card__original">
+                                                                {deal.originalPrice}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {(deal.discount || deal.badge || deal.note) && (
+                                                        <div className="ebay-featured-card__meta">
+                                                            {deal.discount && <span>{deal.discount}</span>}
+                                                            {deal.badge && <span>{deal.badge}</span>}
+                                                            {deal.note && <span>{deal.note}</span>}
+                                                        </div>
+                                                    )}
+
+                                                    <span className="ebay-visually-hidden">
+                                                        Opens in a new window or tab
+                                                    </span>
+                                                </a>
+                                            </article>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="ebay-featured-deals__control"
+                                aria-label="Next featured deal"
+                                onClick={() => handleFeaturedScroll('next')}
+                            >
+                                <i className="bi bi-chevron-right" aria-hidden="true" />
+                            </button>
+                        </div>
+                    </aside>
+                )}
             </main>
         </div>
     );

@@ -1,4 +1,4 @@
-export const categories = [
+﻿export const categories = [
   { id: 1, name: 'Sneakers', image: '/images/ebay_sneaker.png' },
   { id: 2, name: 'Watches', image: '/images/ebay_watch.png' },
   { id: 3, name: 'Electronics', image: '/images/ebay_laptop.png' },
@@ -51,6 +51,68 @@ export const dailyDeals = [
     discount: '30% off',
     image: '/images/ebay_bag.png',
     sold: 'Almost gone'
+  }
+];
+
+export const featuredDeals = [
+  {
+    id: 'fd-01',
+    title: 'Bose QuietComfort Ultra Noise Cancelling Headphones, Certified Refurbished',
+    price: '₫5,636,010',
+    originalPrice: '₫6,003,006',
+    discount: 'Save 6%',
+    badge: 'Certified refurbished',
+    note: 'Free shipping',
+    image: 'https://i.ebayimg.com/images/g/WssAAOSwlkZn~6zp/s-l500.webp',
+    href: 'https://www.ebay.com/itm/166708867898'
+  },
+  {
+    id: 'fd-02',
+    title: 'Nintendo Switch OLED 64GB Game Console + 1 Year Warranty | 2-Day Shipping',
+    price: '₫6,552,189',
+    originalPrice: '₫10,485,338',
+    discount: 'Save 37%',
+    note: 'Ships in 2 days',
+    image: 'https://i.ebayimg.com/images/g/P-AAAeSwO7xpJxJI/s-l500.webp',
+    href: 'https://www.ebay.com/itm/357950678927'
+  },
+  {
+    id: 'fd-03',
+    title: 'Apple iPhone 16 128GB Unlocked Smartphone A3081 (Good Condition)',
+    price: '₫13,080,786',
+    originalPrice: '₫18,376,014',
+    discount: 'Save 29%',
+    image: 'https://i.ebayimg.com/images/g/RjAAAeSwciNozaQf/s-l500.webp',
+    href: 'https://www.ebay.com/itm/227050861810'
+  },
+  {
+    id: 'fd-04',
+    title: 'Acer Nitro V 16 AI 16" Gaming Laptop 16GB RAM 512GB SSD ANV16-42-R1SF',
+    price: '₫17,065,052',
+    originalPrice: '₫21,233,078',
+    discount: 'Save 20%',
+    image: 'https://i.ebayimg.com/images/g/n~cAAeSwr4lpWBiQ/s-l500.webp',
+    href: 'https://www.ebay.com/itm/267531849670'
+  },
+  {
+    id: 'fd-05',
+    title: 'Acer PM161Q 15.6" Portable Monitor FHD 1920x1080 60Hz 20ms (Refurbished)',
+    price: '₫1,096,794',
+    originalPrice: '₫2,621,138',
+    discount: 'Save 58%',
+    badge: 'Manufacturer refurbished',
+    image: 'https://i.ebayimg.com/images/g/WscAAeSw0e5pq1as/s-l500.webp',
+    href: 'https://www.ebay.com/itm/276789897235'
+  },
+  {
+    id: 'fd-06',
+    title: 'Samsung HW-B750F 5.1ch Bluetooth Soundbar with Wireless Subwoofer – 2025',
+    price: '₫5,714,652',
+    originalPrice: '₫15,727,089',
+    discount: 'Save 64%',
+    note: 'Factory sealed',
+    image: 'https://i.ebayimg.com/images/g/DsoAAOSw6jtoFS6e/s-l500.webp',
+    href: 'https://www.ebay.com/itm/157040074913'
   }
 ];
 
