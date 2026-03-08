@@ -47,7 +47,11 @@
 .ebay-header {
     background: #fff;
     border-bottom: 1px solid var(--ebay-border);
-    padding-bottom: 8px;
+}
+
+.ebay-header .ebay-container {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .ebay-header a {
@@ -68,6 +72,8 @@
     font-size: 13px;
     color: var(--ebay-gray);
     border-bottom: 1px solid var(--ebay-border);
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .ebay-header-utility span a {
@@ -80,13 +86,43 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ebay-utility-right {
+    margin-left: auto;
+}
+
+.ebay-utility-icon {
+    border: none;
+    background: transparent;
+    padding: 2px;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ebay-black);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.ebay-utility-icon:hover {
+    color: var(--ebay-blue);
 }
 
 .ebay-header-main {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 32px;
+    padding: 18px 0 14px;
+}
+
+.ebay-header-brand {
     display: flex;
     align-items: center;
-    gap: 24px;
-    padding: 18px 0 14px;
+    gap: 18px;
+    min-width: 0;
 }
 
 .ebay-logo {
@@ -94,6 +130,7 @@
     font-weight: 800;
     letter-spacing: -4px;
     line-height: 1;
+    display: inline-flex;
 }
 
 .ebay-shop-by-category {
@@ -102,10 +139,12 @@
     font-size: 15px;
     font-weight: 600;
     color: var(--ebay-black);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    padding-left: 16px;
+    border-left: 1px solid var(--ebay-border);
 }
 
 .ebay-shop-by-category i {
@@ -113,10 +152,11 @@
 }
 
 .ebay-search-row {
-    flex: 1;
-    display: flex;
-    align-items: center;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 18px;
+    align-items: center;
     min-width: 0;
 }
 
@@ -125,12 +165,18 @@
     align-items: center;
     flex: 1;
     min-width: 0;
-    height: 58px;
-    border: 2px solid var(--ebay-black);
+    height: 56px;
+    border: 1.5px solid var(--ebay-black);
     border-radius: 999px;
-    padding: 0 18px;
+    padding: 0 16px;
     background: #fff;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    gap: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ebay-search-field:focus-within {
+    border-color: var(--ebay-blue);
+    box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.15);
 }
 
 .ebay-search-field i {
@@ -142,9 +188,13 @@
     flex: 1;
     border: none;
     background: transparent;
-    font-size: 18px;
+    font-size: 17px;
     color: #3c4043;
     padding: 0 8px;
+}
+
+.ebay-search-field input:focus {
+    outline: none;
 }
 
 .ebay-search-field input::placeholder {
@@ -154,15 +204,15 @@
 .ebay-search-camera {
     border: none;
     background: transparent;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--ebay-black);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s ease;
 }
 
 .ebay-search-camera:hover {
@@ -173,7 +223,14 @@
     width: 1px;
     height: 60%;
     background: var(--ebay-border-strong);
-    margin: 0 12px;
+}
+
+.ebay-category-select-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 140px;
 }
 
 .ebay-category-select {
@@ -182,61 +239,137 @@
     font-size: 15px;
     font-weight: 600;
     color: var(--ebay-black);
-    padding-right: 24px;
+    padding-right: 28px;
     appearance: none;
     -webkit-appearance: none;
+    width: 100%;
+    cursor: pointer;
 }
 
 .ebay-category-select:focus {
     outline: none;
 }
 
+.ebay-category-select-wrapper i {
+    position: absolute;
+    right: 0;
+    font-size: 14px;
+    pointer-events: none;
+    color: var(--ebay-black);
+}
+
 .ebay-search-btn {
     border: none;
     background: var(--ebay-blue);
     color: #fff;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
-    padding: 0 36px;
-    height: 52px;
+    padding: 0 42px;
+    height: 56px;
     border-radius: 999px;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0, 100, 210, 0.25);
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.2s ease;
 }
 
 .ebay-search-btn:hover {
     background: var(--ebay-blue-dark);
-    transform: translateY(-1px);
 }
 
 .ebay-advanced-search {
     border: none;
     background: transparent;
-    color: var(--ebay-gray);
-    font-size: 14px;
+    color: var(--ebay-black);
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     padding: 0;
+    justify-self: start;
+}
+
+.ebay-advanced-search:hover {
+    color: var(--ebay-blue);
+    text-decoration: underline;
 }
 
 .ebay-main-nav {
     border-top: 1px solid var(--ebay-border);
-    padding-top: 12px;
+    padding: 12px 0 14px;
 }
 
 .ebay-main-nav ul {
     display: flex;
-    gap: 24px;
+    gap: 28px;
     list-style: none;
     padding: 0;
     margin: 0;
     font-size: 14px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .ebay-main-nav a {
     color: var(--ebay-black);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.ebay-main-nav a:hover {
+    color: var(--ebay-blue);
+}
+
+@media (max-width: 1024px) {
+    .ebay-header-main {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .ebay-header-brand {
+        justify-content: space-between;
+    }
+
+    .ebay-search-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .ebay-header-utility {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ebay-search-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .ebay-search-btn {
+        width: 100%;
+    }
+
+    .ebay-utility-right {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 640px) {
+    .ebay-header-brand {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ebay-shop-by-category {
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .ebay-main-nav ul {
+        justify-content: flex-start;
+    }
 }
 
 /* Hero Carousel */
