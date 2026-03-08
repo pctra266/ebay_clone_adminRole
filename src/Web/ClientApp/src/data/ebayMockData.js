@@ -116,6 +116,58 @@ export const featuredDeals = [
   }
 ];
 
+export const trendingDestinations = [
+  {
+    id: 'trend-tech',
+    label: 'Tech',
+    href: 'https://www.ebay.com/b/bn_7000259124',
+    image: 'https://i.ebayimg.com/images/g/EosAAeSw~Wxpqvvs/s-l500.webp',
+    alt: 'Curated tech essentials'
+  },
+  {
+    id: 'trend-motors',
+    label: 'Motors',
+    href: 'https://www.ebay.com/b/bn_569479',
+    image: 'https://i.ebayimg.com/images/g/XjIAAeSwsrNpqvvs/s-l500.webp',
+    alt: 'Performance motors and parts'
+  },
+  {
+    id: 'trend-luxury',
+    label: 'Luxury',
+    href: 'https://www.ebay.com/b/bn_7109710914',
+    image: 'https://i.ebayimg.com/images/g/FBUAAeSwpDhpqvvs/s-l500.webp',
+    alt: 'Luxury accessories on eBay'
+  },
+  {
+    id: 'trend-collectibles',
+    label: 'Collectibles and art',
+    href: 'https://www.ebay.com/b/bn_7000259855',
+    image: 'https://i.ebayimg.com/images/g/FvQAAeSwMcVpqvvs/s-l500.webp',
+    alt: 'Rare collectibles and art pieces'
+  },
+  {
+    id: 'trend-home',
+    label: 'Home and garden',
+    href: 'https://www.ebay.com/b/bn_1853126',
+    image: 'https://i.ebayimg.com/images/g/WnYAAeSwPsRpqvvs/s-l500.webp',
+    alt: 'Home and garden upgrades'
+  },
+  {
+    id: 'trend-cards',
+    label: 'Trading cards',
+    href: 'https://www.ebay.com/b/bn_1852210',
+    image: 'https://i.ebayimg.com/images/g/T6AAAeSwUotpqvvs/s-l500.webp',
+    alt: 'Trending trading card drops'
+  },
+  {
+    id: 'trend-health',
+    label: 'Health and beauty',
+    href: 'https://www.ebay.com/b/bn_1865479',
+    image: 'https://i.ebayimg.com/images/g/M48AAeSwTkFpqvvs/s-l500.webp',
+    alt: 'Health and beauty best sellers'
+  }
+];
+
 export const heroSlides = [
   {
     id: 'motors',

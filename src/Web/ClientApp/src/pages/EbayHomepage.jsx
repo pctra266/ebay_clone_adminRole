@@ -8,13 +8,15 @@ import {
     heroSlides,
     techDestinations,
     loyaltyBanner,
-    motorsBanner
+    motorsBanner,
+    trendingDestinations
 } from '../data/ebayMockData';
 import '../components/Ebay.css';
 
 const EbayHomepage = () => {
     const techCarouselRef = useRef(null);
     const featuredCarouselRef = useRef(null);
+    const trendingCarouselRef = useRef(null);
 
     const handleTechScroll = (direction) => {
         if (!techCarouselRef.current) {
@@ -35,6 +37,18 @@ const EbayHomepage = () => {
 
         const scrollAmount = featuredCarouselRef.current.clientWidth * 0.85;
         featuredCarouselRef.current.scrollBy({
+            left: direction === 'next' ? scrollAmount : -scrollAmount,
+            behavior: 'smooth'
+        });
+    };
+
+    const handleTrendingScroll = (direction) => {
+        if (!trendingCarouselRef.current) {
+            return;
+        }
+
+        const scrollAmount = trendingCarouselRef.current.clientWidth * 0.82;
+        trendingCarouselRef.current.scrollBy({
             left: direction === 'next' ? scrollAmount : -scrollAmount,
             behavior: 'smooth'
         });
@@ -291,6 +305,92 @@ const EbayHomepage = () => {
                         </div>
                     </aside>
                 )}
+
+                {trendingDestinations.length > 0 && (
+                    <aside
+                        className="ebay-trending"
+                        aria-labelledby="ebay-trending-title"
+                        data-viewport='{"trackableId":"01KK5E6Y7PXRDANT6HCZAQH1FH"}'
+                        data-trackablemoduleid="4776"
+                    >
+                        <div className="ebay-trending__header">
+                            <h2 id="ebay-trending-title">Trending on eBay</h2>
+                        </div>
+
+                        <div
+                            className="ebay-trending__carousel"
+                            role="group"
+                            aria-roledescription="Carousel"
+                            aria-label="Trending destinations carousel"
+                        >
+                            <button
+                                type="button"
+                                className="ebay-trending__control"
+                                aria-label="Previous trending destination"
+                                onClick={() => handleTrendingScroll('prev')}
+                            >
+                                <i className="bi bi-chevron-left" aria-hidden="true" />
+                            </button>
+
+                            <div className="ebay-trending__viewport" ref={trendingCarouselRef}>
+                                <ul className="ebay-trending__list" role="list">
+                                    {trendingDestinations.map((destination) => (
+                                        <li key={destination.id} className="ebay-trending-card">
+                                            <a
+                                                className="ebay-trending-card__link"
+                                                href={destination.href}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                <span className="ebay-trending-card__media">
+                                                    <img src={destination.image} alt={destination.alt} loading="lazy" />
+                                                    <span className="ebay-trending-card__scrim" aria-hidden="true" />
+                                                </span>
+                                                <span className="ebay-trending-card__label">{destination.label}</span>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="ebay-trending__control"
+                                aria-label="Next trending destination"
+                                onClick={() => handleTrendingScroll('next')}
+                            >
+                                <i className="bi bi-chevron-right" aria-hidden="true" />
+                            </button>
+                        </div>
+                    </aside>
+                )}
+
+                <section className="ebay-deals-section">
+                    <div className="ebay-deals-header">
+                        <h2>Today's Deals – All With Free Shipping</h2>
+                        <Link to="#">
+                            See all <i className="bi bi-arrow-right" />
+                        </Link>
+                    </div>
+                    <div className="ebay-deals-grid">
+                        {dailyDeals.map((deal) => (
+                            <Link to="#" key={deal.id} className="ebay-deal-card">
+                                <div className="ebay-deal-img-wrapper">
+                                    <img src={deal.image} alt={deal.title} />
+                                </div>
+                                <h3 className="ebay-deal-title">{deal.title}</h3>
+                                <div className="ebay-deal-price">{deal.price}</div>
+                                <div className="ebay-deal-meta">
+                                    {deal.originalPrice && (
+                                        <span className="ebay-deal-original">{deal.originalPrice}</span>
+                                    )}
+                                    {deal.discount && <span>{deal.discount}</span>}
+                                </div>
+                                {deal.sold && <div className="ebay-deal-sold">{deal.sold}</div>}
+                            </Link>
+                        ))}
+                    </div>
+                </section>
             </main>
         </div>
     );

@@ -878,6 +878,134 @@
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
 }
 
+/* Trending Destinations */
+.ebay-trending {
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ebay-trending__header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.ebay-trending__carousel {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ebay-trending__viewport {
+    flex: 1;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
+
+.ebay-trending__viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.ebay-trending__list {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ebay-trending-card {
+    flex: 0 0 calc(14% - 10px);
+    min-width: 160px;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 992px) {
+    .ebay-trending-card {
+        flex: 0 0 180px;
+    }
+}
+
+@media (max-width: 640px) {
+    .ebay-trending-card {
+        flex: 0 0 150px;
+    }
+}
+
+.ebay-trending-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s ease;
+}
+
+.ebay-trending-card__link:hover {
+    opacity: 0.9;
+}
+
+.ebay-trending-card__media {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ebay-trending-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ebay-trending-card__link:hover .ebay-trending-card__media img {
+    transform: scale(1.03);
+}
+
+.ebay-trending-card__scrim {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.05);
+    transition: opacity 0.2s ease;
+}
+
+.ebay-trending-card__link:hover .ebay-trending-card__scrim {
+    opacity: 0.15;
+}
+
+.ebay-trending-card__label {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ebay-trending__control {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--ebay-border-strong);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ebay-black);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ebay-trending__control:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+}
+
 /* Tech Highlights */
 .ebay-tech-highlights {
     margin-bottom: 48px;
