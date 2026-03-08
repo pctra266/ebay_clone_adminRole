@@ -59,6 +59,26 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings["Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
+            //đọc token từ cookie
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    ctx.Token = ctx.Request.Cookies["auth_token"];
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:5001") // URL React dev server của bạn
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động
+            });
         });
     }
 

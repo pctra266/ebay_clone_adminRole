@@ -10,10 +10,22 @@ import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
+import LoginPage from "./pages/LoginPage";
+import EbayHomepage from "./pages/EbayHomepage";
 
 const AppRoutes = [
   {
     index: true,
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/home",
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/dashboard",
     element: <DashboardPage />
   },
   {
@@ -51,6 +63,10 @@ const AppRoutes = [
   {
     path: '/return-requests/:id',
     element: <ReturnRequestDetailPage/>
+  },
+  {
+    path: '/login',
+    element: <LoginPage />
   }
 ];
 
