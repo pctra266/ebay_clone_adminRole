@@ -9,10 +9,21 @@ import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
 import LoginPage from "./pages/LoginPage";
+import EbayHomepage from "./pages/EbayHomepage";
 
 const AppRoutes = [
   {
     index: true,
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/home",
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/dashboard",
     element: <DashboardPage />
   },
   {
