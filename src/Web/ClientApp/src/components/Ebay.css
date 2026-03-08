@@ -331,6 +331,28 @@
     .ebay-search-row {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    .ebay-featured-deals__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .ebay-featured-deals__spacer {
+        display: none;
+    }
+
+    .ebay-featured-card {
+        flex: 0 0 clamp(220px, 34vw, 320px);
+    }
+
+    .ebay-trending-card {
+        flex: 0 0 clamp(160px, 28vw, 220px);
+    }
+
+    .ebay-tech-card {
+        flex: 0 0 clamp(180px, 28vw, 240px);
+    }
 }
 
 @media (max-width: 768px) {
@@ -353,22 +375,89 @@
         justify-content: flex-start;
         gap: 14px;
     }
-}
 
-@media (max-width: 640px) {
-    .ebay-header-brand {
+    .ebay-tech-highlights,
+    .ebay-color-banner,
+    .ebay-motors-banner {
+        padding: 24px clamp(16px, 5vw, 28px);
+    }
+
+    .ebay-featured-deals,
+    .ebay-trending {
+        gap: 20px;
+    }
+
+    .ebay-featured-deals__carousel,
+    .ebay-trending__carousel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .ebay-tech-carousel__controls,
+    .ebay-featured-deals__control,
+    .ebay-trending__control {
+        display: none;
+    }
+
+    .ebay-tech-carousel__viewport,
+    .ebay-featured-deals__viewport,
+    .ebay-trending__viewport {
+        padding-inline: 4px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .ebay-loyalty-banner__body {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 16px;
     }
 
-    .ebay-shop-by-category {
-        border-left: none;
-        padding-left: 0;
+    .ebay-color-banner__grid,
+    .ebay-motors-banner__grid {
+        gap: 20px;
     }
 
-    .ebay-main-nav ul {
-        justify-content: flex-start;
+    .ebay-featured-card,
+    .ebay-trending-card,
+    .ebay-tech-card {
+        flex: 0 0 75vw;
+    }
+}
+
+@media (max-width: 560px) {
+    .ebay-hero-carousel {
+        margin: 24px auto 32px;
+    }
+
+    .ebay-hero-carousel__panel {
+        padding: 20px 16px;
+    }
+
+    .ebay-hero-carousel__title {
+        font-size: 26px;
+    }
+
+    .ebay-hero-carousel__subtitle {
+        font-size: 15px;
+    }
+
+    .ebay-loyalty-banner__heading-link {
+        font-size: clamp(24px, 8vw, 32px);
+    }
+
+    .ebay-tech-card,
+    .ebay-featured-card,
+    .ebay-trending-card {
+        flex: 0 0 88vw;
+    }
+
+    .ebay-footer__legal {
+        text-align: center;
+    }
+
+    .ebay-footer__legal-links {
+        justify-content: center;
     }
 }
 
@@ -1879,4 +1968,115 @@
 
 .ebay-phone-banner__brand-label i {
     font-size: 18px;
+}
+
+/* Responsive refinements */
+@media (max-width: 1024px) {
+    .ebay-featured-deals__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .ebay-featured-deals__spacer {
+        display: none;
+    }
+
+    .ebay-featured-card {
+        flex: 0 0 clamp(220px, 34vw, 320px);
+    }
+
+    .ebay-trending-card {
+        flex: 0 0 clamp(160px, 28vw, 220px);
+    }
+
+    .ebay-tech-card {
+        flex: 0 0 clamp(180px, 28vw, 240px);
+    }
+}
+
+@media (max-width: 768px) {
+    .ebay-tech-highlights,
+    .ebay-color-banner,
+    .ebay-motors-banner {
+        padding: 24px clamp(16px, 5vw, 28px);
+    }
+
+    .ebay-featured-deals,
+    .ebay-trending {
+        gap: 20px;
+    }
+
+    .ebay-featured-deals__carousel,
+    .ebay-trending__carousel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .ebay-tech-carousel__controls,
+    .ebay-featured-deals__control,
+    .ebay-trending__control {
+        display: none;
+    }
+
+    .ebay-tech-carousel__viewport,
+    .ebay-featured-deals__viewport,
+    .ebay-trending__viewport {
+        padding-inline: 4px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .ebay-loyalty-banner__body {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .ebay-color-banner__grid,
+    .ebay-motors-banner__grid {
+        gap: 20px;
+    }
+
+    .ebay-featured-card,
+    .ebay-trending-card,
+    .ebay-tech-card {
+        flex: 0 0 75vw;
+    }
+}
+
+@media (max-width: 560px) {
+    .ebay-hero-carousel {
+        margin: 24px auto 32px;
+    }
+
+    .ebay-hero-carousel__panel {
+        padding: 20px 16px;
+    }
+
+    .ebay-hero-carousel__title {
+        font-size: 26px;
+    }
+
+    .ebay-hero-carousel__subtitle {
+        font-size: 15px;
+    }
+
+    .ebay-loyalty-banner__heading-link {
+        font-size: clamp(24px, 8vw, 32px);
+    }
+
+    .ebay-tech-card,
+    .ebay-featured-card,
+    .ebay-trending-card {
+        flex: 0 0 88vw;
+    }
+
+    .ebay-footer__legal {
+        text-align: center;
+    }
+
+    .ebay-footer__legal-links {
+        justify-content: center;
+    }
 }
