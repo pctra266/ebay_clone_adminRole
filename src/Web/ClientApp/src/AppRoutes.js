@@ -9,6 +9,7 @@ import { ProductList }    from "./pages/Products";
 import LoginPage          from "./pages/LoginPage";
 import Enable2FAPage      from "./pages/Enable2fapage";
 import ProtectedRoute     from "./components/ProtectedRoute";
+import EbayHomepage from "./pages/EbayHomepage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -34,6 +35,20 @@ const AppRoutes = [
   {
     index: true,                              // ✅ chỉ khai báo 1 lần
     element: protect(<DashboardPage />)
+  },
+  {
+    index: true,
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/home",
+    element: <EbayHomepage />,
+    noLayout: true
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardPage />
   },
   {
     path: "/users",
