@@ -37,6 +37,75 @@ const HeroCarousel = ({ slides = [], autoPlay = true }) => {
 
     const isPlaying = autoPlay && !isPaused;
 
+    const renderStandardPanel = (slide) => (
+        <>
+            <div className="ebay-hero-carousel__text">
+                {slide.kicker && <p className="ebay-hero-carousel__eyebrow">{slide.kicker}</p>}
+                <h2 className="ebay-hero-carousel__title">{slide.title}</h2>
+                {slide.subtitle && <p className="ebay-hero-carousel__subtitle">{slide.subtitle}</p>}
+                {slide.ctaLabel && slide.ctaHref && (
+                    <a href={slide.ctaHref} target="_blank" rel="noreferrer" className="ebay-hero-carousel__cta">
+                        {slide.ctaLabel}
+                        <i className="bi bi-arrow-right" aria-hidden="true" />
+                    </a>
+                )}
+                {slide.termsLabel && (
+                    <p className="ebay-hero-carousel__terms">
+                        {slide.termsHref ? (
+                            <a href={slide.termsHref} target="_blank" rel="noreferrer">
+                                {slide.termsLabel}
+                            </a>
+                        ) : (
+                            slide.termsLabel
+                        )}
+                    </p>
+                )}
+            </div>
+
+            <div className="ebay-hero-carousel__media">
+                {slide.image && (
+                    <img src={slide.image} alt={slide.imageAlt || slide.title} loading="lazy" />
+                )}
+            </div>
+        </>
+    );
+
+    const renderPhoneBanner = (slide) => (
+        <div className="ebay-phone-banner">
+            <div className="ebay-phone-banner__content">
+                {slide.kicker && <p className="ebay-phone-banner__eyebrow">{slide.kicker}</p>}
+                <h2 className="ebay-phone-banner__title">{slide.title}</h2>
+                {slide.subtitle && <p className="ebay-phone-banner__subtitle">{slide.subtitle}</p>}
+                {slide.ctaLabel && slide.ctaHref && (
+                    <a
+                        href={slide.ctaHref}
+                        target="_self"
+                        rel="noreferrer"
+                        className="ebay-phone-banner__button"
+                    >
+                        {slide.ctaLabel}
+                    </a>
+                )}
+            </div>
+
+            <ul className="ebay-phone-banner__brands" aria-label="Featured phone brands">
+                {slide.tiles.map((tile) => (
+                    <li key={tile.id} className="ebay-phone-banner__brands-item">
+                        <a href={tile.href} target="_self" rel="noreferrer" className="ebay-phone-banner__brand-card">
+                            <div className="ebay-phone-banner__brand-media">
+                                <img src={tile.image} alt={tile.imageAlt || tile.label} loading="lazy" />
+                            </div>
+                            <span className="ebay-phone-banner__brand-label">
+                                {tile.label}
+                                <i className="bi bi-chevron-right" aria-hidden="true" />
+                            </span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+
     return (
         <section className="ebay-hero-carousel" aria-roledescription="carousel" aria-label="Featured promotions">
             <span className="ebay-visually-hidden" aria-live="polite">
@@ -44,12 +113,19 @@ const HeroCarousel = ({ slides = [], autoPlay = true }) => {
             </span>
 
             <div className="ebay-hero-carousel__viewport">
-                <ul className="ebay-hero-carousel__list" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+                <ul
+                    className="ebay-hero-carousel__list"
+                    style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+                >
                     {safeSlides.map((slide, index) => {
+                        const hasTiles = Array.isArray(slide.tiles) && slide.tiles.length > 0;
                         const panelStyle = {
                             background: slide.background || '#f5f5f5',
                             color: slide.foreground || '#111111'
                         };
+                        const panelClassName = hasTiles
+                            ? 'ebay-hero-carousel__panel ebay-hero-carousel__panel--featured-tiles'
+                            : 'ebay-hero-carousel__panel';
 
                         return (
                             <li
@@ -60,69 +136,8 @@ const HeroCarousel = ({ slides = [], autoPlay = true }) => {
                                 aria-label={`${index + 1} of ${totalSlides}`}
                                 aria-hidden={index !== activeIndex}
                             >
-                                <div className="ebay-hero-carousel__panel" style={panelStyle}>
-                                    <div className="ebay-hero-carousel__text">
-                                        {slide.kicker && (
-                                            <p className="ebay-hero-carousel__eyebrow">{slide.kicker}</p>
-                                        )}
-                                        <h2 className="ebay-hero-carousel__title">{slide.title}</h2>
-                                        {slide.subtitle && (
-                                            <p className="ebay-hero-carousel__subtitle">{slide.subtitle}</p>
-                                        )}
-                                        {slide.ctaLabel && slide.ctaHref && (
-                                            <a
-                                                href={slide.ctaHref}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="ebay-hero-carousel__cta"
-                                            >
-                                                {slide.ctaLabel}
-                                                <i className="bi bi-arrow-right" aria-hidden="true" />
-                                            </a>
-                                        )}
-                                        {slide.termsLabel && (
-                                            <p className="ebay-hero-carousel__terms">
-                                                {slide.termsHref ? (
-                                                    <a href={slide.termsHref} target="_blank" rel="noreferrer">
-                                                        {slide.termsLabel}
-                                                    </a>
-                                                ) : (
-                                                    slide.termsLabel
-                                                )}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="ebay-hero-carousel__media">
-                                        {Array.isArray(slide.tiles) && slide.tiles.length > 0 ? (
-                                            <ul className="ebay-hero-carousel__tiles">
-                                                {slide.tiles.map((tile) => (
-                                                    <li key={tile.id}>
-                                                        <a
-                                                            href={tile.href}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="ebay-hero-carousel__tile"
-                                                        >
-                                                            <span>
-                                                                {tile.label}
-                                                                <i className="bi bi-chevron-right" aria-hidden="true" />
-                                                            </span>
-                                                            <img src={tile.image} alt={tile.label} loading="lazy" />
-                                                        </a>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            slide.image && (
-                                                <img
-                                                    src={slide.image}
-                                                    alt={slide.imageAlt || slide.title}
-                                                    loading="lazy"
-                                                />
-                                            )
-                                        )}
-                                    </div>
+                                <div className={panelClassName} style={panelStyle}>
+                                    {hasTiles ? renderPhoneBanner(slide) : renderStandardPanel(slide)}
                                 </div>
                             </li>
                         );
@@ -172,7 +187,10 @@ const HeroCarousel = ({ slides = [], autoPlay = true }) => {
                                 aria-pressed={!isPlaying}
                                 onClick={() => setIsPaused((prev) => !prev)}
                             >
-                                <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-black`} aria-hidden="true" />
+                                <i
+                                    className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-black`}
+                                    aria-hidden="true"
+                                />
                             </button>
                         )}
                     </div>
@@ -186,7 +204,8 @@ const tileShape = PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     label: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired
+    image: PropTypes.string.isRequired,
+    imageAlt: PropTypes.string
 });
 
 const slideShape = PropTypes.shape({
