@@ -174,3 +174,17 @@ export const loyaltyBanner = {
   termsLabel: 'Discounts in USD. *See terms.',
   termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0'
 };
+
+export const motorsBanner = {
+  id: 'motormar26-banner',
+  title: 'More choice, on and off the road',
+  description: 'Get where you need to go with the right parts and accessories.',
+  ctaLabel: 'Explore offers',
+  ctaHref: 'https://www.ebay.com/e/row/motormar26',
+  termsLabel: 'Discounts in USD. *See terms.',
+  termsHref: 'https://pages.ebay.com/promo/2026/motormar26/#section-0',
+  image: 'https://i.ebayimg.com/images/g/3LsAAeSw5YFpndf6/s-l960.webp',
+  imageAlt: 'Sport utility vehicle driving across open terrain',
+  background: '#0046bd',
+  foreground: '#e6f0ff'
+};

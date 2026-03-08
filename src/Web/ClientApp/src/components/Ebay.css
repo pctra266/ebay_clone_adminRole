@@ -579,6 +579,101 @@
     text-decoration: underline;
 }
 
+/* Motors Banner */
+.ebay-motors-banner {
+    --ebay-motors-bg: #0046bd;
+    --ebay-motors-fg: #e6f0ff;
+    margin-bottom: 48px;
+    background: var(--ebay-motors-bg);
+    color: var(--ebay-motors-fg);
+    border-radius: var(--ebay-panel-radius);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.ebay-motors-banner__grid {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 992px) {
+    .ebay-motors-banner__grid {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        min-height: 360px;
+    }
+}
+
+.ebay-motors-banner__body {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+@media (min-width: 992px) {
+    .ebay-motors-banner__body {
+        grid-column: 2 / span 6;
+        justify-content: center;
+        padding: 48px 32px;
+    }
+}
+
+.ebay-motors-banner__body h2 {
+    margin: 0;
+    font-size: clamp(32px, 5vw, 54px);
+    line-height: 1.1;
+}
+
+.ebay-motors-banner__body p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.ebay-motors-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ebay-motors-bg);
+    background: var(--ebay-motors-fg);
+    transition: transform 0.2s ease, filter 0.2s ease;
+    width: fit-content;
+}
+
+.ebay-motors-banner__cta:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.95);
+}
+
+.ebay-motors-banner__terms {
+    font-size: 14px;
+}
+
+.ebay-motors-banner__terms a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.ebay-motors-banner__media {
+    min-height: 280px;
+}
+
+.ebay-motors-banner__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (min-width: 992px) {
+    .ebay-motors-banner__media {
+        grid-column: 8 / span 9;
+    }
+}
+
 /* Tech Highlights */
 .ebay-tech-highlights {
     margin-bottom: 48px;

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import HeroCarousel from '../components/HeroCarousel';
-import { dailyDeals, heroSlides, techDestinations, loyaltyBanner } from '../data/ebayMockData';
+import { dailyDeals, heroSlides, techDestinations, loyaltyBanner, motorsBanner } from '../data/ebayMockData';
 import '../components/Ebay.css';
 
 const EbayHomepage = () => {
@@ -131,6 +131,45 @@ const EbayHomepage = () => {
                             {loyaltyBanner.ctaLabel}
                         </a>
                     </section>
+                )}
+
+                {motorsBanner && (
+                    <aside
+                        className="ebay-motors-banner"
+                        aria-labelledby="ebay-motors-banner-title"
+                        style={{
+                            '--ebay-motors-bg': motorsBanner.background,
+                            '--ebay-motors-fg': motorsBanner.foreground
+                        }}
+                    >
+                        <div className="ebay-motors-banner__grid">
+                            <div className="ebay-motors-banner__body">
+                                <h2 id="ebay-motors-banner-title">{motorsBanner.title}</h2>
+                                <p>{motorsBanner.description}</p>
+                                <a
+                                    className="ebay-motors-banner__cta"
+                                    href={motorsBanner.ctaHref}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {motorsBanner.ctaLabel}
+                                </a>
+                                <p className="ebay-motors-banner__terms">
+                                    <a href={motorsBanner.termsHref} target="_blank" rel="noreferrer">
+                                        {motorsBanner.termsLabel}
+                                    </a>
+                                </p>
+                            </div>
+
+                            <div className="ebay-motors-banner__media">
+                                <img
+                                    src={motorsBanner.image}
+                                    alt={motorsBanner.imageAlt}
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                    </aside>
                 )}
 
                 <section className="ebay-deals-section">
