@@ -64,7 +64,7 @@ export const featuredDeals = [
     badge: 'Certified refurbished',
     note: 'Free shipping',
     image: 'https://i.ebayimg.com/images/g/WssAAOSwlkZn~6zp/s-l500.webp',
-    href: 'https://www.ebay.com/itm/166708867898'
+    href: '#'
   },
   {
     id: 'fd-02',
@@ -74,7 +74,7 @@ export const featuredDeals = [
     discount: 'Save 37%',
     note: 'Ships in 2 days',
     image: 'https://i.ebayimg.com/images/g/P-AAAeSwO7xpJxJI/s-l500.webp',
-    href: 'https://www.ebay.com/itm/357950678927'
+    href: '#'
   },
   {
     id: 'fd-03',
@@ -83,7 +83,7 @@ export const featuredDeals = [
     originalPrice: '₫18,376,014',
     discount: 'Save 29%',
     image: 'https://i.ebayimg.com/images/g/RjAAAeSwciNozaQf/s-l500.webp',
-    href: 'https://www.ebay.com/itm/227050861810'
+    href: '#'
   },
   {
     id: 'fd-04',
@@ -92,7 +92,7 @@ export const featuredDeals = [
     originalPrice: '₫21,233,078',
     discount: 'Save 20%',
     image: 'https://i.ebayimg.com/images/g/n~cAAeSwr4lpWBiQ/s-l500.webp',
-    href: 'https://www.ebay.com/itm/267531849670'
+    href: '#'
   },
   {
     id: 'fd-05',
@@ -102,7 +102,7 @@ export const featuredDeals = [
     discount: 'Save 58%',
     badge: 'Manufacturer refurbished',
     image: 'https://i.ebayimg.com/images/g/WscAAeSw0e5pq1as/s-l500.webp',
-    href: 'https://www.ebay.com/itm/276789897235'
+    href: '#'
   },
   {
     id: 'fd-06',
@@ -112,7 +112,7 @@ export const featuredDeals = [
     discount: 'Save 64%',
     note: 'Factory sealed',
     image: 'https://i.ebayimg.com/images/g/DsoAAOSw6jtoFS6e/s-l500.webp',
-    href: 'https://www.ebay.com/itm/157040074913'
+    href: '#'
   }
 ];
 
@@ -120,49 +120,49 @@ export const trendingDestinations = [
   {
     id: 'trend-tech',
     label: 'Tech',
-    href: 'https://www.ebay.com/b/bn_7000259124',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/EosAAeSw~Wxpqvvs/s-l500.webp',
     alt: 'Curated tech essentials'
   },
   {
     id: 'trend-motors',
     label: 'Motors',
-    href: 'https://www.ebay.com/b/bn_569479',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/XjIAAeSwsrNpqvvs/s-l500.webp',
     alt: 'Performance motors and parts'
   },
   {
     id: 'trend-luxury',
     label: 'Luxury',
-    href: 'https://www.ebay.com/b/bn_7109710914',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/FBUAAeSwpDhpqvvs/s-l500.webp',
     alt: 'Luxury accessories on eBay'
   },
   {
     id: 'trend-collectibles',
     label: 'Collectibles and art',
-    href: 'https://www.ebay.com/b/bn_7000259855',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/FvQAAeSwMcVpqvvs/s-l500.webp',
     alt: 'Rare collectibles and art pieces'
   },
   {
     id: 'trend-home',
     label: 'Home and garden',
-    href: 'https://www.ebay.com/b/bn_1853126',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/WnYAAeSwPsRpqvvs/s-l500.webp',
     alt: 'Home and garden upgrades'
   },
   {
     id: 'trend-cards',
     label: 'Trading cards',
-    href: 'https://www.ebay.com/b/bn_1852210',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/T6AAAeSwUotpqvvs/s-l500.webp',
     alt: 'Trending trading card drops'
   },
   {
     id: 'trend-health',
     label: 'Health and beauty',
-    href: 'https://www.ebay.com/b/bn_1865479',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/M48AAeSwTkFpqvvs/s-l500.webp',
     alt: 'Health and beauty best sellers'
   }
@@ -174,9 +174,9 @@ export const heroSlides = [
     title: "It's up to you",
     subtitle: 'Customize your ride, your way, with a selection of parts on eBay.',
     ctaLabel: 'Explore offers',
-    ctaHref: 'https://www.ebay.com/e/row/motormar26',
+    ctaHref: '#',
     termsLabel: 'Discounts in USD. *See terms.',
-    termsHref: 'https://pages.ebay.com/promo/2026/motormar26/#section-0',
+    termsHref: '#',
     image: 'https://i.ebayimg.com/images/g/fl4AAeSwV0hpndZs/s-l960.webp',
     background: 'linear-gradient(135deg, #00428e 0%, #0080d6 65%)',
     foreground: '#f2f6ff',
@@ -187,7 +187,7 @@ export const heroSlides = [
     title: 'From selfies to streaming',
     subtitle: "Discover top brands and the latest models at prices you'll love.",
     ctaLabel: 'Upgrade now',
-    ctaHref: 'https://www.ebay.com/b/Cell-Phones-Smartphones/9355/bn_320094',
+    ctaHref: '#',
     background: '#f4f5fb',
     foreground: '#1f2024',
     kicker: 'Smartphones',
@@ -195,19 +195,19 @@ export const heroSlides = [
       {
         id: 'apple',
         label: 'Apple',
-        href: 'https://www.ebay.com/b/Apple-Cell-Phones-Smartphones/9355/bn_319682',
+        href: '#',
         image: 'https://i.ebayimg.com/images/g/cWIAAeSw3ABo0~sF/s-l500.webp'
       },
       {
         id: 'samsung',
         label: 'Samsung',
-        href: 'https://www.ebay.com/b/Samsung-Cell-Phones-and-Smartphones/9355/bn_352130',
+        href: '#',
         image: 'https://i.ebayimg.com/images/g/cmAAAeSwJFpo0~sH/s-l500.webp'
       },
       {
         id: 'xiaomi',
         label: 'Xiaomi',
-        href: 'https://www.ebay.com/b/Xiaomi-Cell-Phones-Smartphones/9355/bn_315817',
+        href: '#',
         image: 'https://i.ebayimg.com/images/g/qi4AAeSwxwRo0~sI/s-l500.webp'
       }
     ]
@@ -217,9 +217,9 @@ export const heroSlides = [
     title: 'Good taste is timeless',
     subtitle: 'Create iconic looks with up to $140* off luxury items.',
     ctaLabel: 'Set your own trends',
-    ctaHref: 'https://www.ebay.com/e/row/luxmar26-eng',
+    ctaHref: '#',
     termsLabel: 'Discounts in USD. *See terms.',
-    termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0',
+    termsHref: '#',
     image: 'https://i.ebayimg.com/images/g/tloAAeSwT7RpoCm5/s-l960.webp',
     background: 'linear-gradient(135deg, #b38adf 0%, #f3d9ff 85%)',
     foreground: '#1f0b2f',
@@ -231,49 +231,49 @@ export const techDestinations = [
   {
     id: 'laptops',
     label: 'Laptops',
-    href: 'https://www.ebay.com/b/bn_1648276',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/SwAAAeSwvwZpqvtW/s-l500.webp',
     alt: 'Assorted performance laptops'
   },
   {
     id: 'computer-parts',
     label: 'Computer parts',
-    href: 'https://www.ebay.com/b/bn_1643095',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/Dz0AAeSwpDhpqvtW/s-l500.webp',
     alt: 'Collection of computer components'
   },
   {
     id: 'smartphones',
     label: 'Smartphones',
-    href: 'https://www.ebay.com/b/bn_320094',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/Rp0AAeSw2yNpqvtW/s-l500.webp',
     alt: 'Latest flagship smartphones'
   },
   {
     id: 'enterprise-networking',
     label: 'Enterprise networking',
-    href: 'https://www.ebay.com/b/bn_1309143',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/O~AAAeSwcIZpqvtW/s-l500.webp',
     alt: 'Enterprise-grade networking hardware'
   },
   {
     id: 'tablets-ebooks',
     label: 'Tablets and eBooks',
-    href: 'https://www.ebay.com/b/bn_320042',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/DaUAAeSwYXxpqvtW/s-l500.webp',
     alt: 'Tablets and eBook readers'
   },
   {
     id: 'storage-media',
     label: 'Storage and blank media',
-    href: 'https://www.ebay.com/b/bn_738891',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/JmMAAeSwUztpqvu5/s-l500.webp',
     alt: 'Hard drives and blank storage media'
   },
   {
     id: 'lenses-filters',
     label: 'Lenses and filters',
-    href: 'https://www.ebay.com/b/bn_152392',
+    href: '#',
     image: 'https://i.ebayimg.com/images/g/RusAAeSw0uxpqvtW/s-l500.webp',
     alt: 'Camera lenses and optical filters'
   }
@@ -284,9 +284,9 @@ export const loyaltyBanner = {
   title: 'Style worth keeping',
   description: 'Get up to $140* off luxury that never fades.',
   ctaLabel: 'Code: LUXMAR26',
-  ctaHref: 'https://www.ebay.com/e/row/luxmar26-eng',
+  ctaHref: '#',
   termsLabel: 'Discounts in USD. *See terms.',
-  termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0'
+  termsHref: '#'
 };
 
 export const motorsBanner = {
@@ -294,9 +294,9 @@ export const motorsBanner = {
   title: 'More choice, on and off the road',
   description: 'Get where you need to go with the right parts and accessories.',
   ctaLabel: 'Explore offers',
-  ctaHref: 'https://www.ebay.com/e/row/motormar26',
+  ctaHref: '#',
   termsLabel: 'Discounts in USD. *See terms.',
-  termsHref: 'https://pages.ebay.com/promo/2026/motormar26/#section-0',
+  termsHref: '#',
   image: 'https://i.ebayimg.com/images/g/3LsAAeSw5YFpndf6/s-l960.webp',
   imageAlt: 'Sport utility vehicle driving across open terrain',
   background: '#0046bd',
@@ -308,9 +308,9 @@ export const colorBanner = {
   title: 'Let the trends follow you',
   description: 'Enjoy up to $140* off luxury pieces that will always turn heads.',
   ctaLabel: 'Claim your classics',
-  ctaHref: 'https://www.ebay.com/e/row/luxmar26-eng',
+  ctaHref: '#',
   termsLabel: 'Discounts in USD. *See terms.',
-  termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0',
+  termsHref: '#',
   image: 'https://i.ebayimg.com/images/g/~ToAAeSwP2VpoCtQ/s-l960.webp',
   imageAlt: 'Model showing timeless luxury accessories',
   background: '#f3e6ff',

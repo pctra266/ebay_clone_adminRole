@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import EbayFooter from '../components/EbayFooter';
 import HeroCarousel from '../components/HeroCarousel';
@@ -85,9 +84,7 @@ const EbayHomepage = () => {
                                     <li key={destination.id} className="ebay-tech-card">
                                         <a
                                             className="ebay-tech-card__link"
-                                            href={destination.href}
-                                            target="_blank"
-                                            rel="noreferrer"
+                                            href="#"
                                         >
                                             <span className="ebay-tech-card__media">
                                                 <img src={destination.image} alt={destination.alt} loading="lazy" />
@@ -129,9 +126,7 @@ const EbayHomepage = () => {
                         <div className="ebay-loyalty-banner__content">
                             <h2 id="ebay-loyalty-banner-title">
                                 <a
-                                    href={loyaltyBanner.ctaHref}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    href="#"
                                     className="ebay-loyalty-banner__heading-link"
                                 >
                                     {loyaltyBanner.title}
@@ -142,16 +137,14 @@ const EbayHomepage = () => {
                                 <p>{loyaltyBanner.description}</p>
 
                                 <a
-                                    href={loyaltyBanner.ctaHref}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    href="#"
                                     className="ebay-loyalty-banner__cta ebay-loyalty-banner__cta--mobile"
                                 >
                                     {loyaltyBanner.ctaLabel}
                                 </a>
 
                                 <span className="ebay-loyalty-banner__terms">
-                                    <a href={loyaltyBanner.termsHref} target="_blank" rel="noreferrer">
+                                    <a href="#">
                                         {loyaltyBanner.termsLabel}
                                     </a>
                                 </span>
@@ -159,9 +152,7 @@ const EbayHomepage = () => {
                         </div>
 
                         <a
-                            href={loyaltyBanner.ctaHref}
-                            target="_blank"
-                            rel="noreferrer"
+                            href="#"
                             className="ebay-loyalty-banner__cta ebay-loyalty-banner__cta--desktop"
                         >
                             {loyaltyBanner.ctaLabel}
@@ -184,14 +175,12 @@ const EbayHomepage = () => {
                                 <p>{motorsBanner.description}</p>
                                 <a
                                     className="ebay-motors-banner__cta"
-                                    href={motorsBanner.ctaHref}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    href="#"
                                 >
                                     {motorsBanner.ctaLabel}
                                 </a>
                                 <p className="ebay-motors-banner__terms">
-                                    <a href={motorsBanner.termsHref} target="_blank" rel="noreferrer">
+                                    <a href="#">
                                         {motorsBanner.termsLabel}
                                     </a>
                                 </p>
@@ -252,9 +241,7 @@ const EbayHomepage = () => {
                                                     </button>
                                                     <a
                                                         className="ebay-featured-card__image-link"
-                                                        href={deal.href}
-                                                        target="_blank"
-                                                        rel="noreferrer"
+                                                        href="#"
                                                     >
                                                         <img src={deal.image} alt={deal.title} loading="lazy" />
                                                         <span className="ebay-featured-card__scrim" aria-hidden="true" />
@@ -263,9 +250,7 @@ const EbayHomepage = () => {
 
                                                 <a
                                                     className="ebay-featured-card__info"
-                                                    href={deal.href}
-                                                    target="_blank"
-                                                    rel="noreferrer"
+                                                    href="#"
                                                 >
                                                     <span className="ebay-featured-card__title">{deal.title}</span>
 
@@ -340,9 +325,7 @@ const EbayHomepage = () => {
                                         <li key={destination.id} className="ebay-trending-card">
                                             <a
                                                 className="ebay-trending-card__link"
-                                                href={destination.href}
-                                                target="_blank"
-                                                rel="noreferrer"
+                                                href="#"
                                             >
                                                 <span className="ebay-trending-card__media">
                                                     <img src={destination.image} alt={destination.alt} loading="lazy" />
@@ -385,7 +368,7 @@ const EbayHomepage = () => {
                                 <p>{colorBanner.description}</p>
                                 <a
                                     className="ebay-color-banner__cta"
-                                    href={colorBanner.ctaHref}
+                                    href="#"
                                     target="_self"
                                     rel="noreferrer"
                                 >
@@ -393,7 +376,7 @@ const EbayHomepage = () => {
                                 </a>
                                 <div className="ebay-color-banner__spacer" aria-hidden="true" />
                                 <p className="ebay-color-banner__terms">
-                                    <a href={colorBanner.termsHref} target="_self" rel="noreferrer">
+                                    <a href="#" target="_self" rel="noreferrer">
                                         {colorBanner.termsLabel}
                                     </a>
                                 </p>
