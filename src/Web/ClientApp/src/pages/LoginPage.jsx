@@ -192,7 +192,7 @@ export default function LoginPage() {
         // ✅ Không lưu token — server đã set HttpOnly cookie
         setStep("success");
         await sleep(1200);
-        window.location.href = "/admin/dashboard";
+        window.location.href = "/";
       }
     } catch (err) {
       setError("Không thể kết nối đến server. Vui lòng thử lại.");
