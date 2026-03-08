@@ -302,3 +302,18 @@ export const motorsBanner = {
   background: '#0046bd',
   foreground: '#e6f0ff'
 };
+
+export const colorBanner = {
+  id: 'luxe-trends',
+  title: 'Let the trends follow you',
+  description: 'Enjoy up to $140* off luxury pieces that will always turn heads.',
+  ctaLabel: 'Claim your classics',
+  ctaHref: 'https://www.ebay.com/e/row/luxmar26-eng',
+  termsLabel: 'Discounts in USD. *See terms.',
+  termsHref: 'https://pages.ebay.com/promo/2026/luxmar26/#section-0',
+  image: 'https://i.ebayimg.com/images/g/~ToAAeSwP2VpoCtQ/s-l960.webp',
+  imageAlt: 'Model showing timeless luxury accessories',
+  background: '#f3e6ff',
+  foreground: '#2b0f4b',
+  trackableId: '01KK5E6Y9GH1K6ZJ4A9HZ4AGJC'
+};

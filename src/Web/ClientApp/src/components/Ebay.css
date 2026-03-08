@@ -1006,6 +1006,123 @@
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
 }
 
+/* Color Banner */
+.ebay-color-banner {
+    margin-bottom: 48px;
+    background: var(--ebay-color-banner-bg, #f3e6ff);
+    color: var(--ebay-color-banner-fg, #2b0f4b);
+    border-radius: var(--ebay-panel-radius);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ebay-color-banner__grid {
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+}
+
+@media (min-width: 992px) {
+    .ebay-color-banner__grid {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        min-height: 436px;
+    }
+}
+
+.ebay-color-banner__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 32px 32px 24px;
+}
+
+@media (min-width: 768px) {
+    .ebay-color-banner__body {
+        padding: 48px;
+    }
+}
+
+@media (min-width: 992px) {
+    .ebay-color-banner__body {
+        grid-column: 2 / span 6;
+        justify-content: center;
+        padding: 40px 24px;
+    }
+}
+
+.ebay-color-banner__body h2 {
+    margin: 0;
+    font-size: clamp(32px, 5vw, 56px);
+    line-height: 1.1;
+}
+
+.ebay-color-banner__body p {
+    margin: 0;
+    font-size: 16px;
+    max-width: 460px;
+}
+
+.ebay-color-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--ebay-color-banner-fg, #2b0f4b);
+    background: rgba(255, 255, 255, 0.9);
+    transition: transform 0.2s ease, filter 0.2s ease;
+    width: fit-content;
+}
+
+.ebay-color-banner__cta:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.95);
+}
+
+.ebay-color-banner__terms {
+    font-size: 13px;
+}
+
+.ebay-color-banner__terms a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.ebay-color-banner__media {
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 992px) {
+    .ebay-color-banner__media {
+        grid-column: 8 / span 9;
+    }
+}
+
+.ebay-color-banner__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left center;
+}
+
+.ebay-color-banner__spacer {
+    flex: 1;
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .ebay-color-banner__spacer {
+        display: block;
+    }
+}
+
 /* Tech Highlights */
 .ebay-tech-highlights {
     margin-bottom: 48px;

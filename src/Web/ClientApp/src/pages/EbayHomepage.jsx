@@ -9,7 +9,8 @@ import {
     techDestinations,
     loyaltyBanner,
     motorsBanner,
-    trendingDestinations
+    trendingDestinations,
+    colorBanner
 } from '../data/ebayMockData';
 import '../components/Ebay.css';
 
@@ -361,6 +362,45 @@ const EbayHomepage = () => {
                             >
                                 <i className="bi bi-chevron-right" aria-hidden="true" />
                             </button>
+                        </div>
+                    </aside>
+                )}
+
+                {colorBanner && (
+                    <aside
+                        className="ebay-color-banner"
+                        aria-labelledby="ebay-color-banner-title"
+                        data-viewport={`{"trackableId":"${colorBanner.trackableId}"}`}
+                        data-trackable-id={colorBanner.trackableId}
+                        style={{
+                            '--ebay-color-banner-bg': colorBanner.background,
+                            '--ebay-color-banner-fg': colorBanner.foreground
+                        }}
+                    >
+                        <div className="ebay-color-banner__grid">
+                            <div className="ebay-color-banner__body">
+                                <div className="ebay-color-banner__spacer" aria-hidden="true" />
+                                <h2 id="ebay-color-banner-title">{colorBanner.title}</h2>
+                                <p>{colorBanner.description}</p>
+                                <a
+                                    className="ebay-color-banner__cta"
+                                    href={colorBanner.ctaHref}
+                                    target="_self"
+                                    rel="noreferrer"
+                                >
+                                    {colorBanner.ctaLabel}
+                                </a>
+                                <div className="ebay-color-banner__spacer" aria-hidden="true" />
+                                <p className="ebay-color-banner__terms">
+                                    <a href={colorBanner.termsHref} target="_self" rel="noreferrer">
+                                        {colorBanner.termsLabel}
+                                    </a>
+                                </p>
+                            </div>
+
+                            <div className="ebay-color-banner__media" role="img" aria-label={colorBanner.imageAlt}>
+                                <img src={colorBanner.image} alt={colorBanner.imageAlt} loading="lazy" />
+                            </div>
                         </div>
                     </aside>
                 )}
