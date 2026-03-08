@@ -8,6 +8,8 @@ import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { ProductList } from "./pages/Products";
+import ReturnRequestsPage from './pages/ReturnRequestsPage';
+import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
 
 const AppRoutes = [
   {
@@ -41,6 +43,14 @@ const AppRoutes = [
   {
     path: '/products',
     element: <ProductList />
+  },
+  {
+    path: '/return-requests',
+    element: <ReturnRequestsPage />
+  },
+  {
+    path: '/return-requests/:id',
+    element: <ReturnRequestDetailPage/>
   }
 ];
 
