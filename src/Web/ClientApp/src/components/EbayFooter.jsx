@@ -94,6 +94,32 @@ const legalLinks = [
     { label: 'AdChoice', href: 'https://www.ebay.com/adchoice' }
 ];
 
+const footerSectionMap = footerSections.reduce((acc, section) => {
+    acc[section.id] = section;
+    return acc;
+}, {});
+
+const FooterLinkSection = ({ section }) => {
+    if (!section) {
+        return null;
+    }
+
+    return (
+        <section className="ebay-footer__section" aria-labelledby={`ebay-footer-${section.id}`}>
+            <h3 id={`ebay-footer-${section.id}`}>{section.title}</h3>
+            <ul role="list">
+                {section.links.map((link) => (
+                    <li key={link.label}>
+                        <a href={link.href} target="_blank" rel="noreferrer">
+                            {link.label}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </section>
+    );
+};
+
 const EbayFooter = () => {
     const currentYear = new Date().getFullYear();
 
@@ -104,77 +130,77 @@ const EbayFooter = () => {
             </h2>
 
             <div className="ebay-footer__grid">
-                {footerSections.map((section) => (
+                <div className="ebay-footer__column" data-footer-column="buy">
+                    <FooterLinkSection section={footerSectionMap.buy} />
+                </div>
+
+                <div className="ebay-footer__column" data-footer-column="sell-tools">
+                    <FooterLinkSection section={footerSectionMap.sell} />
+                    <FooterLinkSection section={footerSectionMap.tools} />
+                </div>
+
+                <div className="ebay-footer__column ebay-footer__column--meta" data-footer-column="companies">
                     <section
-                        key={section.id}
-                        className="ebay-footer__section"
-                        aria-labelledby={`ebay-footer-${section.id}`}
+                        className="ebay-footer__section ebay-footer__section--meta"
+                        aria-labelledby="ebay-footer-companies"
                     >
-                        <h3 id={`ebay-footer-${section.id}`}>{section.title}</h3>
+                        <h3 id="ebay-footer-companies">eBay companies</h3>
                         <ul role="list">
-                            {section.links.map((link) => (
-                                <li key={link.label}>
-                                    <a href={link.href} target="_blank" rel="noreferrer">
-                                        {link.label}
+                            {ebayCompanies.map((company) => (
+                                <li key={company.label}>
+                                    <a href={company.href} target="_blank" rel="noreferrer">
+                                        {company.label}
                                     </a>
                                 </li>
                             ))}
                         </ul>
+
+                        <div>
+                            <h3 id="ebay-footer-connect">Stay connected</h3>
+                            <ul className="ebay-footer__social" role="list" aria-labelledby="ebay-footer-connect">
+                                {socialLinks.map((social) => (
+                                    <li key={social.id}>
+                                        <a
+                                            className="ebay-footer__social-link"
+                                            href={social.href}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <i className={social.icon} aria-hidden="true" />
+                                            <span>{social.label}</span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </section>
-                ))}
+                </div>
 
-                <section
-                    className="ebay-footer__section ebay-footer__section--meta"
-                    aria-labelledby="ebay-footer-companies"
-                >
-                    <h3 id="ebay-footer-companies">eBay companies</h3>
-                    <ul role="list">
-                        {ebayCompanies.map((company) => (
-                            <li key={company.label}>
-                                <a href={company.href} target="_blank" rel="noreferrer">
-                                    {company.label}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="ebay-footer__column" data-footer-column="about">
+                    <FooterLinkSection section={footerSectionMap.about} />
+                </div>
 
-                    <div>
-                        <h3 id="ebay-footer-connect">Stay connected</h3>
-                        <ul className="ebay-footer__social" role="list" aria-labelledby="ebay-footer-connect">
-                            {socialLinks.map((social) => (
-                                <li key={social.id}>
-                                    <a
-                                        className="ebay-footer__social-link"
-                                        href={social.href}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <i className={social.icon} aria-hidden="true" />
-                                        <span>{social.label}</span>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </section>
-
-                <section
-                    className="ebay-footer__section ebay-footer__section--locale"
-                    aria-labelledby="ebay-footer-sites"
-                >
-                    <h3 id="ebay-footer-sites">eBay Sites</h3>
-                    <button
-                        type="button"
-                        className="ebay-footer__locale-selector"
-                        aria-label="Change eBay site location"
+                <div className="ebay-footer__column ebay-footer__column--support" data-footer-column="support">
+                    <FooterLinkSection section={footerSectionMap.help} />
+                    <FooterLinkSection section={footerSectionMap.community} />
+                    <section
+                        className="ebay-footer__section ebay-footer__section--locale"
+                        aria-labelledby="ebay-footer-sites"
                     >
-                        <span role="img" aria-label="United States">
-                            🇺🇸
-                        </span>
-                        <span>United States</span>
-                        <i className="bi bi-chevron-down" aria-hidden="true" />
-                    </button>
-                </section>
+                        <h3 id="ebay-footer-sites">eBay Sites</h3>
+                        <button
+                            type="button"
+                            className="ebay-footer__locale-selector"
+                            aria-label="Change eBay site location"
+                        >
+                            <span className="ebay-footer__locale-flag" role="img" aria-label="United States">
+                                🇺🇸
+                            </span>
+                            <span className="ebay-footer__locale-label">United States</span>
+                            <i className="bi bi-chevron-down" aria-hidden="true" />
+                        </button>
+                    </section>
+                </div>
             </div>
 
             <div className="ebay-footer__legal">

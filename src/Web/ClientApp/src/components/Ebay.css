@@ -1442,23 +1442,37 @@
 
 .ebay-footer__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    column-gap: 48px;
+    row-gap: 32px;
     margin-bottom: 32px;
+    align-items: flex-start;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
+    .ebay-footer__grid {
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
     .ebay-footer__grid {
         grid-template-columns: repeat(5, minmax(180px, 1fr));
     }
+}
 
-    .ebay-footer__section--meta {
-        grid-column: span 1;
-    }
+.ebay-footer__column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
 
-    .ebay-footer__section--locale {
-        align-self: flex-start;
-    }
+.ebay-footer__column--meta {
+    gap: 16px;
+}
+
+.ebay-footer__column--support {
+    gap: 20px;
 }
 
 .ebay-footer__section h3 {
