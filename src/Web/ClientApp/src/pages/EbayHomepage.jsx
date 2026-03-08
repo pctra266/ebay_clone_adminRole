@@ -85,19 +85,6 @@ const EbayHomepage = () => {
                     </div>
                 </section>
 
-                <section className="ebay-categories-section">
-                    <div className="ebay-categories-scroll">
-                        {categories.map((category) => (
-                            <Link to="#" key={category.id} className="ebay-category-item">
-                                <div className="ebay-category-img-container">
-                                    <img src={category.image} alt={category.name} />
-                                </div>
-                                <h3>{category.name}</h3>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
-
                 <section className="ebay-deals-section">
                     <div className="ebay-deals-header">
                         <h2>Today's Deals – All With Free Shipping</h2>
