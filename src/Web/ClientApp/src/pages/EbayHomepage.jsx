@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
+import EbayFooter from '../components/EbayFooter';
 import HeroCarousel from '../components/HeroCarousel';
 import {
     dailyDeals,
@@ -404,34 +405,8 @@ const EbayHomepage = () => {
                         </div>
                     </aside>
                 )}
-
-                <section className="ebay-deals-section">
-                    <div className="ebay-deals-header">
-                        <h2>Today's Deals – All With Free Shipping</h2>
-                        <Link to="#">
-                            See all <i className="bi bi-arrow-right" />
-                        </Link>
-                    </div>
-                    <div className="ebay-deals-grid">
-                        {dailyDeals.map((deal) => (
-                            <Link to="#" key={deal.id} className="ebay-deal-card">
-                                <div className="ebay-deal-img-wrapper">
-                                    <img src={deal.image} alt={deal.title} />
-                                </div>
-                                <h3 className="ebay-deal-title">{deal.title}</h3>
-                                <div className="ebay-deal-price">{deal.price}</div>
-                                <div className="ebay-deal-meta">
-                                    {deal.originalPrice && (
-                                        <span className="ebay-deal-original">{deal.originalPrice}</span>
-                                    )}
-                                    {deal.discount && <span>{deal.discount}</span>}
-                                </div>
-                                {deal.sold && <div className="ebay-deal-sold">{deal.sold}</div>}
-                            </Link>
-                        ))}
-                    </div>
-                </section>
             </main>
+            <EbayFooter />
         </div>
     );
 };
