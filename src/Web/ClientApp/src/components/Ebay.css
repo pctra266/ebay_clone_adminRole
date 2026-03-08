@@ -437,7 +437,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 2px solid var(--ebay-blue);
+    border: 2px solid var(--ebay-black);
     background: transparent;
     cursor: pointer;
     padding: 0;
@@ -445,7 +445,7 @@
 }
 
 .ebay-hero-carousel__dot[aria-current="true"] {
-    background: var(--ebay-blue);
+    background: var(--ebay-black);
     transform: scale(1.15);
 }
 
