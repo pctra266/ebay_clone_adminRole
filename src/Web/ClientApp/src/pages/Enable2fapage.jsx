@@ -578,7 +578,7 @@ export default function Enable2FAPage() {
                 </div>
 
                 <button
-                  onClick={() => window.location.href = "/admin/dashboard"}
+                  onClick={() => window.location.href = "/dashboard"}
                   style={btnPrimary(false)}
                 >
                   <span>Go to Dashboard</span><ArrowRightIcon />
