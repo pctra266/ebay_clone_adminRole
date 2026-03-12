@@ -73,6 +73,12 @@ export function DashboardPage() {
             <p className="text-muted mb-0">Filter by user/entity and inspect before/after data JSON.</p>
           </Link>
         </div>
+        <div className="col-md-6 col-lg-4">
+          <Link className="card card-body text-decoration-none h-100" to="/review-monitoring">
+            <h3 className="h6 mb-1">Review Monitoring</h3>
+            <p className="text-muted mb-0">Monitor flagged reviews and see platform statistics.</p>
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -75,6 +75,7 @@ public class ResolveProductViolationCommandHandler : IRequestHandler<ResolveProd
         }
         else if (request.Action == ViolationResolutionAction.Reject)
         {
+            product.Status = "Active";
             product.ReportCount = 0;
             product.ViolationType = null; 
             MarkReportsAs(product.Reports, "Rejected");

@@ -1,4 +1,4 @@
-﻿using EbayClone.Application.Common.Interfaces;
+using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Constants;
 using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Data.Interceptors;
@@ -81,5 +81,7 @@ public static class DependencyInjection
     });
         builder.Services.AddTransient<IEmailService, EmailService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
+        
+        builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
     }
 }

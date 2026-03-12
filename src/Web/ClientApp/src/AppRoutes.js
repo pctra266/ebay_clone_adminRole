@@ -7,6 +7,8 @@ import { AuditLogsPage } from "./pages/AuditLogsPage";
 import { FetchData } from "./components/FetchData";
 import { ProductList } from "./pages/Public/Home";
 import ProductModerationPage from "./pages/ProductModerationPage";
+import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
+
 
 const AppRoutes = [
   {
@@ -44,6 +46,10 @@ const AppRoutes = [
   {
     path: '/home',
     element: <ProductList />
+  },
+  {
+    path: '/review-monitoring',
+    element: <ReviewMonitoringPage />
   }
 ];
 

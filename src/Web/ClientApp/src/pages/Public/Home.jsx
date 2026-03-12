@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { productService } from '../../services/productService'; // Đảm bảo đường dẫn đúng
+import { reviewsService } from '../../services/reviewsService';
 
 export const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // --- State cho Report Modal ---
-    const [reportingProductId, setReportingProductId] = useState(null); // Lưu ID sản phẩm đang bị report
+    const [reportingProductId, setReportingProductId] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [reportData, setReportData] = useState({
-        reason: 'Counterfeit Item', // Giá trị mặc định
+        reason: 'Counterfeit Item',
         description: '',
         evidenceFiles: '',
         priority: 'Low'
+    });
+
+    // --- State cho Review Modal ---
+    const [reviewingProductId, setReviewingProductId] = useState(null);
+    const [reviewData, setReviewData] = useState({
+        rating: 5,
+        comment: ''
     });
 
     useEffect(() => {
@@ -48,6 +56,15 @@ export const ProductList = () => {
     // --- Hàm đóng Modal ---
     const handleCloseReport = () => {
         setReportingProductId(null);
+    };
+
+    const handleOpenReview = (productId) => {
+        setReviewingProductId(productId);
+        setReviewData({ rating: 5, comment: '' });
+    };
+
+    const handleCloseReview = () => {
+        setReviewingProductId(null);
     };
 
     // --- Hàm xử lý thay đổi input trong Form ---
@@ -87,6 +104,30 @@ export const ProductList = () => {
         }
     };
 
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const payload = {
+                productId: reviewingProductId,
+                reviewerId: 1, // Mock user ID
+                rating: parseInt(reviewData.rating),
+                comment: reviewData.comment
+            };
+
+            await reviewsService.createReview(payload);
+            
+            alert("Đã gửi đánh giá thành công! Đánh giá sẽ được kiểm duyệt nếu có nội dung nhạy cảm.");
+            handleCloseReview();
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi khi gửi đánh giá.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     if (loading) {
         return <p style={{ padding: 20 }}>Đang tải danh sách sản phẩm...</p>;
     }
@@ -103,12 +144,20 @@ export const ProductList = () => {
                             <span>
                                 <strong>{product.title}</strong> - Giá: {product.price}
                             </span>
-                            <button 
-                                onClick={() => handleOpenReport(product.id)}
-                                style={{ background: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
-                            >
-                                Report
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button 
+                                    onClick={() => handleOpenReview(product.id)}
+                                    style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+                                >
+                                    Đánh giá
+                                </button>
+                                <button 
+                                    onClick={() => handleOpenReport(product.id)}
+                                    style={{ background: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+                                >
+                                    Report
+                                </button>
+                            </div>
                         </li>
                     ))
                 )}
@@ -202,6 +251,82 @@ export const ProductList = () => {
                                     style={{ flex: 1, padding: '10px', borderRadius: '4px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                                 >
                                     {isSubmitting ? 'Đang gửi...' : 'Gửi Báo Cáo'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- REVIEW MODAL --- */}
+            {reviewingProductId && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div style={{
+                        background: '#fff', padding: '24px', borderRadius: '12px', 
+                        width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                    }}>
+                        <h3 style={{ marginTop: 0, color: '#1a1a1a' }}>Đánh giá sản phẩm #{reviewingProductId}</h3>
+                        
+                        <form onSubmit={handleSubmitReview} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Số sao</label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setReviewData(prev => ({ ...prev, rating: star }))}
+                                            style={{
+                                                background: 'none', border: 'none', fontSize: '24px', 
+                                                color: star <= reviewData.rating ? '#ffc107' : '#ddd',
+                                                cursor: 'pointer', padding: 0
+                                            }}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Nhận xét của bạn</label>
+                                <textarea 
+                                    value={reviewData.comment} 
+                                    onChange={(e) => setReviewData(prev => ({ ...prev, comment: e.target.value }))}
+                                    required
+                                    rows={4}
+                                    placeholder="Chia sẻ trải nghiệm của bạn..."
+                                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }}
+                                />
+                                {reviewData.comment && ["lừa đảo", "đmm", "chết"].some(w => reviewData.comment.toLowerCase().includes(w)) && (
+                                    <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
+                                        ⚠️ Nội dung chứa từ ngữ nhạy cảm, sẽ bị hệ thống gắn cờ.
+                                    </p>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button 
+                                    type="button" 
+                                    onClick={handleCloseReview} 
+                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    Huỷ
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={isSubmitting}
+                                    style={{ 
+                                        flex: 1, padding: '12px', borderRadius: '8px', border: 'none', 
+                                        background: '#3b82f6', color: '#fff', fontWeight: 'bold', 
+                                        cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    {isSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
                                 </button>
                             </div>
                         </form>

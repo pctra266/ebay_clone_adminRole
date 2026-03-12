@@ -5,6 +5,7 @@ const endpoints = {
   broadcasts: `${API_BASE}/Broadcasts`,
   adminRoles: `${API_BASE}/AdminRoles`,
   auditLogs: `${API_BASE}/AuditLogs`,
+  categories: `${API_BASE}/Categories`,
 };
 
 export default endpoints;
@@ -27,7 +28,9 @@ export const ENDPOINTS = {
         RESOLVE_VIOLATION: (id) => `/api/products/managed/${id}/resolve-violation`,
     },
     
-    // Sau này bạn có module khác thì cứ thêm vào đây:
-    // USERS: { BASE: '/api/users', ... },
-    // ORDERS: { ... }
+    REVIEWS: {
+        BASE: '/api/reviews',
+        FLAGGED: '/api/reviews/flagged',
+        STATUS: (id) => `/api/reviews/${id}/status`,
+    }
 };

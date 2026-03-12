@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { productService } from '../services/productService'; // Đảm bảo đường dẫn này đúng với dự án của bạn
+import { categoryService } from '../services/categoryService';
 
-const CATEGORIES = ['All', 'Electronics', 'Fashion', 'Accessories'];
-const SHOPS = ['All', 'TechStore_VN', 'FashionTrend', 'LuxuryWatches', 'GadgetWorld', 'BagStore'];
+
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -75,7 +75,8 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
     const ACTION_BUTTONS = [
         { id: 1, label: '🗑 Xóa & Cảnh báo', color: '#991B1B', border: '#EF4444', bg: '#FEF2F2', activeBg: '#FCA5A5' },
         { id: 2, label: '👁️ Tạm ẩn bài', color: '#92400E', border: '#F59E0B', bg: '#FFFBEB', activeBg: '#FDE68A' },
-        { id: 3, label: '✅ Bỏ qua (Báo cáo sai)', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' }
+        { id: 3, label: '✅ Bỏ qua (Báo cáo sai)', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' },
+        { id: 4, label: '🔄 Restore', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' }
     ];
 
     return (
@@ -202,8 +203,9 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
 export const ProductModerationPage = () => {
     const [activeTab, setActiveTab] = useState('Reported');
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [categoryFilter, setCategoryFilter] = useState('All');
+    const [categoryFilter, setCategoryFilter] = useState('');
     const [shopFilter, setShopFilter] = useState('All');
     const [search, setSearch] = useState('');
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -214,18 +216,32 @@ export const ProductModerationPage = () => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            // Gọi API thật để lấy danh sách sản phẩm quản lý
-            const data = await productService.getManagedProducts({
-                pageNumber: page,
-                pageSize: PER_PAGE,
-                tab: activeTab
-            });
-            // Giả định API trả về dạng { items: [...], total: 100 } hoặc mảng trực tiếp
-            console.log('API trả về:', data);
-            setProducts(data.items || data);
-            setTotalItems(data.totalCount || (data.items ? data.items.length : data.length));
+            // Cách 3: Chạy song song cả 2 API
+            // Promise.all nhận vào một mảng các Promise và trả về mảng kết quả tương ứng
+            const [productData, categoriesData] = await Promise.all([
+                productService.getManagedProducts({
+                    pageNumber: page,
+                    pageSize: PER_PAGE,
+                    tab: activeTab
+                }),
+                categoryService.getAllCategories()
+            ]);
+
+            // Xử lý dữ liệu Products
+            // Giả định API trả về { items: [], totalCount: 0 } hoặc chỉ là mảng []
+            const items = productData.items || productData;
+            const total = productData.totalCount || (productData.items ? productData.items.length : productData.length);
+
+            setProducts(items);
+            setTotalItems(total);
+
+            // Xử lý dữ liệu Categories
+            setCategories(categoriesData);
+
+            console.log('Tải dữ liệu thành công:', { items, total });
         } catch (err) {
             console.error('Không thể tải dữ liệu:', err);
+            // Bạn có thể set một thông báo lỗi tại đây để hiển thị lên UI
         } finally {
             setLoading(false);
         }
@@ -243,11 +259,11 @@ export const ProductModerationPage = () => {
         // fetchProducts(); 
     };
 
+    const isFiltering = categoryFilter !== '' || shopFilter !== 'All' || search !== '';
     // Nếu lọc qua API thì phần filter client này có thể bỏ qua hoặc để lại nếu bạn chỉ fetch toàn bộ
     const filtered = products.filter(p => {
         // 1. Kiểm tra Category (Lưu ý: kiểm tra p.category có tồn tại không)
-        const matchCat = categoryFilter === 'All' || categoryFilter.includes('All') || p.category === categoryFilter;
-
+        const matchCat = categoryFilter === '' || p.categoryName === categoryFilter;
         // 2. Kiểm tra Shop
         const matchShop = shopFilter === 'All' || shopFilter.includes('All') || p.shopName === shopFilter;
 
@@ -262,7 +278,11 @@ export const ProductModerationPage = () => {
     });
 
     const pendingCount = products.filter(p => p.status === 'Pending Review').length;
+    const displayTotalItems = isFiltering ? filtered.length : totalItems;
+    const filteredTotalPages = Math.ceil(displayTotalItems / PER_PAGE) || 1;
 
+    // Quyết định mảng sản phẩm sẽ hiển thị ra table
+    const displayProducts = isFiltering ? filtered : products;
     return (
         <>
             <style>{`
@@ -318,11 +338,36 @@ export const ProductModerationPage = () => {
 
                         {/* Filters */}
                         <div style={{ padding: '16px 24px', display: 'flex', gap: 12, flexWrap: 'wrap', borderBottom: '1px solid #F1F5F9', background: '#FAFBFC' }}>
-                            <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} style={{ padding: '8px 32px 8px 12px', borderRadius: 8, border: '1.5px solid #E2E8F0', fontSize: 13, color: '#374151', background: '#fff', cursor: 'pointer', appearance: 'none', backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
-                                {CATEGORIES.map(c => <option key={c}>{c === 'All' ? 'Filter by Category (All)' : c}</option>)}
-                            </select>
-                            <select value={shopFilter} onChange={e => setShopFilter(e.target.value)} style={{ padding: '8px 32px 8px 12px', borderRadius: 8, border: '1.5px solid #E2E8F0', fontSize: 13, color: '#374151', background: '#fff', cursor: 'pointer', appearance: 'none', backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
-                                {SHOPS.map(s => <option key={s}>{s === 'All' ? 'Filter by Shop Name (All)' : s}</option>)}
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => {
+                                    const selectedId = e.target.value;
+                                    setCategoryFilter(selectedId); // Lưu ID vào state
+                                    alert('ID đã chọn: ' + selectedId);
+                                }}
+                                style={{
+                                    padding: '8px 32px 8px 12px',
+                                    borderRadius: 8,
+                                    border: '1.5px solid #E2E8F0',
+                                    fontSize: 13,
+                                    color: '#374151',
+                                    background: '#fff',
+                                    cursor: 'pointer',
+                                    appearance: 'none',
+                                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'right 10px center'
+                                }}
+                            >
+                                {/* Option mặc định cho tất cả danh mục */}
+                                <option value="">Filter by Category (All)</option>
+
+                                {/* Map danh sách categories */}
+                                {categories.map((c) => (
+                                    <option key={c.tagId || c.id} value={c.tagName || c.name}>
+                                        {c.tagName || c.name}
+                                    </option>
+                                ))}
                             </select>
                             <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
                                 <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#94A3B8' }}>🔍</span>
@@ -351,7 +396,7 @@ export const ProductModerationPage = () => {
                                                 ))}
                                             </tr>
                                         ))
-                                    ) : filtered.length === 0 ? (
+                                    ) : displayProducts.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} style={{ textAlign: 'center', padding: 48, color: '#94A3B8', fontSize: 14 }}>
                                                 <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
@@ -359,7 +404,7 @@ export const ProductModerationPage = () => {
                                             </td>
                                         </tr>
                                     ) : (
-                                        filtered.map((product, idx) => (
+                                        displayProducts.map((product, idx) => (
                                             <tr key={product.id} className="row-hover" style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.15s', animationDelay: `${idx * 0.05}s`, animation: 'fadeIn 0.3s ease both' }}>
                                                 <td style={{ padding: '14px 16px', fontSize: 13, color: '#64748B', fontWeight: 500 }}>#{product.id}</td>
                                                 <td style={{ padding: '14px 16px' }}>
@@ -391,33 +436,34 @@ export const ProductModerationPage = () => {
                         {/* Footer */}
                         <div style={{ padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F1F5F9', background: '#FAFBFC' }}>
                             <span style={{ fontSize: 13, color: '#64748B' }}>
-                                Showing {totalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, totalItems)} of {totalItems} items
+                                Showing {displayTotalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, displayTotalItems)} of {displayTotalItems} items
                             </span>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                                {totalItems > 0 && (
-                                    <div style={{ display: 'flex', gap: 6 }}>
-                                        {Array.from({ length: totalPages }, (_, index) => index + 1).map(p => (
-                                            <button
-                                                key={p}
-                                                onClick={() => setPage(p)}
-                                                style={{
-                                                    width: 32, height: 32,
-                                                    borderRadius: 7,
-                                                    border: '1.5px solid',
-                                                    borderColor: page === p ? '#2563EB' : '#E2E8F0',
-                                                    background: page === p ? '#EFF6FF' : '#fff',
-                                                    color: page === p ? '#2563EB' : '#64748B',
-                                                    fontWeight: page === p ? 700 : 400,
-                                                    cursor: 'pointer',
-                                                    fontSize: 13
-                                                }}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+
+                            {/* Thêm điều kiện filteredTotalPages > 1 ở đây */}
+                            {filteredTotalPages > 1 && (
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    {Array.from({ length: filteredTotalPages }, (_, index) => index + 1).map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setPage(p)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius: 6,
+                                                cursor: 'pointer',
+                                                fontSize: 13,
+                                                fontWeight: 600,
+                                                transition: 'all 0.2s',
+                                                border: '1px solid',
+                                                borderColor: page === p ? '#2563EB' : '#E2E8F0',
+                                                background: page === p ? '#EFF6FF' : '#fff',
+                                                color: page === p ? '#2563EB' : '#64748B',
+                                            }}
+                                        >
+                                            {p}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
