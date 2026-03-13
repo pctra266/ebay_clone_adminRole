@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const API_BASE = "/api/Auth";
 
@@ -186,6 +188,7 @@ export default function Enable2FAPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
@@ -393,7 +396,7 @@ export default function Enable2FAPage() {
                 </button>
 
                 <button
-                  onClick={() => window.location.href = "/"}
+                  onClick={() => navigate("/")}
                   style={{
                     width: "100%", marginTop: 10, padding: "13px",
                     fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans', sans-serif",
@@ -578,7 +581,7 @@ export default function Enable2FAPage() {
                 </div>
 
                 <button
-                  onClick={() => window.location.href = "/dashboard"}
+                  onClick={() => window.location.href = "/login"}
                   style={btnPrimary(false)}
                 >
                   <span>Go to Dashboard</span><ArrowRightIcon />
