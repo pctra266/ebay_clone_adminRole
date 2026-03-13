@@ -6,6 +6,9 @@ import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AuditLogsPage }  from "./pages/AuditLogsPage";
 import { FetchData }      from "./components/FetchData";
 import { ProductList }    from "./pages/Products";
+import { DisputesPage }   from "./pages/DisputesPage";
+import { DisputeDashboard } from "./pages/DisputeDashboard";
+import { DisputeDetailPage } from "./pages/DisputeDetailPage";
 import LoginPage          from "./pages/LoginPage";
 import Enable2FAPage      from "./pages/Enable2fapage";
 import ProtectedRoute     from "./components/ProtectedRoute";
@@ -33,13 +36,8 @@ const AppRoutes = [
 
   // ── Cần login + bắt buộc có 2FA ──────────────────────────────────
   {
-    index: true,                              // ✅ chỉ khai báo 1 lần
-    element: protect(<DashboardPage />)
-  },
-  {
     index: true,
-    element: <EbayHomepage />,
-    noLayout: true
+    element: protect(<DashboardPage />)
   },
   {
     path: "/home",
@@ -48,7 +46,7 @@ const AppRoutes = [
   },
   {
     path: "/dashboard",
-    element: <DashboardPage />
+    element: protect(<DashboardPage />)
   },
   {
     path: "/users",
@@ -77,6 +75,18 @@ const AppRoutes = [
   {
     path: "/products",
     element: protect(<ProductList />)
+  },
+  {
+    path: "/disputes",
+    element: protect(<DisputesPage />)
+  },
+  {
+    path: "/disputes/dashboard",
+    element: protect(<DisputeDashboard />)
+  },
+  {
+    path: "/disputes/:id",
+    element: protect(<DisputeDetailPage />)
   },
 ];
 
