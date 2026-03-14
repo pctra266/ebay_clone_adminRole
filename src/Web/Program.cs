@@ -34,6 +34,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();          // serve React build from wwwroot
 app.UseExceptionHandler(options => { });
 app.UseCors("FrontendPolicy");
+app.UseRateLimiter();          // Rate Limiting — TRƯỚC authentication
 app.UseAuthentication();
 app.UseAuthorization();
 
