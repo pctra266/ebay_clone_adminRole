@@ -1,6 +1,6 @@
+using EbayClone.Infrastructure.Data;
 using System;
 using EbayClone.Application.Common.Interfaces;
-using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,39 +15,42 @@ builder.AddWebServices();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Run DB migration + seeder on startup (idempotent — safe to run every time)
+await app.InitialiseDatabaseAsync();
+
+// ── Environment-specific middleware ──────────────────────────
 if (app.Environment.IsDevelopment())
 {
-    await app.InitialiseDatabaseAsync();
+    // Dev: nothing extra needed, seeder already ran above
 }
 else
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+// ── Core middleware (ORDER MATTERS) ──────────────────────────
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-
+app.UseStaticFiles();          // serve React build from wwwroot
 app.UseExceptionHandler(options => { });
 app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ── API endpoints ────────────────────────────────────────────
 app.MapRazorPages();
 
 // Register your endpoint groups
 app.MapEndpoints();
 
-// NSwag OpenAPI and Swagger UI
+// ── OpenAPI / Swagger UI ─────────────────────────────────────
 app.UseOpenApi();
 app.UseSwaggerUi(settings =>
 {
     settings.Path = "/api";
 });
 
-// Keep fallback last so it doesn't catch API routes
+// ── SPA fallback (MUST be last — catches all unmatched routes)
 app.MapFallbackToFile("index.html");
 
 app.Run();
