@@ -92,6 +92,19 @@ public class UsersSeeder : ISeeder
                 AvatarUrl = null
             },
             new User
+    {
+        Username = "admin",
+        Email = "admin@ebay.local",
+        Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+        Role = "Admin",
+        Status = "Active",
+        ApprovalStatus = "Approved",
+        IsVerified = true,
+        ViolationCount = 0,
+        TwoFactorEnabled = false,
+        AvatarUrl = null
+    },
+            new User
             {
                 Username = "collectibles_expert",
                 Email = "collectibles@example.com",

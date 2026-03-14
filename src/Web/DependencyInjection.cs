@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
 using EbayClone.Web.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -37,7 +38,17 @@ public static class DependencyInjection
         {
             configure.Title = "EbayClone API";
 
-            configure.Version = "v1";   
+            configure.Version = "v1";
+            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = NSwag.OpenApiSecurityApiKeyLocation.Header,
+                Description = "Type into the textbox: Bearer {your JWT token}"
+            });
+
+            configure.OperationProcessors.Add(
+                new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
 
         var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -58,7 +69,9 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(key)
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                NameClaimType = ClaimTypes.Name,
+                RoleClaimType = ClaimTypes.Role
             };
 
         });

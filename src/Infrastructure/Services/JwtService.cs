@@ -26,7 +26,9 @@ public class JwtService : IJwtService
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim(ClaimTypes.Name, user.Email!)
+            new Claim(ClaimTypes.Name, user.Email!),
+            
+            new Claim(ClaimTypes.Role, user.Role!)
         };
 
         var credentials = new SigningCredentials(
@@ -39,7 +41,7 @@ public class JwtService : IJwtService
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(60),
             signingCredentials: credentials);
-
+          
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

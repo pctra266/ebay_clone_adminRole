@@ -62,6 +62,7 @@ app.UseOpenApi();
 
 // Keep fallback last so it doesn't catch API routes
 app.MapFallbackToFile("index.html");
-
+string hash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+Console.WriteLine(hash);
 app.Run();
 public partial class Program { }
