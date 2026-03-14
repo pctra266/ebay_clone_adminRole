@@ -16,17 +16,17 @@ namespace EbayClone.Web.Endpoints;
 
 public class Users : EndpointGroupBase
 {
-    public override void Map(RouteGroupBuilder groupBuilder)
+    public override void Map(RouteGroupBuilder group)
     {
-        groupBuilder.RequireAuthorization(Policies.ManageUsers);
+        group.RequireAuthorization(Policies.ManageUsers);
 
-        groupBuilder.MapGet("", GetUsers);
-        groupBuilder.MapGet("{id:int}", GetUserById);
-        groupBuilder.MapPut("{id:int}/status", UpdateUserStatus);
-        groupBuilder.MapPost("{id:int}/ban", BanUser);
-        groupBuilder.MapPost("{id:int}/unban", UnbanUser);
-        groupBuilder.MapPost("{id:int}/approve", ApproveUser);
-        groupBuilder.MapPost("{id:int}/reject", RejectUser);
+        group.MapGet("", GetUsers);
+        group.MapGet("{id:int}", GetUserById);
+        group.MapPut("{id:int}/status", UpdateUserStatus);
+        group.MapPost("{id:int}/ban", BanUser);
+        group.MapPost("{id:int}/unban", UnbanUser);
+        group.MapPost("{id:int}/approve", ApproveUser);
+        group.MapPost("{id:int}/reject", RejectUser);
     }
 
     public async Task<Ok<PaginatedList<UserBriefDto>>> GetUsers(

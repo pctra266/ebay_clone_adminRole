@@ -1,6 +1,12 @@
 using EbayClone.Infrastructure.Data;
+using System;
+using EbayClone.Application.Common.Interfaces;
+using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.AddKeyVaultIfConfigured();
@@ -34,6 +40,8 @@ app.UseAuthorization();
 
 // ── API endpoints ────────────────────────────────────────────
 app.MapRazorPages();
+
+// Register your endpoint groups
 app.MapEndpoints();
 
 // ── OpenAPI / Swagger UI ─────────────────────────────────────

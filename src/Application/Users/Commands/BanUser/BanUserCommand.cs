@@ -1,7 +1,7 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace EbayClone.Application.Users.Commands.BanUser;
 
@@ -57,8 +57,8 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
         _context.Notifications.Add(new Notification
         {
             UserId = user.Id,
-            Title = "Tai khoan bi khoa",
-            Content = $"Tai khoan cua ban da bi khoa. Ly do: {request.Reason}",
+            Title = "Account blocked",
+            Content = $"Your account was blocked. Reason: {request.Reason}",
             Type = "InApp",
             Status = "Sent",
             SentAt = DateTime.UtcNow,

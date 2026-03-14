@@ -1,4 +1,4 @@
-﻿using EbayClone.Application.Common.Interfaces;
+using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Constants;
 using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Data.Interceptors;
@@ -29,7 +29,8 @@ public static class DependencyInjection
             options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
-
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
@@ -75,11 +76,6 @@ public static class DependencyInjection
 
             options.AddPolicy(Policies.ViewAuditLogs, policy =>
                 policy.RequireRole(Roles.SuperAdmin));
-        options.AddPolicy(Policies.CanPurge, policy => 
-        policy.RequireRole(Roles.Administrator));
-
-    });
-        builder.Services.AddTransient<IEmailService, EmailService>();
-        builder.Services.AddScoped<IJwtService, JwtService>();
+        });
     }
 }

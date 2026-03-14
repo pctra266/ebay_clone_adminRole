@@ -10,7 +10,7 @@ public partial class SellerWallet
 
     public decimal PendingBalance { get; private set; } = 0; // Money on hold
 
-    public decimal AvailableBalance { get; private set; } = 0; // Money available for withdrawal
+    public decimal AvailableBalance { get;  set; } = 0; // Money available for withdrawal
 
     public decimal TotalEarnings { get; private set; } = 0;
 

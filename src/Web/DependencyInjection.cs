@@ -2,9 +2,10 @@ using System.Text;
 using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -31,6 +32,8 @@ public static class DependencyInjection
             options.SuppressModelStateInvalidFilter = true);
 
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         // Configure NSwag to generate OpenAPI from Minimal API endpoints
         builder.Services.AddOpenApiDocument(configure =>
