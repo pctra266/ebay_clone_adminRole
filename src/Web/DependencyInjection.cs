@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
@@ -74,7 +74,15 @@ public static class DependencyInjection
         {
             options.AddPolicy("FrontendPolicy", policy =>
             {
-                policy.WithOrigins("http://localhost:5001") // URL React dev server của bạn
+                policy
+                      // Dev: React chạy riêng ở localhost
+                      .WithOrigins(
+                          "http://localhost:3000",
+                          "http://localhost:5000",
+                          "http://localhost:5001",
+                          "https://localhost:5001",
+                          "https://localhost:44447"
+                      )
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động
