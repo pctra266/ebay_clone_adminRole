@@ -1,5 +1,6 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Application.Common.Models;
+using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Users.Queries.GetUsers;
@@ -28,7 +29,7 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedList
 
     public async Task<PaginatedList<UserBriefDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Users.AsQueryable();
+        IQueryable<User> query = _context.Users.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.Tab))
         {
@@ -58,8 +59,8 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedList
 
         if (!string.IsNullOrEmpty(request.Search))
         {
-            var searchLower = request.Search.ToLower();
-            query = query.Where(u => 
+            var searchLower = request.Search.Trim().ToLowerInvariant();
+            query = query.Where(u =>
                 (u.Username != null && u.Username.ToLower().Contains(searchLower)) ||
                 (u.Email != null && u.Email.ToLower().Contains(searchLower)));
         }

@@ -1,7 +1,7 @@
-using EbayClone.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Users.Queries.GetUserById;
 
@@ -10,12 +10,12 @@ public record GetUserByIdQuery(int Id) : IRequest<UserDto?>;
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto?>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
+    private readonly IUser _currentUser;
 
-    public GetUserByIdQueryHandler(IApplicationDbContext context, IUser user)
+    public GetUserByIdQueryHandler(IApplicationDbContext context, IUser currentUser)
     {
         _context = context;
-        _user = user;
+        _currentUser = currentUser;
     }
 
     public async Task<UserDto?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
             })
             .ToListAsync(cancellationToken);
 
-        if (int.TryParse(_user.Id, out var adminId))
+        if (int.TryParse(_currentUser.Id, out var adminId))
         {
             _context.AdminActions.Add(new AdminAction
             {

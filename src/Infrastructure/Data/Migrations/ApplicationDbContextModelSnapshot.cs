@@ -112,7 +112,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("AdminId");
 
-                    b.ToTable("AdminActions", (string)null);
+                    b.ToTable("AdminActions");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.AdminRole", b =>
@@ -138,7 +138,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdminRoles", (string)null);
+                    b.ToTable("AdminRoles");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.AdminUserRole", b =>
@@ -169,7 +169,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdminUserRoles", (string)null);
+                    b.ToTable("AdminUserRoles");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.Bid", b =>
@@ -547,6 +547,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("WithdrawalId")
                         .HasColumnType("int");
 
@@ -555,6 +558,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("SellerId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("WithdrawalId");
 
@@ -672,7 +677,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.OrderItem", b =>
@@ -904,12 +909,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<int>("ReportCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("ReportReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReportedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("SellerId")
                         .HasColumnType("int")
                         .HasColumnName("sellerId");
@@ -1006,7 +1005,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("ResolvedBy");
 
-                    b.ToTable("ProductReports", (string)null);
+                    b.ToTable("ProductReports");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.ReturnRequest", b =>
@@ -1322,13 +1321,16 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BankAccountName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BankAccountNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("BankName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("datetime2");
@@ -1337,7 +1339,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("RequestedAt")
                         .HasColumnType("datetime2");
@@ -1347,10 +1350,12 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TransactionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -1682,7 +1687,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                 {
                     b.HasOne("EbayClone.Domain.Entities.OrderTable", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EbayClone.Domain.Entities.User", "Seller")
                         .WithMany()
@@ -1690,13 +1696,22 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EbayClone.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("EbayClone.Domain.Entities.WithdrawalRequest", "Withdrawal")
                         .WithMany()
-                        .HasForeignKey("WithdrawalId");
+                        .HasForeignKey("WithdrawalId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Order");
 
                     b.Navigation("Seller");
+
+                    b.Navigation("User");
 
                     b.Navigation("Withdrawal");
                 });
@@ -1798,7 +1813,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                 {
                     b.HasOne("EbayClone.Domain.Entities.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Category");
                 });
@@ -1882,7 +1898,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.HasOne("EbayClone.Domain.Entities.User", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Seller");
@@ -1912,12 +1928,13 @@ namespace EbayClone.Infrastructure.Data.Migrations
                 {
                     b.HasOne("EbayClone.Domain.Entities.User", "Processor")
                         .WithMany()
-                        .HasForeignKey("ProcessedBy");
+                        .HasForeignKey("ProcessedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("EbayClone.Domain.Entities.User", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Processor");

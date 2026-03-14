@@ -8,7 +8,6 @@ public partial class SellerWallet
 
     public int SellerId { get; set; }
 
- 
     public decimal PendingBalance { get; set; } = 0; // Money on hold (new sales, awaiting clearance)
 
     public decimal AvailableBalance { get;  set; } = 0; // Money available for withdrawal
@@ -18,8 +17,6 @@ public partial class SellerWallet
     public decimal TotalWithdrawn { get; private set; } = 0;
     public decimal DisputedBalance { get; set; } = 0; // Money frozen due to disputes
 
-
-    
     public decimal TotalRefunded { get; set; } = 0; // Total refunded due to disputes/returns
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

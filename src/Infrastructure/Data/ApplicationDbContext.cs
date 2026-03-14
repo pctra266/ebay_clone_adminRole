@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EbayClone.Application.Common.Interfaces;
@@ -457,6 +457,30 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
             entity.Property(e => e.Username)
                 .HasMaxLength(100)
                 .HasColumnName("username");
+        });
+
+
+        modelBuilder.Entity<FinancialTransaction>(entity =>
+        {
+            entity.HasOne(e => e.Seller)
+                .WithMany()
+                .HasForeignKey(e => e.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.Order)
+                .WithMany()
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.Withdrawal)
+                .WithMany()
+                .HasForeignKey(e => e.WithdrawalId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         // NEW: Apply configurations from assembly for new entities

@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
 using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -32,12 +33,13 @@ public static class DependencyInjection
             options.SuppressModelStateInvalidFilter = true);
 
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         // Configure NSwag to generate OpenAPI from Minimal API endpoints
         builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "EbayClone API";
-
             configure.Version = "v1";
             configure.AddSecurity("JWT", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
             {
@@ -73,7 +75,26 @@ public static class DependencyInjection
                 NameClaimType = ClaimTypes.Name,
                 RoleClaimType = ClaimTypes.Role
             };
+            //đọc token từ cookie
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    ctx.Token = ctx.Request.Cookies["auth_token"];
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:5001") // URL React dev server của bạn
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động
+            });
         });
     }
 

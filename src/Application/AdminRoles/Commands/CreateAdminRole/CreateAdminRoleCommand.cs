@@ -1,7 +1,6 @@
 using EbayClone.Application.Common.Interfaces;
-using System.Text.Json;
-
 using EbayClone.Domain.Entities;
+using System.Text.Json;
 
 namespace EbayClone.Application.AdminRoles.Commands.CreateAdminRole;
 

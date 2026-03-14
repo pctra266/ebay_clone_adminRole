@@ -9,6 +9,7 @@ public partial class FinancialTransaction
     public int UserId { get; set; }
     public int SellerId { get; set; } // Renamed/Mapped from UserId context
 
+
     public string Type { get; set; } = string.Empty; // 'OrderPayment', 'Refund', 'Withdrawal', 'PlatformFee', 'FeeDeduction'
 
     public decimal Amount { get; set; }
@@ -26,6 +27,10 @@ public partial class FinancialTransaction
     // Navigation properties
     [ForeignKey(nameof(SellerId))]
     public virtual User? Seller { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public virtual User? User { get; set; }
+
 
     [ForeignKey(nameof(OrderId))]
     public virtual OrderTable? Order { get; set; }
