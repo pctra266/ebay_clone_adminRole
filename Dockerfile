@@ -39,12 +39,13 @@ COPY src/ src/
 # Copy built React app into wwwroot (replaces SPA proxy)
 COPY --from=react-build /app/ClientApp/build src/Web/wwwroot/
 
-# Publish – skip NSwag & SPA build (already done)
+# Publish – skip NSwag & SPA build (already done in Stage 1)
 RUN dotnet publish src/Web/Web.csproj \
     -c Release \
     -o /publish \
     --no-restore \
-    /p:SkipNSwag=True
+    /p:SkipNSwag=True \
+    /p:SkipPublishRunWebpack=True
 
 
 # ============================================================
