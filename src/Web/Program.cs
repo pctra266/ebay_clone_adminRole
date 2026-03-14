@@ -52,6 +52,7 @@ app.UseSwaggerUi(settings =>
 
 // ── SPA fallback (MUST be last — catches all unmatched routes)
 app.MapFallbackToFile("index.html");
-
+string hash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+Console.WriteLine(hash);
 app.Run();
 public partial class Program { }
