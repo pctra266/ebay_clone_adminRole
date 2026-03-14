@@ -3,12 +3,13 @@ import { Route, Routes } from 'react-router-dom';
 import AppRoutes from './AppRoutes';
 import { Layout } from './components/Layout';
 import './custom.css';
-
+import { AuthProvider } from './context/AuthContext';
 export default class App extends Component {
   static displayName = App.name;
 
   render() {
     return (
+      <AuthProvider>
       <Routes>
         {AppRoutes.map((route, index) => {
           const { element, requireAuth, noLayout, ...rest } = route;
@@ -22,6 +23,7 @@ export default class App extends Component {
           );
         })}
       </Routes>
+      </AuthProvider>
     );
   }
 }

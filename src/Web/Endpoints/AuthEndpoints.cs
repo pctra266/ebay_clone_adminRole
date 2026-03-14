@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
+using EbayClone.Application.Authentication.Commands.Enable2FA;
 using EbayClone.Application.Authentication.Commands.Login;
 using EbayClone.Application.Authentication.Commands.Verify2FA;
+using EbayClone.Application.Authentication.Commands.Verify2FASetup;
 
 namespace EbayClone.Web.Endpoints;
 
@@ -12,6 +14,8 @@ public class Auth : EndpointGroupBase
         group.MapPost("verify-2fa", Verify2FA);
         group.MapPost("logout", Logout);
         group.MapGet("me", Me).RequireAuthorization();
+        group.MapPost("enable-2fa", Enable2FA).RequireAuthorization();
+        group.MapPost("verify-2fa-setup", Verify2FASetup).RequireAuthorization();
     }
 
     public async Task<IResult> Login(ISender sender, LoginCommand command, HttpContext http)
@@ -64,7 +68,37 @@ public class Auth : EndpointGroupBase
         var email = http.User.FindFirst(ClaimTypes.Email)?.Value;
         var userId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var role = http.User.FindFirst(ClaimTypes.Role)?.Value;
+        var twoFactorEnabled = http.User.FindFirst("twoFactorEnabled")?.Value == "true"; // ✅ thêm
 
-        return Results.Ok(new { email, userId, role });
+        return Results.Ok(new { email, userId, role, twoFactorEnabled });
     }
+
+    public async Task<IResult> Enable2FA(ISender sender, HttpContext http)
+    {
+        // Lấy email từ JWT claim, không cần client gửi lên
+        var email = http.User.FindFirst(ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email))
+            return Results.Unauthorized();
+
+        var qrBase64 = await sender.Send(new Enable2FACommand(email));
+
+        return Results.Ok(new
+        {
+            success = true,
+            qrCode = qrBase64,          // base64 PNG → hiển thị trực tiếp trên frontend
+            message = "Scan QR code with your authenticator app"
+        });
+    }
+    public async Task<IResult> Verify2FASetup(ISender sender, HttpContext http, Verify2FASetupRequest req)
+    {
+        var userId = int.Parse(http.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isValid = await sender.Send(new Verify2FASetupCommand(userId, req.Code));
+
+        if (!isValid)
+            return Results.Ok(new { success = false, errorMessage = "Mã không hợp lệ" });
+
+        return Results.Ok(new { success = true });
+    }
+
+    public record Verify2FASetupRequest(string Code);
 }

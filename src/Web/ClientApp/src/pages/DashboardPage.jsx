@@ -73,6 +73,24 @@ export function DashboardPage() {
             <p className="text-muted mb-0">Filter by user/entity and inspect before/after data JSON.</p>
           </Link>
         </div>
+        <div className="col-md-6 col-lg-4">
+          <Link className="card card-body text-decoration-none h-100" to="/disputes">
+            <h3 className="h6 mb-1">
+              <i className="fas fa-balance-scale me-2 text-warning"></i>
+              Disputes Management
+            </h3>
+            <p className="text-muted mb-0">Handle buyer-seller disputes, assign cases, and resolve conflicts.</p>
+          </Link>
+        </div>
+        <div className="col-md-6 col-lg-4">
+          <Link className="card card-body text-decoration-none h-100" to="/disputes/dashboard">
+            <h3 className="h6 mb-1">
+              <i className="fas fa-chart-line me-2 text-info"></i>
+              Disputes Analytics
+            </h3>
+            <p className="text-muted mb-0">View statistics, performance metrics, and resolution insights.</p>
+          </Link>
+        </div>
       </div>
     </section>
   );

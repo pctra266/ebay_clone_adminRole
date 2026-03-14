@@ -4,6 +4,7 @@ using EbayClone.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EbayClone.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311080317_FixDecimalPrecision")]
+    partial class FixDecimalPrecision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -558,7 +561,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("WithdrawalId");
 
-                    b.ToTable("FinancialTransactions");
+                    b.ToTable("FinancialTransactions", (string)null);
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.Inventory", b =>
@@ -847,7 +850,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("PlatformFees");
+                    b.ToTable("PlatformFees", (string)null);
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.Product", b =>
@@ -1012,15 +1015,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AdminNote")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("createdAt");
-
-                    b.Property<string>("EvidenceImages")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("int")
@@ -1029,15 +1026,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<string>("Reason")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("reason");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ResolvedByAdminId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ShopSolution")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .HasMaxLength(20)
@@ -1152,7 +1140,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("SellerWallets");
+                    b.ToTable("SellerWallets", (string)null);
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.ShippingInfo", b =>
@@ -1373,7 +1361,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("WithdrawalRequests");
+                    b.ToTable("WithdrawalRequests", (string)null);
                 });
 
             modelBuilder.Entity("EbayClone.Infrastructure.Identity.ApplicationUser", b =>

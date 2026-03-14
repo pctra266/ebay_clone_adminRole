@@ -2,14 +2,12 @@
 import { useState, useEffect } from "react";
 
 export function useAuth() {
-  const [user, setUser] = useState(null);       // data user
-  const [loading, setLoading] = useState(true); // đang check
-  const [isAuth, setIsAuth] = useState(false);  // đã login chưa
+  const [user, setUser]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuth, setIsAuth]   = useState(false);
 
   useEffect(() => {
-    fetch("/api/Auth/me", {
-      credentials: "include", // ✅ gửi cookie tự động
-    })
+    fetch("/api/Auth/me", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Unauthorized");
         return res.json();
