@@ -1,0 +1,52 @@
+services:
+  # ============================================================
+  # SQL Server 2022
+  # ============================================================
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ebay_sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${SA_PASSWORD}' -Q 'SELECT 1' -C -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ============================================================
+  # ASP.NET Core API + React SPA
+  # ============================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ebay_api
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      # DB connection — 'db' là tên service trên, SQL Server listen port 1433
+      ConnectionStrings__MyCnn: "Server=db,1433;Database=CloneEbayDB;User Id=sa;Password=${SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;"
+      # JWT
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "EbayClone"
+      Jwt__Audience: "EbayCloneUsers"
+      # Email
+      EmailSettings__SenderEmail: "${EMAIL_SENDER}"
+      EmailSettings__SenderPassword: "${EMAIL_PASSWORD}"
+      EmailSettings__SmtpServer: "smtp.gmail.com"
+      EmailSettings__Port: "587"
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+    name: ebay_sqlserver_data
