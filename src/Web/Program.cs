@@ -1,7 +1,6 @@
 using EbayClone.Infrastructure.Data;
 using System;
 using EbayClone.Application.Common.Interfaces;
-using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
