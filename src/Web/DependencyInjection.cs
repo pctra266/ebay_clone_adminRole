@@ -28,6 +28,9 @@ public static class DependencyInjection
 
         builder.Services.AddRazorPages();
 
+        // Rate Limiting — 3 policies: strict / standard / authenticated
+        builder.Services.AddAppRateLimiting();
+
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
