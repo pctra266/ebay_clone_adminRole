@@ -24,9 +24,11 @@ public class JwtService : IJwtService
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim(ClaimTypes.Name, user.Email!)
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // ✅ đổi từ Sub
+            new Claim(ClaimTypes.Email, user.Email!),                 // ✅ đổi từ JwtRegisteredClaimNames.Email
+            new Claim(ClaimTypes.Name, user.Email!),
+            new Claim(ClaimTypes.Role, user.Role!),
+            new Claim("twoFactorEnabled", user.TwoFactorEnabled.ToString().ToLower())
         };
 
         var credentials = new SigningCredentials(

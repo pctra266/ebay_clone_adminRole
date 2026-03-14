@@ -89,11 +89,21 @@ public class ApplicationDbContextInitialiser
 
     private async Task SeedIdentityRolesAsync()
     {
-        var administratorRole = new IdentityRole(Roles.Administrator);
-        if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
+        var roleNames = new[]
         {
-            await _roleManager.CreateAsync(administratorRole);
-            _logger.LogInformation("Seeded Identity Role: {Role}", Roles.Administrator);
+            Roles.Administrator,
+            Roles.SuperAdmin,
+            Roles.Monitor,
+            Roles.Support
+        };
+
+        foreach (var roleName in roleNames)
+        {
+            if (_roleManager.Roles.All(r => r.Name != roleName))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+                _logger.LogInformation("Seeded Identity Role: {Role}", roleName);
+            }
         }
     }
 
@@ -109,7 +119,7 @@ public class ApplicationDbContextInitialiser
         if (_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "Administrator1!");
-            await _userManager.AddToRolesAsync(administrator, new[] { Roles.Administrator });
+            await _userManager.AddToRolesAsync(administrator, new[] { Roles.Administrator, Roles.SuperAdmin });
             _logger.LogInformation("Seeded Default Admin User: {Email}", administrator.Email);
         }
     }

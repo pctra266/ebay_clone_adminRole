@@ -1,3 +1,16 @@
+const API_BASE = "/api";
+
+const endpoints = {
+    users: `${API_BASE}/Users`,
+    broadcasts: `${API_BASE}/Broadcasts`,
+    adminRoles: `${API_BASE}/AdminRoles`,
+    auditLogs: `${API_BASE}/AuditLogs`,
+};
+
+export default endpoints;
+
+// src/constants/endpoints.js
+
 export const ENDPOINTS = {
     PRODUCTS: {
         BASE: "/api/products",
@@ -13,4 +26,10 @@ export const ENDPOINTS = {
         BAN: (id) => `/api/users/${id}/ban`,
         UNBAN: (id) => `/api/users/${id}/unban`,
     },
+
+
+    // Sau này bạn có module khác thì cứ thêm vào đây:
+    // USERS: { BASE: '/api/users', ... },
+    // ORDERS: { ... }
+
 };

@@ -22,7 +22,9 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
 
     public async Task<bool> Handle(ApproveUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+
         if (user == null)
         {
             return false;
@@ -41,25 +43,13 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
         user.ApprovedBy = request.AdminId;
         user.ApprovedAt = DateTime.UtcNow;
 
-        _context.AdminActions.Add(new AdminAction
+        var after = new
         {
-            AdminId = request.AdminId,
-            Action = "ApproveUser",
-            TargetType = "User",
-            TargetId = user.Id,
-            Details = JsonSerializer.Serialize(new
-            {
-                before,
-                after = new
-                {
-                    user.Status,
-                    user.ApprovalStatus,
-                    user.ApprovedBy,
-                    user.ApprovedAt
-                }
-            }),
-            CreatedAt = DateTime.UtcNow
-        });
+            user.Status,
+            user.ApprovalStatus,
+            user.ApprovedBy,
+            user.ApprovedAt
+        };
 
         _context.Notifications.Add(new Notification
         {
@@ -73,8 +63,29 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
             CreatedAt = DateTime.UtcNow
         });
 
+        _context.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Title = "Thong bao phe duyet tai khoan",
+            Content = "Tai khoan cua ban da duoc phe duyet.",
+            Type = "Email",
+            Status = "Pending",
+            CreatedBy = request.AdminId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.AdminId,
+            Action = "ApproveUser",
+            TargetType = "User",
+            TargetId = user.Id,
+            Details = JsonSerializer.Serialize(new { before, after }),
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
+
         return true;
     }
 }
-

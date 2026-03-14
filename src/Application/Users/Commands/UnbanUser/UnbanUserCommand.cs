@@ -22,7 +22,9 @@ public class UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, bool>
 
     public async Task<bool> Handle(UnbanUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+
         if (user == null)
         {
             return false;
@@ -31,6 +33,7 @@ public class UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, bool>
         var before = new
         {
             user.Status,
+            user.ApprovalStatus,
             user.BannedReason,
             user.BannedBy,
             user.BannedAt
@@ -41,25 +44,14 @@ public class UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, bool>
         user.BannedBy = null;
         user.BannedAt = null;
 
-        _context.AdminActions.Add(new AdminAction
+        var after = new
         {
-            AdminId = request.AdminId,
-            Action = "UnbanUser",
-            TargetType = "User",
-            TargetId = user.Id,
-            Details = JsonSerializer.Serialize(new
-            {
-                before,
-                after = new
-                {
-                    user.Status,
-                    user.BannedReason,
-                    user.BannedBy,
-                    user.BannedAt
-                }
-            }),
-            CreatedAt = DateTime.UtcNow
-        });
+            user.Status,
+            user.ApprovalStatus,
+            user.BannedReason,
+            user.BannedBy,
+            user.BannedAt
+        };
 
         _context.Notifications.Add(new Notification
         {
@@ -73,8 +65,29 @@ public class UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, bool>
             CreatedAt = DateTime.UtcNow
         });
 
+        _context.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Title = "Thong bao mo khoa tai khoan",
+            Content = "Tai khoan cua ban da duoc kich hoat lai.",
+            Type = "Email",
+            Status = "Pending",
+            CreatedBy = request.AdminId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.AdminId,
+            Action = "UnbanUser",
+            TargetType = "User",
+            TargetId = user.Id,
+            Details = JsonSerializer.Serialize(new { before, after }),
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
+
         return true;
     }
 }
-

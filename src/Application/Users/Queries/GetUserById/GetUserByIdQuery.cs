@@ -31,6 +31,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
         }
 
         var dto = user.ToDto();
+
         dto.MaskedPhone = MaskPhone(user.Addresses
             .OrderByDescending(a => a.IsDefault == true)
             .ThenByDescending(a => a.Id)
@@ -53,6 +54,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
 
         dto.ViolationHistory = await _context.AdminActions
             .Where(a => a.TargetType == "User" && a.TargetId == request.Id)
+            .Where(a => a.Action.Contains("Ban") || a.Action.Contains("Reject") || a.Action.Contains("Suspend"))
             .OrderByDescending(a => a.CreatedAt)
             .Take(10)
             .Select(a => new UserViolationHistoryDto
@@ -74,7 +76,10 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
                 Action = "ViewUserProfile",
                 TargetType = "User",
                 TargetId = request.Id,
-                Details = "{\"viewed\":true}",
+                Details = JsonSerializer.Serialize(new
+                {
+                    viewedFields = new[] { "PersonalInfo", "OrderHistory", "ViolationHistory", "MaskedSensitiveData" }
+                }),
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -95,23 +100,22 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
         {
             using var json = JsonDocument.Parse(verificationDocuments);
             var root = json.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                return null;
-            }
 
-            var keys = new[] { "cccd", "nationalId", "idNumber", "citizenId" };
-            foreach (var key in keys)
+            if (root.ValueKind == JsonValueKind.Object)
             {
-                if (root.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String)
+                var keys = new[] { "cccd", "nationalId", "idNumber", "citizenId" };
+                foreach (var key in keys)
                 {
-                    return value.GetString();
+                    if (root.TryGetProperty(key, out var property) && property.ValueKind == JsonValueKind.String)
+                    {
+                        return property.GetString();
+                    }
                 }
             }
         }
         catch
         {
-            return null;
+            // Ignore malformed JSON from legacy data.
         }
 
         return null;
@@ -148,4 +152,3 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
         return $"{nationalId[..2]}{new string('*', nationalId.Length - 4)}{nationalId[^2..]}";
     }
 }
-

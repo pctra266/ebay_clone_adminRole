@@ -4,21 +4,6 @@ namespace EbayClone.Application.Users;
 
 public static class UserMappings
 {
-    public static UserBriefDto ToBriefDto(this User user)
-    {
-        return new UserBriefDto
-        {
-            Id = user.Id,
-            Username = user.Username,
-            Email = user.Email,
-            Role = user.Role,
-            Status = user.Status,
-            ApprovalStatus = user.ApprovalStatus,
-            IsVerified = user.IsVerified,
-            LastLoginAt = user.LastLoginAt
-        };
-    }
-
     public static UserDto ToDto(this User user)
     {
         return new UserDto
@@ -27,6 +12,7 @@ public static class UserMappings
             Username = user.Username,
             Email = user.Email,
             Role = user.Role,
+            AvatarUrl = user.AvatarUrl,
             Status = user.Status,
             ApprovalStatus = user.ApprovalStatus,
             BannedReason = user.BannedReason,
@@ -41,5 +27,20 @@ public static class UserMappings
             LastLoginAt = user.LastLoginAt
         };
     }
-}
 
+    public static UserBriefDto ToBriefDto(this User user)
+    {
+        return new UserBriefDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            Role = user.Role,
+            AvatarUrl = user.AvatarUrl,
+            Status = user.Status,
+            ApprovalStatus = user.ApprovalStatus,
+            IsVerified = user.IsVerified,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}

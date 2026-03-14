@@ -1,35 +1,93 @@
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
-import { Home } from "./components/Home";
-import { ProductList } from "./pages/Products";
-import { UserList } from "./pages/Users";
-import { UserDetail } from "./pages/UserDetail";
+import { DashboardPage }  from "./pages/DashboardPage";
+import { UsersPage }      from "./pages/UsersPage";
+import { UserDetailPage } from "./pages/UserDetailPage";
+import { BroadcastPage }  from "./pages/BroadcastPage";
+import { AdminRolesPage } from "./pages/AdminRolesPage";
+import { AuditLogsPage }  from "./pages/AuditLogsPage";
+import { FetchData }      from "./components/FetchData";
+import { ProductList }    from "./pages/Products";
+import { DisputesPage }   from "./pages/DisputesPage";
+import { DisputeDashboard } from "./pages/DisputeDashboard";
+import { DisputeDetailPage } from "./pages/DisputeDetailPage";
+import LoginPage          from "./pages/LoginPage";
+import Enable2FAPage      from "./pages/Enable2fapage";
+import ProtectedRoute     from "./components/ProtectedRoute";
+import EbayHomepage from "./pages/EbayHomepage";
+
+// Helper cho gọn
+const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
 
 const AppRoutes = [
+  // ── Public ───────────────────────────────────────────────────────
+  {
+    path: "/login",
+    element: <LoginPage />
+  },
+
+  // ── Cần login nhưng chưa cần 2FA ─────────────────────────────────
+  {
+    path: "/enable2FA",
+    element: (
+      <ProtectedRoute skip2FACheck>
+        <Enable2FAPage />
+      </ProtectedRoute>
+    )
+  },
+
+  // ── Cần login + bắt buộc có 2FA ──────────────────────────────────
   {
     index: true,
-    element: <Home />
+    element: protect(<DashboardPage />)
   },
   {
-    path: '/counter',
-    element: <Counter />
+    path: "/home",
+    element: <EbayHomepage />,
+    noLayout: true
   },
   {
-    path: '/fetch-data',
-    element: <FetchData />
+    path: "/dashboard",
+    element: protect(<DashboardPage />)
   },
   {
-    path: '/products',
-    element: <ProductList />
+    path: "/users",
+    element: protect(<UsersPage />)
   },
   {
-    path: '/users',
-    element: <UserList />
+    path: "/users/:userId",
+    element: protect(<UserDetailPage />)
   },
   {
-    path: '/users/:id',
-    element: <UserDetail />
-  }
+    path: "/broadcasts",
+    element: protect(<BroadcastPage />)
+  },
+  {
+    path: "/admin-roles",
+    element: protect(<AdminRolesPage />)
+  },
+  {
+    path: "/audit-logs",
+    element: protect(<AuditLogsPage />)
+  },
+  {
+    path: "/fetch-data",
+    element: protect(<FetchData />)
+  },
+  {
+    path: "/products",
+    element: protect(<ProductList />)
+  },
+  {
+    path: "/disputes",
+    element: protect(<DisputesPage />)
+  },
+  {
+    path: "/disputes/dashboard",
+    element: protect(<DisputeDashboard />)
+  },
+  {
+    path: "/disputes/:id",
+    element: protect(<DisputeDetailPage />)
+  },
 ];
 
 export default AppRoutes;

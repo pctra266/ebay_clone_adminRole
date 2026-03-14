@@ -6,6 +6,7 @@ public class UserBriefDto
     public string? Username { get; set; }
     public string? Email { get; set; }
     public string? Role { get; set; }
+    public string? AvatarUrl { get; set; }
     public string Status { get; set; } = "Active";
     public string ApprovalStatus { get; set; } = "Approved";
     public bool IsVerified { get; set; }
@@ -18,20 +19,35 @@ public class UserDto
     public string? Username { get; set; }
     public string? Email { get; set; }
     public string? Role { get; set; }
+    public string? AvatarUrl { get; set; }
+    
+    // Status fields
     public string Status { get; set; } = "Active";
     public string ApprovalStatus { get; set; } = "Approved";
+    
+    // Ban info
     public string? BannedReason { get; set; }
     public int? BannedBy { get; set; }
     public DateTime? BannedAt { get; set; }
+    
+    // Approval info
     public int? ApprovedBy { get; set; }
     public DateTime? ApprovedAt { get; set; }
+    
+    // Security & Verification
     public bool TwoFactorEnabled { get; set; }
     public bool IsVerified { get; set; }
     public int ViolationCount { get; set; }
+    
+    // Login info
     public string? LastLoginIp { get; set; }
     public DateTime? LastLoginAt { get; set; }
+
+    // Security-masked sensitive data
     public string? MaskedPhone { get; set; }
     public string? MaskedNationalId { get; set; }
+
+    // Detail screen data
     public List<UserOrderHistoryDto> OrderHistory { get; set; } = new();
     public List<UserViolationHistoryDto> ViolationHistory { get; set; } = new();
 }
@@ -53,4 +69,3 @@ public class UserViolationHistoryDto
     public int AdminId { get; set; }
     public string? AdminUsername { get; set; }
 }
-

@@ -1,6 +1,5 @@
-﻿using EbayClone.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
+﻿using EbayClone.Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +7,7 @@ namespace EbayClone.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+
     // 1. Khai báo các bảng (DbSet) mà tầng Application được phép truy cập
     DbSet<Address> Addresses { get; }
     DbSet<Bid> Bids { get; }
@@ -44,8 +44,6 @@ public interface IApplicationDbContext
     DbSet<FinancialTransaction> FinancialTransactions { get; }
     DbSet<DisputeMessage> DisputeMessages { get; }
 
-
-  
+    // 2. Hàm lưu thay đổi (Quan trọng nhất)
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
-

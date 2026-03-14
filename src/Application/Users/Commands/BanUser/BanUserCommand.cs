@@ -23,7 +23,9 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
 
     public async Task<bool> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+
         if (user == null)
         {
             return false;
@@ -32,6 +34,7 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
         var before = new
         {
             user.Status,
+            user.ApprovalStatus,
             user.BannedReason,
             user.BannedBy,
             user.BannedAt
@@ -42,26 +45,14 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
         user.BannedBy = request.AdminId;
         user.BannedAt = DateTime.UtcNow;
 
-        _context.AdminActions.Add(new AdminAction
+        var after = new
         {
-            AdminId = request.AdminId,
-            Action = "BanUser",
-            TargetType = "User",
-            TargetId = user.Id,
-            Details = JsonSerializer.Serialize(new
-            {
-                reason = request.Reason,
-                before,
-                after = new
-                {
-                    user.Status,
-                    user.BannedReason,
-                    user.BannedBy,
-                    user.BannedAt
-                }
-            }),
-            CreatedAt = DateTime.UtcNow
-        });
+            user.Status,
+            user.ApprovalStatus,
+            user.BannedReason,
+            user.BannedBy,
+            user.BannedAt
+        };
 
         _context.Notifications.Add(new Notification
         {
@@ -75,8 +66,34 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
             CreatedAt = DateTime.UtcNow
         });
 
+        _context.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Title = "Canh bao tai khoan",
+            Content = $"Tai khoan cua ban da bi khoa. Ly do: {request.Reason}",
+            Type = "Email",
+            Status = "Pending",
+            CreatedBy = request.AdminId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        _context.AdminActions.Add(new AdminAction
+        {
+            AdminId = request.AdminId,
+            Action = "BanUser",
+            TargetType = "User",
+            TargetId = user.Id,
+            Details = JsonSerializer.Serialize(new
+            {
+                reason = request.Reason,
+                before,
+                after
+            }),
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _context.SaveChangesAsync(cancellationToken);
+
         return true;
     }
 }
-

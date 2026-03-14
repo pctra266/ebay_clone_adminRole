@@ -23,36 +23,41 @@ public class LoginCommandHandler
     }
 
     public async Task<LoginResponse> Handle(
-        LoginCommand request,
-        CancellationToken cancellationToken)
+    LoginCommand request,
+    CancellationToken cancellationToken)
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(
                 x => x.Email == request.Email,
                 cancellationToken);
 
+        // ❌ Bỏ throw, trả về response có lỗi
         if (user == null)
-            throw new UnauthorizedAccessException("Invalid credentials");
-
-        // Verify password (BCrypt)
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
-            throw new UnauthorizedAccessException("Invalid credentials");
-
-        // Check 2FA
-        if (user.TwoFactorEnabled)
-        {
             return new LoginResponse
             {
+                Success = false,
+                ErrorMessage = "Email hoặc mật khẩu không đúng"
+            };
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            return new LoginResponse
+            {
+                Success = false,
+                ErrorMessage = "Email hoặc mật khẩu không đúng"
+            };
+
+        if (user.TwoFactorEnabled)
+            return new LoginResponse
+            {
+                Success = true,
                 RequireTwoFactor = true,
                 UserId = user.Id
             };
-        }
 
-        // Generate JWT
         var token = _jwtService.GenerateToken(user);
-
         return new LoginResponse
         {
+            Success = true,
             Token = token,
             RequireTwoFactor = false,
             UserId = user.Id
