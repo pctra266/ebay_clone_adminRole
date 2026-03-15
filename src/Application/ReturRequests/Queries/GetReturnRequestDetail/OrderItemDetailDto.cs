@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using EbayClone.Application.Common.Interfaces;
@@ -32,6 +32,15 @@ public record ReturnRequestDetailDto
     public DateTime? OrderDate { get; init; }
     public string? OrderStatus { get; init; }
     public List<OrderItemDetailDto> OrderItems { get; init; } = new();
+
+    // Ebay Dispute Tracking
+    public bool IsRefundedByEbayFund { get; init; }
+    public string? ResolutionAction { get; init; }
+    public string? ReturnLabelUrl { get; init; }
+    
+    // Delivery & Tracking
+    public string? TrackingNumber { get; init; }
+    public string? DeliveryStatus { get; init; }
 }
 
 public record GetReturnRequestDetailQuery(int Id)
@@ -56,6 +65,8 @@ public class GetReturnRequestDetailQueryHandler
             .Include(r => r.Order)
                 .ThenInclude(o => o!.OrderItems)
                     .ThenInclude(oi => oi.Product)
+            .Include(r => r.Order)
+                .ThenInclude(o => o!.ShippingInfos)
             .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
 
         if (returnRequest == null)
@@ -77,6 +88,11 @@ public class GetReturnRequestDetailQueryHandler
             TotalPrice = returnRequest.Order?.TotalPrice,
             OrderDate = returnRequest.Order?.OrderDate,
             OrderStatus = returnRequest.Order?.Status,
+            IsRefundedByEbayFund = returnRequest.IsRefundedByEbayFund,
+            ResolutionAction = returnRequest.ResolutionAction,
+            ReturnLabelUrl = returnRequest.ReturnLabelUrl,
+            TrackingNumber = returnRequest.Order?.ShippingInfos.FirstOrDefault()?.TrackingNumber,
+            DeliveryStatus = returnRequest.Order?.ShippingInfos.FirstOrDefault()?.Status,
             OrderItems = returnRequest.Order?.OrderItems
                 .Select(oi => new OrderItemDetailDto
                 {

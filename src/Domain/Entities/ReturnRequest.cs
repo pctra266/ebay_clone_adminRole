@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
@@ -18,6 +18,11 @@ public partial class ReturnRequest
     public string? AdminNote { get; set; }       // Ghi chú của admin khi xử lý
     public DateTime? ResolvedAt { get; set; }    // Thời điểm admin xử lý
     public int? ResolvedByAdminId { get; set; }  // Admin nào xử lý
+
+    // Thêm mới cho eBay Refund & Dispute Management
+    public bool IsRefundedByEbayFund { get; set; } = false;
+    public string? ResolutionAction { get; set; } // "RequireReturn", "KeepItem", "RefundWithoutReturn"
+    public string? ReturnLabelUrl { get; set; } // Nhãn vận chuyển trả hàng
 
     public virtual OrderTable? Order { get; set; }
     public virtual User? User { get; set; }

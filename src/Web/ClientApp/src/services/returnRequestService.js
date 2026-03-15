@@ -24,6 +24,25 @@ const returnRequestService = {
       method: 'POST',
       body: JSON.stringify({ returnRequestId: id, adminNote }),
     }),
+
+  // Phán quyết từ Admin (Adjudication)
+  adjudicateReturnRequest: (id, data) =>
+    apiRequest(`${BASE}/${id}/adjudicate`, {
+      method: 'POST',
+      body: JSON.stringify({
+        returnRequestId: id,
+        adminNote: data.adminNote,
+        resolutionAction: data.resolutionAction, // "RequireReturn", "KeepItem", "RefundWithoutReturn"
+        isRefundedByEbayFund: data.isRefundedByEbayFund,
+      }),
+    }),
+
+  // Cấp mã vận đơn trả hàng (Return Facilitation)
+  provideReturnLabel: (id, returnLabelUrl) =>
+    apiRequest(`${BASE}/${id}/return-label`, {
+      method: 'POST',
+      body: JSON.stringify({ returnRequestId: id, returnLabelUrl }),
+    }),
 };
 
 export default returnRequestService;

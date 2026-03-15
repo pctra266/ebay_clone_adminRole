@@ -3,15 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import returnRequestService from '../services/returnRequestService';
 
 const STATUS_TABS = [
-  { key: 'Pending',  label: 'Chờ xử lý',   color: '#f59e0b' },
-  { key: 'Approved', label: 'Đã chấp nhận', color: '#10b981' },
-  { key: 'Rejected', label: 'Đã từ chối',   color: '#ef4444' },
+  { key: 'Pending',   label: 'Chờ xử lý',   color: '#f59e0b' },
+  { key: 'Escalated', label: 'Khiếu nại',   color: '#6366f1' },
+  { key: 'Approved',  label: 'Đã hoàn tiền', color: '#10b981' },
+  { key: 'Rejected',  label: 'Đã từ chối',   color: '#ef4444' },
 ];
 
 const statusBadge = {
-  Pending:  { bg: '#fef3c7', color: '#92400e', text: 'Chờ xử lý'   },
-  Approved: { bg: '#d1fae5', color: '#065f46', text: 'Đã chấp nhận' },
-  Rejected: { bg: '#fee2e2', color: '#991b1b', text: 'Đã từ chối'  },
+  Pending:               { bg: '#fef3c7', color: '#92400e', text: 'Chờ xử lý'       },
+  Approved:              { bg: '#d1fae5', color: '#065f46', text: 'Đã hoàn tiền'    },
+  Rejected:              { bg: '#fee2e2', color: '#991b1b', text: 'Đã từ chối'     },
+  WaitingForReturnLabel: { bg: '#e0e7ff', color: '#3730a3', text: 'Đợi mã vận đơn' },
+  ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', text: 'Đã cấp mã VD'   },
+  Returned:              { bg: '#fef9c3', color: '#854d0e', text: 'Đã trả hàng'    },
+  Escalated:             { bg: '#ffedd5', color: '#9a3412', text: 'Đang khiếu nại' },
 };
 
 export default function ReturnRequestsPage() {

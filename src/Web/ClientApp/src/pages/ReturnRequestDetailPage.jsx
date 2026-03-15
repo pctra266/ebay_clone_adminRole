@@ -16,6 +16,11 @@ export default function ReturnRequestDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // New state for Adjudication
+  const [resolutionAction, setResolutionAction] = useState('RequireReturn');
+  const [isRefundedByEbayFund, setIsRefundedByEbayFund] = useState(false);
+  const [returnLabelUrl, setReturnLabelUrl] = useState('');
+
   // Lightbox
   const [lightbox, setLightbox] = useState(null);
 
@@ -34,20 +39,38 @@ export default function ReturnRequestDetailPage() {
   }, [id]);
 
   const handleAction = async () => {
-    if (modal === 'reject' && !adminNote.trim()) {
-      setSubmitError('Vui lòng nhập lý do từ chối.');
+    if ((modal === 'reject' || modal === 'adjudicate') && !adminNote.trim()) {
+      setSubmitError('Vui lòng nhập ghi chú/lý do.');
       return;
     }
+    if (modal === 'provideLabel' && !returnLabelUrl.trim()) {
+      setSubmitError('Vui lòng nhập URL nhãn trả hàng.');
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError('');
     try {
       if (modal === 'approve') {
         await returnRequestService.approveReturnRequest(Number(id), adminNote);
-      } else {
+      } else if (modal === 'reject') {
         await returnRequestService.rejectReturnRequest(Number(id), adminNote);
+      } else if (modal === 'adjudicate') {
+        await returnRequestService.adjudicateReturnRequest(Number(id), {
+          adminNote,
+          resolutionAction,
+          isRefundedByEbayFund,
+        });
+      } else if (modal === 'provideLabel') {
+        await returnRequestService.provideReturnLabel(Number(id), returnLabelUrl);
       }
-      // Bước 4 kết quả: quay lại danh sách (đơn đã mất khỏi Pending)
-      navigate('/return-requests', { state: { toast: modal === 'approve' ? 'Đã chấp nhận hoàn tiền!' : 'Đã từ chối yêu cầu.' } });
+      
+      const successMsg = modal === 'approve' ? 'Đã chấp nhận!' 
+                         : modal === 'reject' ? 'Đã từ chối!' 
+                         : modal === 'adjudicate' ? 'Đã xử lý phán quyết!' 
+                         : 'Đã cấp nhãn trả hàng!';
+
+      navigate('/return-requests', { state: { toast: successMsg } });
     } catch {
       setSubmitError('Xử lý thất bại. Vui lòng thử lại.');
     } finally {
@@ -208,48 +231,118 @@ export default function ReturnRequestDetailPage() {
                 {detail.totalPrice ? `${Number(detail.totalPrice).toLocaleString('vi-VN')}đ` : '—'}
               </span>
             } />
+            {detail.resolutionAction && (
+              <Row label="Hướng xử lý" value={
+                <span style={{ fontWeight: 600, color: '#4f46e5' }}>
+                  {detail.resolutionAction === 'RequireReturn' ? 'Trả hàng & Hoàn tiền' : 
+                   detail.resolutionAction === 'KeepItem' ? 'Giữ hàng & Hoàn tiền' : 'Hoàn tiền ngay'}
+                </span>
+              } />
+            )}
+            {detail.isRefundedByEbayFund && (
+              <div style={{ background: '#fef9c3', padding: '4px 8px', borderRadius: 4, fontSize: 11, color: '#854d0e', marginTop: 8, textAlign: 'center' }}>
+                 🛡️ Ebay chi trả quỹ bồi thường
+              </div>
+            )}
           </Card>
 
+          {/* Tracking Info */}
+          {(detail.trackingNumber || detail.returnLabelUrl) && (
+            <Card title="🚚 Thông tin vận chuyển">
+              {detail.trackingNumber && <Row label="Mã vận đơn" value={<strong>{detail.trackingNumber}</strong>} />}
+              {detail.deliveryStatus && <Row label="Trạng thái" value={detail.deliveryStatus} />}
+              {detail.returnLabelUrl && (
+                <div style={{ marginTop: 12 }}>
+                  <a href={detail.returnLabelUrl} target="_blank" rel="noreferrer" style={{
+                    display: 'block', textAlign: 'center', padding: '8px', 
+                    background: '#f3f4f6', borderRadius: 8, fontSize: 12, 
+                    color: '#4f46e5', fontWeight: 600, textDecoration: 'none',
+                    border: '1.5px solid #e5e7eb'
+                  }}>
+                    📄 Xem nhãn trả hàng (PDF/Image)
+                  </a>
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* ACTION PANEL — Bước 4 */}
-          {isPending && (
+          {(isPending || detail.status === 'Escalated') && (
             <div style={{
               background: '#fff', borderRadius: 14, padding: 24,
               border: '1px solid #e5e7eb', boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
             }}>
               <h3 style={{ margin: '0 0 6px', fontSize: 14, fontWeight: 700, color: '#111827' }}>⚖️ Quyết định xử lý</h3>
               <p style={{ margin: '0 0 16px', fontSize: 12, color: '#6b7280' }}>
-                Chọn hành động để xử lý yêu cầu này. Sau khi xử lý, đơn sẽ rời khỏi danh sách chờ.
+                Chọn hành động để xử lý yêu cầu này.
               </p>
+              
               <button
-                onClick={() => { setModal('approve'); setAdminNote(''); setSubmitError(''); }}
+                onClick={() => { setModal('adjudicate'); setAdminNote(''); setSubmitError(''); }}
                 style={{
                   width: '100%', padding: '12px', borderRadius: 10,
-                  background: '#10b981', color: '#fff', border: 'none',
+                  background: '#6366f1', color: '#fff', border: 'none',
                   fontWeight: 700, fontSize: 14, cursor: 'pointer',
                   fontFamily: "'DM Sans', sans-serif",
                   marginBottom: 10, transition: 'background 0.2s',
                 }}
-                onMouseEnter={e => e.target.style.background = '#059669'}
-                onMouseLeave={e => e.target.style.background = '#10b981'}
               >
-                ✅ Chấp nhận hoàn tiền
+                ⚖️ Phán quyết (Adjudicate)
               </button>
-              <button
-                onClick={() => { setModal('reject'); setAdminNote(''); setSubmitError(''); }}
-                style={{
-                  width: '100%', padding: '12px', borderRadius: 10,
-                  background: '#fff', color: '#ef4444',
-                  border: '1.5px solid #ef4444',
-                  fontWeight: 700, fontSize: 14, cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif",
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { e.target.style.background = '#fef2f2'; }}
-                onMouseLeave={e => { e.target.style.background = '#fff'; }}
-              >
-                ❌ Từ chối yêu cầu
-              </button>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => { setModal('approve'); setAdminNote(''); setSubmitError(''); }}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: 10,
+                    background: '#10b981', color: '#fff', border: 'none',
+                    fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  ✅ Đồng ý
+                </button>
+                <button
+                  onClick={() => { setModal('reject'); setAdminNote(''); setSubmitError(''); }}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: 10,
+                    background: '#fff', color: '#ef4444',
+                    border: '1.5px solid #ef4444',
+                    fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  ❌ Từ chối
+                </button>
+              </div>
             </div>
+          )}
+
+          {/* Provide Return Label Panel */}
+          {detail.status === 'WaitingForReturnLabel' && (
+             <div style={{
+               background: '#fff', borderRadius: 14, padding: 24,
+               border: '1px solid #e5e7eb', boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+             }}>
+               <h3 style={{ margin: '0 0 6px', fontSize: 14, fontWeight: 700, color: '#111827' }}>📮 Cấp nhãn trả hàng</h3>
+               <p style={{ margin: '0 0 16px', fontSize: 12, color: '#6b7280' }}>
+                 Yêu cầu này đang đợi Admin cung cấp nhãn trả hàng cho khách.
+               </p>
+               <button
+                 onClick={() => { setModal('provideLabel'); setReturnLabelUrl(''); setSubmitError(''); }}
+                 style={{
+                   width: '100%', padding: '12px', borderRadius: 10,
+                   background: '#10b981', color: '#fff', border: 'none',
+                   fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                   fontFamily: "'DM Sans', sans-serif",
+                   transition: 'background 0.2s',
+                 }}
+               >
+                 📦 Gửi nhãn vận chuyển
+               </button>
+             </div>
           )}
 
           {/* Đã xử lý */}
@@ -263,7 +356,11 @@ export default function ReturnRequestDetailPage() {
                 {detail.status === 'Approved' ? '✅' : '❌'}
               </div>
               <p style={{ margin: 0, fontWeight: 700, color: detail.status === 'Approved' ? '#065f46' : '#991b1b', fontSize: 14 }}>
-                {detail.status === 'Approved' ? 'Đã chấp nhận hoàn tiền' : 'Đã từ chối yêu cầu'}
+                {detail.status === 'Approved' ? 'Đã hoàn tiền' : 
+                 detail.status === 'WaitingForReturnLabel' ? 'Đợi nhãn trả hàng' :
+                 detail.status === 'ReturnLabelProvided' ? 'Đã cung cấp nhãn' :
+                 detail.status === 'Returned' ? 'Đã nhận hàng trả' :
+                 detail.status === 'Rejected' ? 'Đã từ chối' : detail.status}
               </p>
               {detail.resolvedAt && (
                 <p style={{ margin: '6px 0 0', fontSize: 11, color: '#6b7280' }}>
@@ -307,23 +404,74 @@ export default function ReturnRequestDetailPage() {
                 : 'Yêu cầu sẽ bị từ chối và khách hàng sẽ được thông báo.'}
             </p>
 
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-              Ghi chú Admin {modal === 'reject' && <span style={{ color: '#ef4444' }}>*</span>}
-            </label>
-            <textarea
-              placeholder={modal === 'approve' ? 'Nhập ghi chú (tùy chọn)...' : 'Nhập lý do từ chối (bắt buộc)...'}
-              value={adminNote}
-              onChange={e => setAdminNote(e.target.value)}
-              rows={3}
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: 8,
-                border: '1.5px solid #e5e7eb', fontSize: 13, resize: 'vertical',
-                fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box',
-                outline: 'none',
-              }}
-              onFocus={e => e.target.style.borderColor = '#6366f1'}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-            />
+            {modal === 'adjudicate' && (
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
+                  Hướng giải quyết
+                </label>
+                <select 
+                  value={resolutionAction}
+                  onChange={e => setResolutionAction(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 13, marginBottom: 12, outline: 'none' }}
+                >
+                  <option value="RequireReturn">Yêu cầu trả hàng & hoàn tiền</option>
+                  <option value="KeepItem">Khách giữ hàng & hoàn tiền (Full)</option>
+                  <option value="RefundWithoutReturn">Hoàn tiền không cần trả hàng</option>
+                </select>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input 
+                    type="checkbox" 
+                    id="ebayFund" 
+                    checked={isRefundedByEbayFund} 
+                    onChange={e => setIsRefundedByEbayFund(e.target.checked)} 
+                  />
+                  <label htmlFor="ebayFund" style={{ fontSize: 13, color: '#374151' }}>
+                    Sử dụng quỹ Ebay để bồi thường (Ebay Fund)
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {modal === 'provideLabel' ? (
+               <div style={{ marginBottom: 20 }}>
+                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
+                    URL nhãn trả hàng (Shipping Label) <span style={{ color: '#ef4444' }}>*</span>
+                 </label>
+                 <input
+                   type="text"
+                   placeholder="https://example.com/labels/123.pdf"
+                   value={returnLabelUrl}
+                   onChange={e => setReturnLabelUrl(e.target.value)}
+                   style={{
+                     width: '100%', padding: '10px 12px', borderRadius: 8,
+                     border: '1.5px solid #e5e7eb', fontSize: 13,
+                     fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box',
+                     outline: 'none',
+                   }}
+                 />
+               </div>
+            ) : (
+              <>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
+                  Ghi chú Admin {(modal === 'reject' || modal === 'adjudicate') && <span style={{ color: '#ef4444' }}>*</span>}
+                </label>
+                <textarea
+                  placeholder={modal === 'approve' ? 'Nhập ghi chú (tùy chọn)...' : 'Nhập lý do/ghi chú (bắt buộc)...'}
+                  value={adminNote}
+                  onChange={e => setAdminNote(e.target.value)}
+                  rows={3}
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: 8,
+                    border: '1.5px solid #e5e7eb', fontSize: 13, resize: 'vertical',
+                    fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box',
+                    outline: 'none',
+                  }}
+                  onFocus={e => e.target.style.borderColor = '#6366f1'}
+                  onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </>
+            )}
 
             {submitError && (
               <p style={{ color: '#ef4444', fontSize: 12, margin: '6px 0 0' }}>⚠️ {submitError}</p>
@@ -355,7 +503,10 @@ export default function ReturnRequestDetailPage() {
                   fontFamily: "'DM Sans', sans-serif",
                 }}
               >
-                {submitting ? 'Đang xử lý...' : (modal === 'approve' ? 'Xác nhận hoàn tiền' : 'Xác nhận từ chối')}
+                {submitting ? 'Đang xử lý...' : 
+                 (modal === 'approve' ? 'Xác nhận hoàn tiền' : 
+                  modal === 'reject' ? 'Xác nhận từ chối' :
+                  modal === 'adjudicate' ? 'Xác nhận phán quyết' : 'Gửi nhãn trả hàng')}
               </button>
             </div>
           </div>
@@ -415,9 +566,13 @@ function Row({ label, value }) {
 
 function StatusChip({ status }) {
   const map = {
-    Pending:  { bg: '#fef3c7', color: '#92400e', label: '⏳ Chờ xử lý'    },
-    Approved: { bg: '#d1fae5', color: '#065f46', label: '✅ Đã chấp nhận' },
-    Rejected: { bg: '#fee2e2', color: '#991b1b', label: '❌ Đã từ chối'   },
+    Pending:               { bg: '#fef3c7', color: '#92400e', label: '⏳ Chờ xử lý'       },
+    Approved:              { bg: '#d1fae5', color: '#065f46', label: '✅ Đã hoàn tiền'    },
+    Rejected:              { bg: '#fee2e2', color: '#991b1b', label: '❌ Đã từ chối'     },
+    WaitingForReturnLabel: { bg: '#e0e7ff', color: '#3730a3', label: '📮 Đợi nhãn VD'    },
+    ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', label: '🚚 Đã cấp mã VD'   },
+    Returned:              { bg: '#fef9c3', color: '#854d0e', label: '📦 Đã trả hàng'    },
+    Escalated:             { bg: '#ffedd5', color: '#9a3412', label: '⚖️ Đang khiếu nại' },
   };
   const s = map[status] || { bg: '#f3f4f6', color: '#374151', label: status };
   return (
@@ -425,6 +580,7 @@ function StatusChip({ status }) {
       background: s.bg, color: s.color,
       padding: '6px 16px', borderRadius: 20,
       fontSize: 13, fontWeight: 700,
+      fontFamily: "'DM Sans', sans-serif"
     }}>
       {s.label}
     </span>
