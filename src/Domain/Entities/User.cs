@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
@@ -46,6 +46,9 @@ public partial class User
     
     // Verification fields
     public int ViolationCount { get; set; } = 0;
+    
+    // Seller Performance Management
+    public int PerformanceScore { get; set; } = 100; // Điểm uy tín
     
     public bool IsVerified { get; set; } = false; // KYC verification
     

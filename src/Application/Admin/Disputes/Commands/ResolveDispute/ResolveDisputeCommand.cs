@@ -188,12 +188,12 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         // Create refund transaction
         var refundTransaction = new FinancialTransaction
         {
-            UserId = dispute.RaisedBy ?? 0,
+            SellerId = dispute.RaisedBy ?? 0,
             Type = "Refund",
             Amount = refundAmount,
             Description = $"Refund for dispute {dispute.CaseId}",
             OrderId = dispute.OrderId,
-            CreatedAt = DateTime.UtcNow
+            Date = DateTime.UtcNow
         };
         _context.FinancialTransactions.Add(refundTransaction);
 
@@ -215,7 +215,8 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
                 
                 // Move money: DisputedBalance ? AvailableBalance
                 sellerWallet.DisputedBalance -= frozenAmount;
-                sellerWallet.AvailableBalance += frozenAmount;
+
+                sellerWallet.CreditAvailable(frozenAmount);
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
         }
@@ -244,7 +245,8 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             {
                 // Seller keeps part, refunds part
                 sellerWallet.DisputedBalance -= disputedAmount;
-                sellerWallet.AvailableBalance += sellerKeeps;
+
+                sellerWallet.CreditAvailable(sellerKeeps);
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
@@ -253,12 +255,14 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         // Create refund transaction for buyer
         var refundTransaction = new FinancialTransaction
         {
-            UserId = dispute.RaisedBy ?? 0,
+
+            SellerId = dispute.RaisedBy ?? 0,
             Type = "PartialRefund",
             Amount = refundAmount,
             Description = $"Partial refund for dispute {dispute.CaseId} (Split decision)",
             OrderId = dispute.OrderId,
-            CreatedAt = DateTime.UtcNow
+
+            Date = DateTime.UtcNow
         };
         _context.FinancialTransactions.Add(refundTransaction);
 

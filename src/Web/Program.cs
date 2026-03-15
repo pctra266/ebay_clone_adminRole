@@ -1,8 +1,11 @@
-using System;
 using EbayClone.Infrastructure.Data;
+using System;
+using EbayClone.Application.Common.Interfaces;
+using EbayClone.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.AddKeyVaultIfConfigured();
@@ -12,36 +15,45 @@ builder.AddWebServices();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Run DB migration + seeder on startup (idempotent — safe to run every time)
+await app.InitialiseDatabaseAsync();
+
+// ── Environment-specific middleware ──────────────────────────
 if (app.Environment.IsDevelopment())
 {
-    await app.InitialiseDatabaseAsync();
+    // Dev: nothing extra needed, seeder already ran above
 }
 else
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+// ── Core middleware (ORDER MATTERS) ──────────────────────────
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles();          // serve React build from wwwroot
+app.UseExceptionHandler(options => { });
+app.UseCors("FrontendPolicy");
+app.UseRateLimiter();          // Rate Limiting — TRƯỚC authentication
+app.UseAuthentication();
+app.UseAuthorization();
 
+// ── API endpoints ────────────────────────────────────────────
+app.MapRazorPages();
+
+// Register your endpoint groups
+app.MapEndpoints();
+
+// ── OpenAPI / Swagger UI ─────────────────────────────────────
+app.UseOpenApi();
 app.UseSwaggerUi(settings =>
 {
     settings.Path = "/api";
-    settings.DocumentPath = "/api/specification.json";
 });
 
-app.MapRazorPages();
-
+// ── SPA fallback (MUST be last — catches all unmatched routes)
 app.MapFallbackToFile("index.html");
-
-app.UseExceptionHandler(options => { });
-
-
-app.MapEndpoints();
-
+string hash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+Console.WriteLine(hash);
 app.Run();
-
 public partial class Program { }

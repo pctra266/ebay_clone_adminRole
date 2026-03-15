@@ -1,8 +1,13 @@
-﻿using Azure.Identity;
+using System.Security.Claims;
+using System.Text;
+using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -23,16 +28,84 @@ public static class DependencyInjection
 
         builder.Services.AddRazorPages();
 
+        // Rate Limiting — 3 policies: strict / standard / authenticated
+        builder.Services.AddAppRateLimiting();
+
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
 
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
-        builder.Services.AddOpenApiDocument((configure, sp) =>
+        // Configure NSwag to generate OpenAPI from Minimal API endpoints
+        builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "EbayClone API";
+            configure.Version = "v1";
+            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = NSwag.OpenApiSecurityApiKeyLocation.Header,
+                Description = "Type into the textbox: Bearer {your JWT token}"
+            });
 
+            configure.OperationProcessors.Add(
+                new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("JWT"));
+        });
+
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                NameClaimType = ClaimTypes.Name,
+                RoleClaimType = ClaimTypes.Role
+            };
+            //đọc token từ cookie
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    ctx.Token = ctx.Request.Cookies["auth_token"];
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendPolicy", policy =>
+            {
+                policy
+                      // Dev: React chạy riêng ở localhost
+                      .WithOrigins(
+                          "http://localhost:3000",
+                          "http://localhost:5000",
+                          "http://localhost:5001",
+                          "https://localhost:5001",
+                          "https://localhost:44447"
+                      )
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động
+            });
         });
     }
 

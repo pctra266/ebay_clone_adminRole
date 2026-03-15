@@ -1,10 +1,13 @@
+
 ﻿using EbayClone.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+
     // 1. Khai báo các bảng (DbSet) mà tầng Application được phép truy cập
     DbSet<Address> Addresses { get; }
     DbSet<Bid> Bids { get; }
@@ -31,6 +34,7 @@ public interface IApplicationDbContext
     // Các bảng mới cho Admin
     DbSet<ProductReport> ProductReports { get; }
     DbSet<SellerWallet> SellerWallets { get; }
+
     DbSet<WithdrawalRequest> WithdrawalRequests { get; }
     DbSet<PlatformFee> PlatformFees { get; }
     DbSet<AdminAction> AdminActions { get; }

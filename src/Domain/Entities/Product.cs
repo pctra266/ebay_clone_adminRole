@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
 
-public partial class Product
+public class Product : BaseAuditableEntity
 {
-    public int Id { get; set; }
-
     public string? Title { get; set; }
 
     public string? Description { get; set; }
@@ -27,10 +25,6 @@ public partial class Product
     public string Status { get; set; } = "Active"; // 'Active', 'Hidden', 'Reported', 'Deleted'
     
     public int ReportCount { get; set; } = 0;
-    
-    public string? ReportedBy { get; set; } // JSON array of user IDs
-    
-    public string? ReportReason { get; set; }
     
     public bool IsVerified { get; set; } = false; // Admin approved
     
@@ -55,4 +49,7 @@ public partial class Product
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual User? Seller { get; set; }
+
+    public virtual ICollection<ProductReport> Reports { get; set; } = new List<ProductReport>();
 }
+

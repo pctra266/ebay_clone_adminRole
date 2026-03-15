@@ -10,18 +10,63 @@ public partial class SellerWallet
 
     public decimal PendingBalance { get; set; } = 0; // Money on hold (new sales, awaiting clearance)
 
-    public decimal AvailableBalance { get; set; } = 0; // Money available for withdrawal
+    public decimal AvailableBalance { get;  set; } = 0; // Money available for withdrawal
 
+
+    public decimal TotalEarnings { get; private set; } = 0;
+
+    public decimal TotalWithdrawn { get; private set; } = 0;
     public decimal DisputedBalance { get; set; } = 0; // Money frozen due to disputes
 
-    public decimal TotalEarnings { get; set; } = 0;
-
-    public decimal TotalWithdrawn { get; set; } = 0;
-    
     public decimal TotalRefunded { get; set; } = 0; // Total refunded due to disputes/returns
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
     public virtual User? Seller { get; set; }
+
+    public void CreditPending(decimal amount)
+    {
+        if (amount < 0) throw new ArgumentException("Amount must be positive");
+        PendingBalance += amount;
+        TotalEarnings += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void MovePendingToAvailable(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Amount must be positive");
+        if (PendingBalance < amount) throw new InvalidOperationException("Insufficient pending balance");
+        
+        PendingBalance -= amount;
+        AvailableBalance += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void DeductAvailable(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Amount must be positive");
+        if (AvailableBalance < amount) throw new InvalidOperationException("Insufficient available balance");
+
+        AvailableBalance -= amount;
+        TotalWithdrawn += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RefundFromPending(decimal amount)
+    {
+         if (amount <= 0) throw new ArgumentException("Amount must be positive");
+         if (PendingBalance < amount) throw new InvalidOperationException("Insufficient pending balance");
+
+         PendingBalance -= amount;
+         TotalEarnings -= amount; // Revert earning
+         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void CreditAvailable(decimal amount)
+    {
+        if (amount < 0) throw new ArgumentException("Amount must be positive");
+        AvailableBalance += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
