@@ -14,7 +14,7 @@ metadata:
   labels:
     app: ebay-api
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: ebay-api   # route traffic đến tất cả Pods có label này
   ports:
@@ -22,4 +22,3 @@ spec:
       protocol: TCP
       port: 80          # port bên trong cluster
       targetPort: 8080  # port của container
-      nodePort: 30500   # port truy cập từ bên ngoài → localhost:30500
