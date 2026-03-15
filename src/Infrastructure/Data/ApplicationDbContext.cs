@@ -48,7 +48,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
 
 
-
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return base.SaveChangesAsync(cancellationToken);

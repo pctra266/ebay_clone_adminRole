@@ -85,8 +85,24 @@ export function DisputeDetailPage() {
       setShowResolveModal(false);
       await loadDisputeDetail(); // Refresh
     } catch (error) {
+      // Handle validation errors or problem details returned by problem details middleware
+      let errorMsg = "Failed to resolve dispute";
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errorMsg = error.response.data;
+        } else if (error.response.data.title) {
+          errorMsg = error.response.data.title;
+          if (error.response.data.errors) {
+            const firstError = Object.values(error.response.data.errors)[0];
+            if (firstError && firstError.length > 0) {
+              errorMsg += `: ${firstError[0]}`;
+            }
+          }
+        }
+      }
+      
       setToast({ 
-        message: error.response?.data || "Failed to resolve dispute", 
+        message: errorMsg, 
         type: "error" 
       });
     } finally {
@@ -166,7 +182,7 @@ export function DisputeDetailPage() {
           </div>
         </div>
         <div className="d-flex gap-2">
-          {!dispute.assignedToAdmin && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+          {!dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
             <button
               type="button"
               className="btn btn-outline-primary"
@@ -176,7 +192,7 @@ export function DisputeDetailPage() {
               Assign to Me
             </button>
           )}
-          {dispute.assignedToAdmin === adminId && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+          {dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
             <button
               type="button"
               className="btn btn-success"
@@ -232,8 +248,8 @@ export function DisputeDetailPage() {
                   <tr>
                     <td className="text-muted">Assigned To:</td>
                     <td>
-                      {dispute.assignedToAdmin ? (
-                        <span className="badge bg-success">Admin #{dispute.assignedToAdmin}</span>
+                      {dispute.assignedTo ? (
+                        <span className="badge bg-success">Admin #{dispute.assignedTo}</span>
                       ) : (
                         <span className="text-muted">Unassigned</span>
                       )}

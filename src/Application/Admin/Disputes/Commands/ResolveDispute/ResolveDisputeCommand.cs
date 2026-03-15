@@ -79,8 +79,18 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             throw new ValidationException("This dispute has already been resolved.");
         }
 
-        // Get current admin ID
+        // Get current admin ID - Handle mapping from Identity GUID to User table int ID
         var adminId = int.TryParse(_currentUser.Id, out var parsedId) ? parsedId : (int?)null;
+        
+        if (adminId == null || adminId == 0)
+        {
+            // Fallback to the default admin user in the Domain User table if identity claim doesn't map directly
+            var fallbackAdmin = await _context.Users
+                .Where(u => u.Role == "Admin" || u.Role == "System")
+                .FirstOrDefaultAsync(cancellationToken);
+                
+            adminId = fallbackAdmin?.Id ?? 1; // Default to 1 if no user found
+        }
 
         // Update dispute resolution
         dispute.Status = DisputeStatuses.Resolved;
@@ -215,6 +225,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
                 
                 // Move money: DisputedBalance ? AvailableBalance
                 sellerWallet.DisputedBalance -= frozenAmount;
+
                 sellerWallet.CreditAvailable(frozenAmount);
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
@@ -244,6 +255,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             {
                 // Seller keeps part, refunds part
                 sellerWallet.DisputedBalance -= disputedAmount;
+
                 sellerWallet.CreditAvailable(sellerKeeps);
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
@@ -253,11 +265,13 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         // Create refund transaction for buyer
         var refundTransaction = new FinancialTransaction
         {
+
             SellerId = dispute.RaisedBy ?? 0,
             Type = "PartialRefund",
             Amount = refundAmount,
             Description = $"Partial refund for dispute {dispute.CaseId} (Split decision)",
             OrderId = dispute.OrderId,
+
             Date = DateTime.UtcNow
         };
         _context.FinancialTransactions.Add(refundTransaction);

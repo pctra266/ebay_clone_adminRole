@@ -12,6 +12,7 @@ public partial class SellerWallet
 
     public decimal AvailableBalance { get;  set; } = 0; // Money available for withdrawal
 
+
     public decimal TotalEarnings { get; private set; } = 0;
 
     public decimal TotalWithdrawn { get; private set; } = 0;
