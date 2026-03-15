@@ -4,6 +4,7 @@ using EbayClone.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EbayClone.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260314172021_MergeAdminRoleFeatures")]
+    partial class MergeAdminRoleFeatures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1259,9 +1262,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<string>("IpWhitelist")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsReviewRestricted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
@@ -1275,15 +1275,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("password");
-
-                    b.Property<DateTime?>("ProductBanUntil")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ReviewBanUntil")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ReviewViolationCount")
-                        .HasColumnType("int");
 
                     b.Property<string>("Role")
                         .HasMaxLength(20)

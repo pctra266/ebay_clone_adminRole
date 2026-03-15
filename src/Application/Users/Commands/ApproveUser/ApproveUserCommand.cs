@@ -1,7 +1,7 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace EbayClone.Application.Users.Commands.ApproveUser;
 
@@ -39,9 +39,9 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
         };
 
         user.ApprovalStatus = "Approved";
+        user.Status = "Active";
         user.ApprovedBy = request.AdminId;
         user.ApprovedAt = DateTime.UtcNow;
-        user.Status = "Active";
 
         var after = new
         {
@@ -54,8 +54,8 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
         _context.Notifications.Add(new Notification
         {
             UserId = user.Id,
-            Title = "Tai khoan da duoc phe duyet",
-            Content = "Chuc mung! Tai khoan cua ban da duoc phe duyet.",
+            Title = "Account approved",
+            Content = "Your account has been approved.",
             Type = "InApp",
             Status = "Sent",
             SentAt = DateTime.UtcNow,

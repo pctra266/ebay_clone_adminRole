@@ -1,10 +1,12 @@
-﻿using System.Text;
+using System.Security.Claims;
+using System.Text;
 using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
+using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -26,17 +28,32 @@ public static class DependencyInjection
 
         builder.Services.AddRazorPages();
 
+        // Rate Limiting — 3 policies: strict / standard / authenticated
+        builder.Services.AddAppRateLimiting();
+
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
 
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         // Configure NSwag to generate OpenAPI from Minimal API endpoints
         builder.Services.AddOpenApiDocument(configure =>
         {
             configure.Title = "EbayClone API";
-            configure.Version = "v1";   
+            configure.Version = "v1";
+            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = NSwag.OpenApiSecurityApiKeyLocation.Header,
+                Description = "Type into the textbox: Bearer {your JWT token}"
+            });
+
+            configure.OperationProcessors.Add(
+                new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
 
         var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -57,7 +74,9 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(key)
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                NameClaimType = ClaimTypes.Name,
+                RoleClaimType = ClaimTypes.Role
             };
             //đọc token từ cookie
             options.Events = new JwtBearerEvents
@@ -74,7 +93,15 @@ public static class DependencyInjection
         {
             options.AddPolicy("FrontendPolicy", policy =>
             {
-                policy.WithOrigins("http://localhost:5001") // URL React dev server của bạn
+                policy
+                      // Dev: React chạy riêng ở localhost
+                      .WithOrigins(
+                          "http://localhost:3000",
+                          "http://localhost:5000",
+                          "http://localhost:5001",
+                          "https://localhost:5001",
+                          "https://localhost:44447"
+                      )
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động

@@ -29,6 +29,8 @@ public static class DependencyInjection
             options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -75,13 +77,8 @@ public static class DependencyInjection
 
             options.AddPolicy(Policies.ViewAuditLogs, policy =>
                 policy.RequireRole(Roles.SuperAdmin));
-        options.AddPolicy(Policies.CanPurge, policy => 
-        policy.RequireRole(Roles.Administrator));
+        });
 
-    });
-        builder.Services.AddTransient<IEmailService, EmailService>();
-        builder.Services.AddScoped<IJwtService, JwtService>();
-        
         builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
     }
 }

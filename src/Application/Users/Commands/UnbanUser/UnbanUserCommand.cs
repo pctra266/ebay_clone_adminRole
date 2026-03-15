@@ -1,7 +1,7 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace EbayClone.Application.Users.Commands.UnbanUser;
 
@@ -56,8 +56,8 @@ public class UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, bool>
         _context.Notifications.Add(new Notification
         {
             UserId = user.Id,
-            Title = "Tai khoan da duoc mo khoa",
-            Content = "Tai khoan cua ban da duoc kich hoat lai.",
+            Title = "Account unblocked",
+            Content = "Your account has been unblocked.",
             Type = "InApp",
             Status = "Sent",
             SentAt = DateTime.UtcNow,
