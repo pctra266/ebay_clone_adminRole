@@ -3,6 +3,7 @@ using EbayClone.Application.ReturRequests.Commands.RejectReturnRequest;
 using EbayClone.Application.ReturRequests.Queries.GetReturnRequestDetail;
 using EbayClone.Application.ReturRequests.Queries.GetReturnRequests;
 using EbayClone.Application.ReturRequests.Commands.ProcessReturnLabel;
+using EbayClone.Application.ReturRequests.Queries.GetReturnRequestMessages;
 
 namespace EbayClone.Web.Endpoints;
 
@@ -15,6 +16,9 @@ public class AdminReturnRequests : EndpointGroupBase
 
         // GET /api/adminreturnrequests/{id}           → Bước 3: Chi tiết yêu cầu
         group.MapGet("{id}", GetReturnRequestDetail);
+
+        // GET /api/adminreturnrequests/{id}/messages   → Mới: Lấy tin nhắn làm bằng chứng
+        group.MapGet("{id}/messages", GetReturnRequestMessages);
 
         // POST /api/adminreturnrequests/{id}/approve  → Bước 4: Chấp nhận hoàn tiền (giữ lại cho tương thích ngược)
         group.MapPost("{id}/approve", ApproveReturnRequest);
@@ -41,6 +45,12 @@ public class AdminReturnRequests : EndpointGroupBase
     public async Task<ReturnRequestDetailDto> GetReturnRequestDetail(ISender sender, int id)
     {
         return await sender.Send(new GetReturnRequestDetailQuery(id));
+    }
+
+    // Lấy tin nhắn giữa Buyer và Seller làm bằng chứng
+    public async Task<List<ReturnRequestMessageDto>> GetReturnRequestMessages(ISender sender, int id)
+    {
+        return await sender.Send(new GetReturnRequestMessagesQuery(id));
     }
 
     // Bước 4: Chấp nhận hoàn tiền

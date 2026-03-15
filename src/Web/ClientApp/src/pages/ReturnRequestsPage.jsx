@@ -3,20 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import returnRequestService from '../services/returnRequestService';
 
 const STATUS_TABS = [
-  { key: 'Pending',   label: 'Chờ xử lý',   color: '#f59e0b' },
-  { key: 'Escalated', label: 'Khiếu nại',   color: '#6366f1' },
-  { key: 'Approved',  label: 'Đã hoàn tiền', color: '#10b981' },
-  { key: 'Rejected',  label: 'Đã từ chối',   color: '#ef4444' },
+  { key: 'Pending',   label: 'Pending Review', color: '#f59e0b' },
+  { key: 'Escalated', label: 'Escalated',      color: '#6366f1' },
+  { key: 'Approved',  label: 'Refunded',       color: '#10b981' },
+  { key: 'Rejected',  label: 'Rejected',       color: '#ef4444' },
 ];
 
 const statusBadge = {
-  Pending:               { bg: '#fef3c7', color: '#92400e', text: 'Chờ xử lý'       },
-  Approved:              { bg: '#d1fae5', color: '#065f46', text: 'Đã hoàn tiền'    },
-  Rejected:              { bg: '#fee2e2', color: '#991b1b', text: 'Đã từ chối'     },
-  WaitingForReturnLabel: { bg: '#e0e7ff', color: '#3730a3', text: 'Đợi mã vận đơn' },
-  ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', text: 'Đã cấp mã VD'   },
-  Returned:              { bg: '#fef9c3', color: '#854d0e', text: 'Đã trả hàng'    },
-  Escalated:             { bg: '#ffedd5', color: '#9a3412', text: 'Đang khiếu nại' },
+  Pending:               { bg: '#fef3c7', color: '#92400e', text: 'Pending Analysis' },
+  Approved:              { bg: '#d1fae5', color: '#065f46', text: 'Refunded'         },
+  Rejected:              { bg: '#fee2e2', color: '#991b1b', text: 'Rejected'         },
+  WaitingForReturnLabel: { bg: '#e0e7ff', color: '#3730a3', text: 'Waiting for Label' },
+  ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', text: 'Label Provided'  },
+  Returned:              { bg: '#fef9c3', color: '#854d0e', text: 'Item Returned'   },
+  Escalated:             { bg: '#ffedd5', color: '#9a3412', text: 'Escalated'        },
 };
 
 export default function ReturnRequestsPage() {
@@ -34,7 +34,7 @@ export default function ReturnRequestsPage() {
       const data = await returnRequestService.getReturnRequests(status);
       setRequests(data);
     } catch {
-      setError('Không thể tải danh sách. Vui lòng thử lại.');
+      setError('Could not load requests. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -74,10 +74,10 @@ export default function ReturnRequestsPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#111827' }}>
-              📦 Quản lý Đơn hàng & Hoàn trả
+              📦 Return & Refund Management
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-              Kiểm duyệt và xử lý các yêu cầu hoàn trả từ khách hàng
+              Review and process customer return requests
             </p>
           </div>
 
@@ -85,7 +85,7 @@ export default function ReturnRequestsPage() {
           <div style={{ position: 'relative' }}>
             <input
               type="text"
-              placeholder="Tìm theo ID đơn hàng..."
+              placeholder="Search by Order ID..."
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               style={{
@@ -151,7 +151,7 @@ export default function ReturnRequestsPage() {
               borderTop: '3px solid #6366f1', borderRadius: '50%',
               animation: 'spin 0.8s linear infinite', margin: '0 auto 16px',
             }} />
-            <p style={{ color: '#9ca3af', fontSize: 13 }}>Đang tải dữ liệu...</p>
+            <p style={{ color: '#9ca3af', fontSize: 13 }}>Loading data...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : filtered.length === 0 ? (
@@ -162,7 +162,7 @@ export default function ReturnRequestsPage() {
           }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
             <p style={{ color: '#6b7280', fontSize: 15, fontWeight: 500 }}>
-              {searchId ? `Không tìm thấy đơn hàng #${searchId}` : 'Không có yêu cầu nào trong mục này'}
+              {searchId ? `No order found with #${searchId}` : 'No requests found in this section'}
             </p>
           </div>
         ) : (
@@ -180,12 +180,12 @@ export default function ReturnRequestsPage() {
               fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase',
             }}>
               <span>ID</span>
-              <span>Đơn #</span>
-              <span>Khách hàng</span>
-              <span>Lý do</span>
-              <span>Tổng tiền</span>
-              <span>Ngày tạo</span>
-              <span>Trạng thái</span>
+              <span>Order #</span>
+              <span>Customer</span>
+              <span>Reason</span>
+              <span>Total</span>
+              <span>Created At</span>
+              <span>Status</span>
             </div>
 
             {/* Rows */}
@@ -220,10 +220,10 @@ export default function ReturnRequestsPage() {
                   {r.reason || '—'}
                 </span>
                 <span style={{ fontWeight: 600, color: '#111827' }}>
-                  {r.totalPrice ? `${Number(r.totalPrice).toLocaleString('vi-VN')}đ` : '—'}
+                  {r.totalPrice ? `$${Number(r.totalPrice).toLocaleString('en-US')}` : '—'}
                 </span>
                 <span style={{ color: '#6b7280' }}>
-                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : '—'}
+                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US') : '—'}
                 </span>
                 {badge(r.status)}
               </div>

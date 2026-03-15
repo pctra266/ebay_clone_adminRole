@@ -43,6 +43,10 @@ const returnRequestService = {
       method: 'POST',
       body: JSON.stringify({ returnRequestId: id, returnLabelUrl }),
     }),
+
+  // Lấy tin nhắn làm bằng chứng (Evidence)
+  getReturnRequestMessages: (id) =>
+    apiRequest(`${BASE}/${id}/messages`),
 };
 
 export default returnRequestService;
