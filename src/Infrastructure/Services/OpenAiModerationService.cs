@@ -40,8 +40,8 @@ public class OpenAiModerationService : IContentModerationService
                 model = _model,
                 messages = new[]
                 {
-                    new { role = "system", content = "You are a content moderator. Analyze product reviews for profanity, hate speech, vulgarity, or extreme toxicity in Vietnamese. Respond with ONLY 'TOXIC: [reason]' or 'SAFE'. Be extremely concise, do not provide explanations unless the review is toxic." },
-                    new { role = "user", content = $"Review: \"{content}\"" }
+                    new { role = "system", content = "You are a content moderator. Analyze product names and reviews for illegal items (drugs, weapons, contraband), profanity, hate speech, spam, inserted links, vulgarity, or extreme toxicity in Vietnamese. Respond with ONLY 'TOXIC: [1-3 word reason]' (e.g., 'TOXIC: Illegal drugs', 'TOXIC: Spam link', 'TOXIC: Profanity') or 'SAFE'. If the text mentions drugs (e.g., 'ma túy'), weapons, or illegal goods, you MUST flag it as TOXIC." },
+                    new { role = "user", content = $"Content to check: \"{content}\"" }
                 },
                 temperature = 0.1,
                 max_tokens = 1000 // High limit to ensure reasoning models don't get cut off

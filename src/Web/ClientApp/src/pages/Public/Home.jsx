@@ -30,7 +30,8 @@ export const ProductList = () => {
                 // Tuỳ thuộc vào API thực tế, ở đây mình giả định hàm lấy danh sách
                 const data = await productService.getAllProducts();
                 // Nếu backend trả về phân trang, nhớ đổi thành data.items || data
-                setProducts(data.items || data || []); 
+                const allProducts = data.items || data || [];
+                setProducts(allProducts.filter(p => p.status === 'Active')); 
             } catch (error) {
                 console.error("Không thể tải dữ liệu", error);
             } finally {

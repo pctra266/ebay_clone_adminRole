@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using EbayClone.Application.Common.Interfaces;
@@ -19,7 +19,8 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<Pr
     public async Task<List<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
         return await _context.Products
-            .AsNoTracking() 
+            .AsNoTracking()
+            .Where(p => p.Status == "Active")
             .Include(p => p.Seller)
             .Select(p => new ProductDto
             {

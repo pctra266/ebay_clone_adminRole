@@ -14,11 +14,12 @@ import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
-import { Home } from "./components/Home";
+import { ProductList } from "./pages/Public/Home";
+
+import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
-
 
 const AppRoutes = [
   // ── Public ───────────────────────────────────────────────────────
@@ -96,9 +97,13 @@ const AppRoutes = [
     element: protect(<ReviewMonitoringPage />)
   },
   {
-    path: "/",
-    element: protect(<Home />)
+    path: "/public",
+    element: protect(<ProductList />)
+  },
+  {
+    path: "/seller-products",
+    element: protect(<SellerProductManagementPage />)
   }
 ];
 
-export default AppRoutes;
+export default AppRoutes;

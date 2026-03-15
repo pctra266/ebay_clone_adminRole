@@ -1,6 +1,7 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EbayClone.Application.Reviews.Commands;
 
@@ -15,16 +16,27 @@ public record CreateReviewCommand : IRequest<int>
 public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, int>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IContentModerationService _moderationService;
+    private readonly IServiceProvider _serviceProvider;
 
-    public CreateReviewCommandHandler(IApplicationDbContext context, IContentModerationService moderationService)
+    public CreateReviewCommandHandler(IApplicationDbContext context, IServiceProvider serviceProvider)
     {
         _context = context;
-        _moderationService = moderationService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<int> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
     {
+        var reviewer = await _context.Users.FindAsync(new object[] { request.ReviewerId }, cancellationToken);
+        if (reviewer != null)
+        {
+            if (reviewer.Status == "Banned")
+                throw new Exception("Tài khoản của bạn đã bị khóa.");
+            if (reviewer.IsReviewRestricted)
+                throw new Exception("Bạn đã bị hạn chế chức năng đánh giá vĩnh viễn.");
+            if (reviewer.ReviewBanUntil.HasValue && reviewer.ReviewBanUntil.Value > DateTime.UtcNow)
+                throw new Exception($"Chức năng đánh giá của bạn bị tạm khóa đến {reviewer.ReviewBanUntil.Value:dd/MM/yyyy HH:mm}.");
+        }
+
         var review = new Review
         {
             ProductId = request.ProductId,
@@ -44,21 +56,43 @@ public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, i
             review.Status = "PendingReview";
         }
 
-        // 2. Logic gắn cờ dựa trên AI Content Moderation (Gemini)
-        if (!string.IsNullOrEmpty(request.Comment))
-        {
-            var (isFlagged, reason) = await _moderationService.ModerateContentAsync(request.Comment, cancellationToken);
-            
-            if (isFlagged)
-            {
-                review.FlaggedBySystem = true;
-                review.FlagReason = review.FlagReason == null ? reason : review.FlagReason + ", " + reason;
-                review.Status = "PendingReview";
-            }
-        }
-
         _context.Reviews.Add(review);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // 2. Logic gắn cờ dựa trên AI Content Moderation chạy ngầm (Background)
+        if (!string.IsNullOrEmpty(request.Comment))
+        {
+            var reviewId = review.Id;
+            var comment = request.Comment;
+
+            _ = Task.Run(async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var moderationService = scope.ServiceProvider.GetRequiredService<IContentModerationService>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+
+                try
+                {
+                    var (isFlagged, reason) = await moderationService.ModerateContentAsync(comment, default);
+                    
+                    if (isFlagged)
+                    {
+                        var r = await dbContext.Reviews.FindAsync(new object[] { reviewId });
+                        if (r != null)
+                        {
+                            r.FlaggedBySystem = true;
+                            r.FlagReason = string.IsNullOrEmpty(r.FlagReason) ? reason : r.FlagReason + ", " + reason;
+                            r.Status = "PendingReview";
+                            await dbContext.SaveChangesAsync(default);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Fail silently in background
+                }
+            });
+        }
 
         return review.Id;
     }

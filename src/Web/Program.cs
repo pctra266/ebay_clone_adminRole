@@ -42,20 +42,8 @@ app.UseSwaggerUi(settings =>
     settings.Path = "/api";
 });
 
-app.MapRazorPages();
-
 app.MapFallbackToFile("index.html");
-
-app.UseExceptionHandler(options => { });
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 
 app.MapEndpoints();
 
-// NSwag OpenAPI and Swagger UI
-app.UseOpenApi();
-
 app.Run();
-public partial class Program { }

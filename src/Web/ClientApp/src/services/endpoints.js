@@ -20,6 +20,9 @@ export const ENDPOINTS = {
         // GET danh sách quản lý (Màn hình 5)
         MANAGED: '/api/products/managed',
         
+        // GET danh sách sản phẩm theo seller
+        SELLER: (id) => `/api/products/seller/${id}`,
+        
         // Cần truyền ID (PUT, DELETE, GET by ID) -> Dùng arrow function
         DETAIL: (id) => `/api/products/${id}`, 
         

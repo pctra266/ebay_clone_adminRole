@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
@@ -45,8 +45,14 @@ public partial class User
     public DateTime? LastLoginAt { get; set; }
     
     // Verification fields
-    public int ViolationCount { get; set; } = 0;
+    public int ViolationCount { get; set; } = 0; // Tích lũy vi phạm liên quan đến đăng bán sản phẩm
+    public DateTime? ProductBanUntil { get; set; } // Khóa quyền đăng sản phẩm đến ngày nào đó
     
+    // Review Penalty fields
+    public int ReviewViolationCount { get; set; } = 0; // Tích lũy vi phạm đánh giá
+    public DateTime? ReviewBanUntil { get; set; } // Khóa quyền review đến ngày nào đó
+    public bool IsReviewRestricted { get; set; } = false; // Bị hạn chế chức năng review vĩnh viễn (hoặc tài khoản)
+
     public bool IsVerified { get; set; } = false; // KYC verification
     
     public string? VerificationDocuments { get; set; } // JSON: CCCD, Business License
