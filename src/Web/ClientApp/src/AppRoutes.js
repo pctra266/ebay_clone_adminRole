@@ -13,6 +13,8 @@ import LoginPage          from "./pages/LoginPage";
 import Enable2FAPage      from "./pages/Enable2fapage";
 import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
+import ReturnRequestsPage from './pages/ReturnRequestsPage';
+import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -75,6 +77,14 @@ const AppRoutes = [
   {
     path: "/products",
     element: protect(<ProductList />)
+  },
+  {
+    path: '/return-requests',
+    element: <ReturnRequestsPage />
+  },
+  {
+    path: '/return-requests/:id',
+    element: <ReturnRequestDetailPage/>
   },
   {
     path: "/disputes",

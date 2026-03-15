@@ -4,6 +4,7 @@ using EbayClone.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EbayClone.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315070157_AddPerformanceScore")]
+    partial class AddPerformanceScore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -547,9 +550,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("WithdrawalId")
                         .HasColumnType("int");
 
@@ -558,8 +558,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("SellerId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("WithdrawalId");
 
@@ -1054,8 +1052,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("status");
 
                     b.Property<int?>("UserId")
@@ -1723,12 +1721,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EbayClone.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("EbayClone.Domain.Entities.WithdrawalRequest", "Withdrawal")
                         .WithMany()
                         .HasForeignKey("WithdrawalId")
@@ -1737,8 +1729,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Seller");
-
-                    b.Navigation("User");
 
                     b.Navigation("Withdrawal");
                 });
