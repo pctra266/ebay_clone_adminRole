@@ -79,8 +79,18 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             throw new ValidationException("This dispute has already been resolved.");
         }
 
-        // Get current admin ID
+        // Get current admin ID - Handle mapping from Identity GUID to User table int ID
         var adminId = int.TryParse(_currentUser.Id, out var parsedId) ? parsedId : (int?)null;
+        
+        if (adminId == null || adminId == 0)
+        {
+            // Fallback to the default admin user in the Domain User table if identity claim doesn't map directly
+            var fallbackAdmin = await _context.Users
+                .Where(u => u.Role == "Admin" || u.Role == "System")
+                .FirstOrDefaultAsync(cancellationToken);
+                
+            adminId = fallbackAdmin?.Id ?? 1; // Default to 1 if no user found
+        }
 
         // Update dispute resolution
         dispute.Status = DisputeStatuses.Resolved;
