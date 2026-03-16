@@ -138,7 +138,8 @@ public class ApplicationDbContextInitialiser
             typeof(StoresSeeder),
             typeof(AddressesSeeder),
             typeof(DisputesSeeder),
-            typeof(ReturnRequestsSeeder)
+            typeof(ReturnRequestsSeeder),
+            typeof(FinanceDemoSeeder)
         };
 
         // Create seeder instances and sort by Order property

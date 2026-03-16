@@ -62,15 +62,15 @@ public class Financials : EndpointGroupBase
         return await sender.Send(command);
     }
 
-    public async Task<IResult> ApproveWithdrawal(ISender sender, int id, [FromBody] string transactionId)
+    public async Task<IResult> ApproveWithdrawal(ISender sender, int id, ApproveWithdrawalRequest request)
     {
-        await sender.Send(new ApproveWithdrawalCommand(id, transactionId));
+        await sender.Send(new ApproveWithdrawalCommand(id, request.TransactionId));
         return Results.NoContent();
     }
 
-    public async Task<IResult> RejectWithdrawal(ISender sender, int id, [FromBody] string reason)
+    public async Task<IResult> RejectWithdrawal(ISender sender, int id, RejectWithdrawalRequest request)
     {
-        await sender.Send(new RejectWithdrawalCommand(id, reason));
+        await sender.Send(new RejectWithdrawalCommand(id, request.Reason));
         return Results.NoContent();
     }
 
@@ -89,3 +89,6 @@ public class Financials : EndpointGroupBase
         return await sender.Send(new GetRevenueReportQuery());
     }
 }
+
+public record ApproveWithdrawalRequest(string TransactionId);
+public record RejectWithdrawalRequest(string Reason);

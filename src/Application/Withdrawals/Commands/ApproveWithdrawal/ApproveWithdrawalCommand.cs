@@ -19,42 +19,53 @@ public class ApproveWithdrawalCommandHandler : IRequestHandler<ApproveWithdrawal
 
     public async Task Handle(ApproveWithdrawalCommand request, CancellationToken cancellationToken)
     {
-        var withdrawal = await _context.WithdrawalRequests
-            .Include(w => w.Seller)
-            .FirstOrDefaultAsync(w => w.Id == request.WithdrawalId, cancellationToken);
-
-        if (withdrawal == null) throw new KeyNotFoundException($"Withdrawal request {request.WithdrawalId} not found.");
-
-        if (withdrawal.Status != WithdrawalRequest.StatusPending)
+        try
         {
-            throw new InvalidOperationException("Only pending requests can be approved.");
+            var withdrawal = await _context.WithdrawalRequests
+                .FirstOrDefaultAsync(w => w.Id == request.WithdrawalId, cancellationToken);
+
+            if (withdrawal == null) throw new KeyNotFoundException($"Withdrawal request {request.WithdrawalId} not found.");
+
+            if (withdrawal.Status != WithdrawalRequest.StatusPending)
+            {
+                throw new InvalidOperationException("Only pending requests can be approved.");
+            }
+
+            var wallet = await _context.SellerWallets
+                .FirstOrDefaultAsync(w => w.SellerId == withdrawal.SellerId, cancellationToken);
+            
+            if (wallet == null) throw new InvalidOperationException("Seller wallet not found.");
+            
+            wallet.ConfirmWithdrawal(withdrawal.Amount);
+
+            withdrawal.Status = WithdrawalRequest.StatusApproved;
+            withdrawal.ProcessedBy = int.Parse(_user.Id ?? "0");
+            withdrawal.ProcessedAt = DateTime.UtcNow;
+            withdrawal.TransactionId = request.TransactionId;
+
+            var transaction = new FinancialTransaction
+            {
+                SellerId = withdrawal.SellerId,
+                UserId = withdrawal.SellerId, 
+                Type = "Withdrawal",
+                Amount = -withdrawal.Amount,
+                BalanceAfter = wallet.AvailableBalance,
+                WithdrawalId = withdrawal.Id,
+                Description = string.IsNullOrEmpty(request.TransactionId) 
+                    ? "Withdrawal Approved" 
+                    : $"Withdrawal Approved: {request.TransactionId}",
+                Date = DateTime.UtcNow
+            };
+            _context.FinancialTransactions.Add(transaction);
+
+            await _context.SaveChangesAsync(cancellationToken);
         }
-
-        // Update status
-        withdrawal.Status = WithdrawalRequest.StatusApproved;
-        withdrawal.ProcessedBy = int.Parse(_user.Id ?? "0"); // Admin ID
-        withdrawal.ProcessedAt = DateTime.UtcNow;
-        withdrawal.TransactionId = request.TransactionId;
-
-        // Update Wallet: Confirm from locked to withdrawn
-        var wallet = await _context.SellerWallets
-            .FirstOrDefaultAsync(w => w.SellerId == withdrawal.SellerId, cancellationToken);
-        
-        if (wallet == null) throw new InvalidOperationException("Seller wallet not found.");
-        
-        wallet.ConfirmWithdrawal(withdrawal.Amount);
-
-        // Record Financial Transaction (Audit log)
-        var transaction = new FinancialTransaction
+        catch (Exception ex)
         {
-            SellerId = withdrawal.SellerId,
-            Type = "Withdrawal",
-            Amount = -withdrawal.Amount, // Negative since money left system
-            Description = $"Withdrawal Approved: {request.TransactionId}",
-            Date = DateTime.UtcNow
-        };
-        _context.FinancialTransactions.Add(transaction);
-
-        await _context.SaveChangesAsync(cancellationToken);
+            // Emergency debug logging - Try multiple paths to be sure
+            try { await System.IO.File.WriteAllTextAsync("approve_error.txt", ex.ToString()); } catch {}
+            try { await System.IO.File.WriteAllTextAsync("C:\\temp\\approve_error.txt", ex.ToString()); } catch {}
+            throw;
+        }
     }
 }
