@@ -1,5 +1,6 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
+using EbayClone.Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -47,7 +48,7 @@ public class CreateAdminUserCommandHandler : IRequestHandler<CreateAdminUserComm
             Username = request.Username,
             Email = request.Email,
             Password = request.Password,
-            Role = "Admin",
+            Role = Roles.Administrator,
             Status = "Active",
             ApprovalStatus = "Approved",
             IsVerified = true

@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using EbayClone.Domain.Entities;
+using EbayClone.Domain.Constants;
+using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Infrastructure.Data.Seeders;
 
@@ -18,13 +20,7 @@ public class UsersSeeder : ISeeder
 
     public async Task SeedAsync()
     {
-        if (_context.Users.Any())
-        {
-            _logger.LogInformation("Users already seeded, skipping...");
-            return;
-        }
-
-        var users = new List<User>
+        var usersToSeed = new List<User>
         {
             new User
             {
@@ -92,18 +88,18 @@ public class UsersSeeder : ISeeder
                 AvatarUrl = null
             },
             new User
-    {
-        Username = "admin",
-        Email = "admin@ebay.local",
-        Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
-        Role = "Admin",
-        Status = "Active",
-        ApprovalStatus = "Approved",
-        IsVerified = true,
-        ViolationCount = 0,
-        TwoFactorEnabled = false,
-        AvatarUrl = null
-    },
+            {
+                Username = "admin",
+                Email = "admin@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                Role = Roles.Administrator,
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
+            },
             new User
             {
                 Username = "collectibles_expert",
@@ -119,9 +115,24 @@ public class UsersSeeder : ISeeder
             }
         };
 
-        _context.Users.AddRange(users);
-        await _context.SaveChangesAsync();
+        var addedCount = 0;
+        foreach (var user in usersToSeed)
+        {
+            if (!await _context.Users.AnyAsync(u => u.Email == user.Email))
+            {
+                _context.Users.Add(user);
+                addedCount++;
+            }
+        }
 
-        _logger.LogInformation("Seeded {Count} Sample Users", users.Count);
+        if (addedCount > 0)
+        {
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Seeded {Count} additional users", addedCount);
+        }
+        else
+        {
+            _logger.LogInformation("All seed users already exist, skipping...");
+        }
     }
 }

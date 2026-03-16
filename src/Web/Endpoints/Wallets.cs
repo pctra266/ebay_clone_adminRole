@@ -8,7 +8,7 @@ public class Wallets : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder group)
     {
-        group.RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+        group.RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         group.MapGet("/", GetWallets);
     }

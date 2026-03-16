@@ -21,26 +21,26 @@ public class Financials : EndpointGroupBase
 
         // Fees
         group.MapGet("fees", GetFees)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
              
         group.MapPut("fees", UpdateFees)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         // Withdrawals
         group.MapGet("withdrawals", GetRequests)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
              
         group.MapPost("withdrawals/request", RequestWithdrawal);
         
         group.MapPost("withdrawals/{id}/approve", ApproveWithdrawal)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
              
         group.MapPost("withdrawals/{id}/reject", RejectWithdrawal)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         // Maintenance/Settlement
         group.MapPost("settle", SettleFunds)
-             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         // Reports
         group.MapGet("reports/revenue", GetRevenueReport)
