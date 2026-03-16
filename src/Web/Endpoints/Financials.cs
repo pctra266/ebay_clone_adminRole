@@ -2,6 +2,8 @@ using EbayClone.Application.PlatformFees.Commands.UpdatePlatformFees;
 using EbayClone.Application.PlatformFees.Queries.GetPlatformFees;
 using EbayClone.Application.Reports.Queries.GetRevenueReport;
 using EbayClone.Application.Withdrawals.Commands.ApproveWithdrawal;
+using EbayClone.Application.Financials.Commands.SettlePendingFunds;
+using EbayClone.Application.Withdrawals.Queries.GetWithdrawalRequests;
 using EbayClone.Application.Withdrawals.Commands.RejectWithdrawal;
 using EbayClone.Application.Withdrawals.Commands.RequestWithdrawal;
 using EbayClone.Domain.Constants;
@@ -25,12 +27,19 @@ public class Financials : EndpointGroupBase
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
 
         // Withdrawals
+        group.MapGet("withdrawals", GetRequests)
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+             
         group.MapPost("withdrawals/request", RequestWithdrawal);
         
         group.MapPost("withdrawals/{id}/approve", ApproveWithdrawal)
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
              
         group.MapPost("withdrawals/{id}/reject", RejectWithdrawal)
+             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+
+        // Maintenance/Settlement
+        group.MapPost("settle", SettleFunds)
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
 
         // Reports
@@ -63,6 +72,16 @@ public class Financials : EndpointGroupBase
     {
         await sender.Send(new RejectWithdrawalCommand(id, reason));
         return Results.NoContent();
+    }
+
+    public async Task<List<WithdrawalRequestDto>> GetRequests(ISender sender, [FromQuery] string? status)
+    {
+        return await sender.Send(new GetWithdrawalRequestsQuery(status));
+    }
+
+    public async Task<int> SettleFunds(ISender sender)
+    {
+        return await sender.Send(new SettlePendingFundsCommand());
     }
 
     public async Task<RevenueReportDto> GetRevenueReport(ISender sender)

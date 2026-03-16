@@ -36,6 +36,14 @@ public class ApproveWithdrawalCommandHandler : IRequestHandler<ApproveWithdrawal
         withdrawal.ProcessedAt = DateTime.UtcNow;
         withdrawal.TransactionId = request.TransactionId;
 
+        // Update Wallet: Confirm from locked to withdrawn
+        var wallet = await _context.SellerWallets
+            .FirstOrDefaultAsync(w => w.SellerId == withdrawal.SellerId, cancellationToken);
+        
+        if (wallet == null) throw new InvalidOperationException("Seller wallet not found.");
+        
+        wallet.ConfirmWithdrawal(withdrawal.Amount);
+
         // Record Financial Transaction (Audit log)
         var transaction = new FinancialTransaction
         {
