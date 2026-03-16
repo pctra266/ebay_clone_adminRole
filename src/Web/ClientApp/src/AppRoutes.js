@@ -17,6 +17,7 @@ import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
 import { WalletsPage } from "./pages/WalletsPage";
 import { WithdrawalsPage } from "./pages/WithdrawalsPage";
+import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -107,6 +108,10 @@ const AppRoutes = [
   {
     path: "/withdrawals",
     element: protect(<WithdrawalsPage />)
+  },
+  {
+    path: "/settlements",
+    element: protect(<PendingSettlementsPage />)
   },
 ];
 

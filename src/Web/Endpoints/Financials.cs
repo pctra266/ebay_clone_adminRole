@@ -6,6 +6,8 @@ using EbayClone.Application.Financials.Commands.SettlePendingFunds;
 using EbayClone.Application.Withdrawals.Queries.GetWithdrawalRequests;
 using EbayClone.Application.Withdrawals.Commands.RejectWithdrawal;
 using EbayClone.Application.Withdrawals.Commands.RequestWithdrawal;
+using EbayClone.Application.Financials.Queries.GetPendingSettlementOrders;
+using EbayClone.Application.Financials.Commands.SettleOrder;
 using EbayClone.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +41,9 @@ public class Financials : EndpointGroupBase
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         // Maintenance/Settlement
-        group.MapPost("settle", SettleFunds)
+        group.MapPost("trigger-settlement", TriggerSettlement);
+        group.MapGet("settlement-orders", GetPendingSettlementOrders);
+        group.MapPost("settle-order/{id}", SettleOrder)
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
 
         // Reports
@@ -79,9 +83,20 @@ public class Financials : EndpointGroupBase
         return await sender.Send(new GetWithdrawalRequestsQuery(status));
     }
 
-    public async Task<int> SettleFunds(ISender sender)
+    public async Task<int> TriggerSettlement(ISender sender)
     {
         return await sender.Send(new SettlePendingFundsCommand());
+    }
+
+    public async Task<List<PendingSettlementOrderDto>> GetPendingSettlementOrders(ISender sender)
+    {
+        return await sender.Send(new GetPendingSettlementOrdersQuery());
+    }
+
+    public async Task<IResult> SettleOrder(ISender sender, int id)
+    {
+        var result = await sender.Send(new SettleOrderCommand(id));
+        return result ? Results.Ok() : Results.BadRequest("Failed to settle order. Ensure it's delivered and past dispute window.");
     }
 
     public async Task<RevenueReportDto> GetRevenueReport(ISender sender)

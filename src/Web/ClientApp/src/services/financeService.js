@@ -26,7 +26,17 @@ const financeService = {
     },
 
     settleFunds: async () => {
-        return await apiRequest(`${endpoints.financials}/settle`, {
+        return await apiRequest(`${endpoints.financials}/trigger-settlement`, {
+            method: 'POST'
+        });
+    },
+
+    getPendingSettlementOrders: async () => {
+        return await apiRequest(`${endpoints.financials}/settlement-orders`);
+    },
+
+    settleOrder: async (id) => {
+        return await apiRequest(`${endpoints.financials}/settle-order/${id}`, {
             method: 'POST'
         });
     }
