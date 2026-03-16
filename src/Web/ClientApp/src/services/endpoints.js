@@ -5,11 +5,7 @@ const endpoints = {
     broadcasts: `${API_BASE}/Broadcasts`,
     adminRoles: `${API_BASE}/AdminRoles`,
     auditLogs: `${API_BASE}/AuditLogs`,
-  users: `${API_BASE}/Users`,
-  broadcasts: `${API_BASE}/Broadcasts`,
-  adminRoles: `${API_BASE}/AdminRoles`,
-  auditLogs: `${API_BASE}/AuditLogs`,
-  categories: `${API_BASE}/Categories`,
+    categories: `${API_BASE}/Categories`,
 };
 
 export default endpoints;
