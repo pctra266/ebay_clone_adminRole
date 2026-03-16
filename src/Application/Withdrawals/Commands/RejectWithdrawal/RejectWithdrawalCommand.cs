@@ -35,8 +35,8 @@ public class RejectWithdrawalCommandHandler : IRequestHandler<RejectWithdrawalCo
 
         if (wallet == null) throw new InvalidOperationException("Seller wallet not found.");
 
-        // 2. Refund to Available Balance
-        wallet.CreditAvailable(withdrawal.Amount);
+        // 2. Refund to Available Balance (from LockedBalance)
+        wallet.UnlockFunds(withdrawal.Amount);
 
         // 3. Update Status
         withdrawal.Status = WithdrawalRequest.StatusRejected;

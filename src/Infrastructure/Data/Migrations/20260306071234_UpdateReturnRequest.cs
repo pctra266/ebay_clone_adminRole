@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,13 +11,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ReportReason",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ReportedBy",
-                table: "Product");
+            migrationBuilder.Sql("IF COL_LENGTH('Product', 'ReportReason') IS NOT NULL ALTER TABLE [Product] DROP COLUMN [ReportReason];");
+            migrationBuilder.Sql("IF COL_LENGTH('Product', 'ReportedBy') IS NOT NULL ALTER TABLE [Product] DROP COLUMN [ReportedBy];");
 
             migrationBuilder.AddColumn<string>(
                 name: "AdminNote",

@@ -37,6 +37,10 @@ public class SellerWalletConfiguration : IEntityTypeConfiguration<SellerWallet>
             .HasColumnType("decimal(18,2)")
             .IsRequired();
 
+        builder.Property(x => x.LockedBalance)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
         builder.Property(x => x.UpdatedAt)
             .IsRequired();
 

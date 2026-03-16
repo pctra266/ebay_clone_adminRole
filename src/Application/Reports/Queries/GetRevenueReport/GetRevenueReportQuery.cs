@@ -32,19 +32,18 @@ public class GetRevenueReportQueryHandler : IRequestHandler<GetRevenueReportQuer
         // For now, I'll filter by 'FeeDeduction' type to show intent, even if empty.
         
         var query = _context.FinancialTransactions
-            .AsNoTracking();
+            .AsNoTracking()
+            .Where(t => t.Type == "FeeDeduction");
 
         var totalRevenue = await query
-            .Where(t => t.Type == "FeeDeduction") 
             .SumAsync(t => t.Amount, cancellationToken);
 
         var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
         var revenueThisMonth = await query
-            .Where(t => t.Type == "FeeDeduction" && t.Date >= startOfMonth)
+            .Where(t => t.Date >= startOfMonth)
             .SumAsync(t => t.Amount, cancellationToken);
             
         var totalTransactions = await query
-            .Where(t => t.Type == "FeeDeduction")
             .CountAsync(cancellationToken);
 
         // Group by day for the last 30 days

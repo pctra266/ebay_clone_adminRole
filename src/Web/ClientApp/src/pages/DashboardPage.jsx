@@ -91,6 +91,24 @@ export function DashboardPage() {
             <p className="text-muted mb-0">View statistics, performance metrics, and resolution insights.</p>
           </Link>
         </div>
+        <div className="col-md-6 col-lg-4">
+          <Link className="card card-body text-decoration-none h-100" to="/wallets">
+            <h3 className="h6 mb-1">
+              <i className="fas fa-wallet me-2 text-success"></i>
+              Seller Wallets
+            </h3>
+            <p className="text-muted mb-0">Monitor balances and manually trigger fund settlement.</p>
+          </Link>
+        </div>
+        <div className="col-md-6 col-lg-4">
+          <Link className="card card-body text-decoration-none h-100" to="/withdrawals">
+            <h3 className="h6 mb-1">
+              <i className="fas fa-hand-holding-usd me-2 text-primary"></i>
+              Withdrawal Requests
+            </h3>
+            <p className="text-muted mb-0">Review pending withdrawals, approve payouts or reject requests.</p>
+          </Link>
+        </div>
       </div>
     </section>
   );
