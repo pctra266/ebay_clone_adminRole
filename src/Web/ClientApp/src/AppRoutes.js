@@ -15,6 +15,8 @@ import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
+import { WalletsPage } from "./pages/WalletsPage";
+import { WithdrawalsPage } from "./pages/WithdrawalsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -97,6 +99,14 @@ const AppRoutes = [
   {
     path: "/disputes/:id",
     element: protect(<DisputeDetailPage />)
+  },
+  {
+    path: "/wallets",
+    element: protect(<WalletsPage />)
+  },
+  {
+    path: "/withdrawals",
+    element: protect(<WithdrawalsPage />)
   },
 ];
 
