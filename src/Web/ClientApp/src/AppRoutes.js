@@ -12,6 +12,11 @@ import LoginPage          from "./pages/LoginPage";
 import Enable2FAPage      from "./pages/Enable2fapage";
 import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
+import ReturnRequestsPage from './pages/ReturnRequestsPage';
+import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
+import { WalletsPage } from "./pages/WalletsPage";
+import { WithdrawalsPage } from "./pages/WithdrawalsPage";
+import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
@@ -87,6 +92,18 @@ const AppRoutes = [
   {
     path: "/disputes/:id",
     element: protect(<DisputeDetailPage />)
+  },
+  {
+    path: "/wallets",
+    element: protect(<WalletsPage />)
+  },
+  {
+    path: "/withdrawals",
+    element: protect(<WithdrawalsPage />)
+  },
+  {
+    path: "/settlements",
+    element: protect(<PendingSettlementsPage />)
   },
   {
     path: '/products',

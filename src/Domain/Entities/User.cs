@@ -52,7 +52,10 @@ public partial class User
     public int ReviewViolationCount { get; set; } = 0; // Tích lũy vi phạm đánh giá
     public DateTime? ReviewBanUntil { get; set; } // Khóa quyền review đến ngày nào đó
     public bool IsReviewRestricted { get; set; } = false; // Bị hạn chế chức năng review vĩnh viễn (hoặc tài khoản)
-
+    
+    // Seller Performance Management
+    public int PerformanceScore { get; set; } = 100; // Điểm uy tín
+    
     public bool IsVerified { get; set; } = false; // KYC verification
     
     public string? VerificationDocuments { get; set; } // JSON: CCCD, Business License
