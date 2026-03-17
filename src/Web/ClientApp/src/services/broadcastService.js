@@ -5,6 +5,10 @@ export function getBroadcasts(query) {
   return apiRequest(endpoints.broadcasts, { query });
 }
 
+export function getActiveBroadcasts() {
+  return apiRequest(`${endpoints.broadcasts}/active`);
+}
+
 export function sendBroadcast(payload) {
   return apiRequest(endpoints.broadcasts, {
     method: "POST",
