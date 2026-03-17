@@ -112,6 +112,45 @@ public class UsersSeeder : ISeeder
                 ViolationCount = 0,
                 TwoFactorEnabled = false,
                 AvatarUrl = null
+            },
+            new User
+            {
+                Username = "superadmin",
+                Email = "superadmin@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                Role = Roles.SuperAdmin,
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
+            },
+            new User
+            {
+                Username = "support",
+                Email = "support@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                Role = Roles.Support,
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
+            },
+            new User
+            {
+                Username = "monitor",
+                Email = "monitor@ebay.local",
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                Role = Roles.Monitor,
+                Status = "Active",
+                ApprovalStatus = "Approved",
+                IsVerified = true,
+                ViolationCount = 0,
+                TwoFactorEnabled = false,
+                AvatarUrl = null
             }
         };
 
