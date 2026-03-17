@@ -45,7 +45,8 @@ export class NavMenu extends Component {
             <SidebarLink to="/wallets" icon="bi bi-wallet2">Ví tiền</SidebarLink>
             <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Rút tiền</SidebarLink>
             <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Tranh chấp</SidebarLink>
-            <SidebarLink to="/audit-logs" icon="bi bi-graph-up-arrow">Báo cáo</SidebarLink>
+            <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Báo cáo</SidebarLink>
+            <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Thống kê</SidebarLink>
             <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Thông báo</SidebarLink>
             <SidebarLink to="/admin-roles" icon="bi bi-gear">Cài đặt</SidebarLink>
           </ul>

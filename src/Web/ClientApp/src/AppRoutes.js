@@ -22,6 +22,7 @@ import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
+import StatisticsPage from "./pages/StatisticsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -120,6 +121,10 @@ const AppRoutes = [
   {
     path: "/seller-products",
     element: protect(<SellerProductManagementPage />)
+  },
+  {
+    path: "/statistics",
+    element: protect(<StatisticsPage />)
   }
 ];
 
