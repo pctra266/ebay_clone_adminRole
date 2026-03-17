@@ -4,6 +4,7 @@ using EbayClone.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EbayClone.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260316182347_AddSellerReviewFeatures")]
+    partial class AddSellerReviewFeatures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1142,43 +1145,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.ToTable("Review", (string)null);
                 });
 
-            modelBuilder.Entity("EbayClone.Domain.Entities.ReviewReport", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ReporterUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReporterUserId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("ReviewReports");
-                });
-
             modelBuilder.Entity("EbayClone.Domain.Entities.SellerWallet", b =>
                 {
                     b.Property<int>("Id")
@@ -1982,23 +1948,6 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Reviewer");
-                });
-
-            modelBuilder.Entity("EbayClone.Domain.Entities.ReviewReport", b =>
-                {
-                    b.HasOne("EbayClone.Domain.Entities.User", "Reporter")
-                        .WithMany()
-                        .HasForeignKey("ReporterUserId");
-
-                    b.HasOne("EbayClone.Domain.Entities.Review", "Review")
-                        .WithMany()
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reporter");
-
-                    b.Navigation("Review");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.SellerWallet", b =>

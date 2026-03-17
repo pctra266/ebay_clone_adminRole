@@ -53,5 +53,7 @@ export const ENDPOINTS = {
         BASE: '/api/reviews',
         FLAGGED: '/api/reviews/flagged',
         STATUS: (id) => `/api/reviews/${id}/status`,
+        REPLY: (id) => `/api/reviews/${id}/reply`,
+        REPORT: (id) => `/api/reviews/${id}/report`,
     }
 };

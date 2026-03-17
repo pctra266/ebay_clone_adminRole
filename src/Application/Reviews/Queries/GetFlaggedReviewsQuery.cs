@@ -1,12 +1,19 @@
 using EbayClone.Application.Common.Interfaces;
+using EbayClone.Application.Common.Models;
+using EbayClone.Application.Reviews;
+using EbayClone.Application.Reviews.Queries;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Reviews.Queries;
 
-public record GetFlaggedReviewsQuery : IRequest<List<ReviewModerationDto>>;
+public record GetFlaggedReviewsQuery : IRequest<PaginatedList<ReviewModerationDto>>
+{
+    public int PageNumber { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+}
 
-public class GetFlaggedReviewsQueryHandler : IRequestHandler<GetFlaggedReviewsQuery, List<ReviewModerationDto>>
+public class GetFlaggedReviewsQueryHandler : IRequestHandler<GetFlaggedReviewsQuery, PaginatedList<ReviewModerationDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -15,9 +22,9 @@ public class GetFlaggedReviewsQueryHandler : IRequestHandler<GetFlaggedReviewsQu
         _context = context;
     }
 
-    public async Task<List<ReviewModerationDto>> Handle(GetFlaggedReviewsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<ReviewModerationDto>> Handle(GetFlaggedReviewsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Reviews
+        var query = _context.Reviews
             .AsNoTracking()
             .Where(r => r.FlaggedBySystem || r.Status == "PendingReview" || r.Status == "Hidden")
             .OrderByDescending(r => r.CreatedAt)
@@ -33,8 +40,25 @@ public class GetFlaggedReviewsQueryHandler : IRequestHandler<GetFlaggedReviewsQu
                 CreatedAt = r.CreatedAt,
                 Status = r.Status,
                 FlaggedBySystem = r.FlaggedBySystem,
-                FlagReason = r.FlagReason
-            })
-            .ToListAsync(cancellationToken);
+                FlagReason = r.FlagReason,
+                ReportedBySeller = r.ReportedBySeller,
+                SellerReportReason = r.SellerReportReason,
+                Reports = r.Product != null ? _context.ReviewReports
+                    .Where(rep => rep.ReviewId == r.Id)
+                    .Select(rep => new ReviewReportDto
+                    {
+                        Id = rep.Id,
+                        ReporterName = rep.Reporter != null ? rep.Reporter.Username : "Anonymous",
+                        Reason = rep.Reason,
+                        Description = rep.Description,
+                        CreatedAt = rep.CreatedAt
+                    }).ToList() : new List<ReviewReportDto>()
+            });
+
+        return await PaginatedList<ReviewModerationDto>.CreateAsync(
+            query, 
+            request.PageNumber, 
+            request.PageSize, 
+            cancellationToken);
     }
 }

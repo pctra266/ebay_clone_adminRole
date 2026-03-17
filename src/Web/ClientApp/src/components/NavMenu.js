@@ -147,9 +147,13 @@ export function NavMenu() {
           )}
           {["SuperAdmin", "Support"].includes(role) && (
             <SidebarLink to="/products" icon="bi bi-box-seam">Sản phẩm</SidebarLink>
+
           )}
           {["SuperAdmin", "Support"].includes(role) && (
-            <SidebarLink to="/settlements" icon="bi bi-cart-check">Đơn hàng</SidebarLink>
+            <>
+              <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Đánh giá</SidebarLink>
+              <SidebarLink to="/settlements" icon="bi bi-cart-check">Đơn hàng</SidebarLink>
+            </>
           )}
           {["SuperAdmin", "Administrator"].includes(role) && (
             <>

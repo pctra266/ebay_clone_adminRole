@@ -1,3 +1,4 @@
+using EbayClone.Application.Common.Models;
 using EbayClone.Application.Reviews;
 using EbayClone.Application.Reviews.Commands;
 using EbayClone.Application.Reviews.Queries;
@@ -16,6 +17,8 @@ public class Reviews : EndpointGroupBase
         groupBuilder.MapGet(GetFlaggedReviews, "flagged");
         groupBuilder.MapPut(UpdateReviewStatus, "{id:int}/status");
         groupBuilder.MapPost(CreateReview);
+        groupBuilder.MapPost(ReplyToReview, "{id:int}/reply");
+        groupBuilder.MapPost(ReportReview, "{id:int}/report");
     }
 
     public async Task<Ok<int>> CreateReview(ISender sender, [FromBody] CreateReviewCommand command)
@@ -24,9 +27,16 @@ public class Reviews : EndpointGroupBase
         return TypedResults.Ok(result);
     }
 
-    public async Task<Ok<List<ReviewModerationDto>>> GetFlaggedReviews(ISender sender)
+    public async Task<Ok<PaginatedList<ReviewModerationDto>>> GetFlaggedReviews(
+        ISender sender,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var result = await sender.Send(new GetFlaggedReviewsQuery());
+        var result = await sender.Send(new GetFlaggedReviewsQuery 
+        { 
+            PageNumber = pageNumber, 
+            PageSize = pageSize 
+        });
         return TypedResults.Ok(result);
     }
 
@@ -47,6 +57,45 @@ public class Reviews : EndpointGroupBase
 
         return TypedResults.Ok();
     }
+
+    public async Task<Results<Ok, NotFound>> ReplyToReview(
+        ISender sender,
+        int id,
+        [FromBody] ReplyToReviewRequest request)
+    {
+        var result = await sender.Send(new ReplyToReviewCommand
+        {
+            ReviewId = id,
+            SellerId = request.SellerId,
+            Reply = request.Reply
+        });
+
+        if (!result) return TypedResults.NotFound();
+
+        return TypedResults.Ok();
+    }
+
+    public async Task<Results<Ok, NotFound>> ReportReview(
+        ISender sender,
+        int id,
+        [FromBody] ReportReviewRequest request)
+    {
+        var result = await sender.Send(new ReportReviewCommand
+        {
+            ReviewId = id,
+            ReporterUserId = request.ReporterId,
+            Reason = request.Reason,
+            Description = request.Description
+        });
+
+        if (!result) return TypedResults.NotFound();
+
+        return TypedResults.Ok();
+    }
 }
 
 public record UpdateReviewStatusRequest(string Status, string Action, int AdminId);
+
+public record ReplyToReviewRequest(int SellerId, string Reply);
+
+public record ReportReviewRequest(int? ReporterId, string Reason, string? Description);

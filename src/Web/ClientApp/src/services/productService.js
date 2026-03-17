@@ -18,6 +18,17 @@ export const productService = {
         }
     },
 
+    // GET /api/products/{id}
+    getProductById: async (id) => {
+        try {
+            const response = await axios.get(ENDPOINTS.PRODUCTS.DETAIL(id));
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+            throw error;
+        }
+    },
+
     // POST /api/products
     createProduct: async (payload) => {
         try {

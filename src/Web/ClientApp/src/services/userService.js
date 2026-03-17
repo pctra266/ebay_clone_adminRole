@@ -1,10 +1,10 @@
 import axios from "axios";
-
-// Ensure cookies (auth_token) are sent with every axios request
-axios.defaults.withCredentials = true;
 import { ENDPOINTS } from "./endpoints";
 import endpoints from "./endpoints";
 import { apiRequest } from "./httpClient";
+
+// Ensure cookies (auth_token) are sent with every axios request
+axios.defaults.withCredentials = true;
 
 // axios-based service (used by HEAD branch pages)
 export const userService = {

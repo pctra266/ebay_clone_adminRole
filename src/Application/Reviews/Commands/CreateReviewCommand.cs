@@ -2,6 +2,7 @@ using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Reviews.Commands;
 
@@ -27,6 +28,9 @@ public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, i
     public async Task<int> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
     {
         var reviewer = await _context.Users.FindAsync(new object[] { request.ReviewerId }, cancellationToken);
+        if (reviewer == null)
+            throw new Exception("Không tìm thấy người dùng.");
+
         if (reviewer != null)
         {
             if (reviewer.Status == "Banned")
@@ -36,6 +40,19 @@ public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, i
             if (reviewer.ReviewBanUntil.HasValue && reviewer.ReviewBanUntil.Value > DateTime.UtcNow)
                 throw new Exception($"Chức năng đánh giá của bạn bị tạm khóa đến {reviewer.ReviewBanUntil.Value:dd/MM/yyyy HH:mm}.");
         }
+
+        // Verify the user actually purchased the product and order is completed
+        //var hasPurchased = await _context.OrderTables
+        //    .Include(o => o.OrderItems)
+        //    .AnyAsync(o => o.BuyerId == request.ReviewerId 
+        //                   && o.Status == "Completed" 
+        //                   && o.OrderItems.Any(i => i.ProductId == request.ProductId), 
+        //        cancellationToken);
+
+        //if (!hasPurchased)
+        //{
+        //    throw new Exception("Bạn chỉ có thể đánh giá những sản phẩm đã mua thành công.");
+        //}
 
         var review = new Review
         {

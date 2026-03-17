@@ -7,6 +7,7 @@ using EbayClone.Application.Products.Commands.ResolveProductViolation;
 using EbayClone.Application.Products.Commands.UpdateProduct;
 using EbayClone.Application.Products.Queries.DTOs;
 using EbayClone.Application.Products.Queries.GetProducts;
+using EbayClone.Application.Products.Queries.GetProductById;
 using EbayClone.Application.Products.Queries.GetSellerProducts;
 using EbayClone.Application.Products.Queries.GetViolationDetails;
 using Microsoft.AspNetCore.Builder;
@@ -22,6 +23,7 @@ public class Products : EndpointGroupBase
 
         // Chỉ cần khai báo các hành động cụ thể vào group này
         group.MapGet(GetProducts);              // Tự động thành: GET /api/products
+        group.MapGet("{id}", GetProductById);   // GET /api/products/{id}
         group.MapPost(CreateProduct);           // Tự động thành: POST /api/products
         group.MapPut("{id}", UpdateProduct);
         group.MapDelete("{id}", DeleteProduct);
@@ -39,6 +41,12 @@ public class Products : EndpointGroupBase
     public async Task<List<ProductDto>> GetProducts(ISender sender)
     {
         return await sender.Send(new GetProductsQuery());
+    }
+
+    public async Task<IResult> GetProductById(ISender sender, int id)
+    {
+        var product = await sender.Send(new GetProductByIdQuery(id));
+        return product != null ? Results.Ok(product) : Results.NotFound();
     }
 
     public async Task<int> CreateProduct(ISender sender, CreateProductCommand command)

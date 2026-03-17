@@ -20,6 +20,7 @@ import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
+import EbayProductDetail from "./pages/EbayProductDetail";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import StatisticsPage from "./pages/StatisticsPage";
@@ -123,9 +124,14 @@ const AppRoutes = [
     element: protect(<SellerProductManagementPage />)
   },
   {
+    path: "/product/:id",
+    element: <EbayProductDetail />,
+    noLayout: true
+  },
+  {
     path: "/statistics",
     element: protect(<StatisticsPage />)
   }
 ];
 
-export default AppRoutes;
+export default AppRoutes;
