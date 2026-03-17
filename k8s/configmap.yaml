@@ -1,0 +1,25 @@
+# ============================================================
+# ConfigMap — Config không nhạy cảm
+# Giá trị nhạy cảm (password, key) → dùng Secret thay thế
+# ============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ebay-config
+  namespace: ebay-clone
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+
+  # Connection string — password được inject từ Secret
+  # Tên host 'ebay-db' = tên Service của SQL Server bên dưới
+  ConnectionStrings__MyCnn: "Server=ebay-db,1433;Database=CloneEbayDB;User Id=sa;Password=$(SA_PASSWORD_ACTUAL);Encrypt=True;TrustServerCertificate=True;"
+
+  # Email (non-sensitive)
+  EmailSettings__SmtpServer: "smtp.gmail.com"
+  EmailSettings__Port: "587"
+  EmailSettings__SenderEmail: "your-email@gmail.com"
+
+  # JWT (non-sensitive meta)
+  Jwt__Issuer: "EbayClone"
+  Jwt__Audience: "EbayCloneUsers"

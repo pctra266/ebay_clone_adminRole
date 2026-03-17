@@ -37,10 +37,9 @@ public class RequestWithdrawalCommandHandler : IRequestHandler<RequestWithdrawal
         }
 
         // 1. Check logical balance (AvailableBalance >= Amount)
-        // Note: The wallet.DeductAvailable method checks this, but we are just requesting here.
-        // In this design, "Requesting" moves money to "Processing" state (deducts from Available).
+        // Note: The wallet.LockAvailableFunds method checks this and moves funds to LockedBalance.
         
-        wallet.DeductAvailable(request.Amount); // Throw exception if insufficient
+        wallet.LockAvailableFunds(request.Amount); // Throw exception if insufficient
 
         var withdrawal = new WithdrawalRequest
         {

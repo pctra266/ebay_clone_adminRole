@@ -5,7 +5,6 @@ import { BroadcastPage }  from "./pages/BroadcastPage";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AuditLogsPage }  from "./pages/AuditLogsPage";
 import { FetchData }      from "./components/FetchData";
-import { ProductList }    from "./pages/Products";
 import { DisputesPage }   from "./pages/DisputesPage";
 import { DisputeDashboard } from "./pages/DisputeDashboard";
 import { DisputeDetailPage } from "./pages/DisputeDetailPage";
@@ -13,6 +12,17 @@ import LoginPage          from "./pages/LoginPage";
 import Enable2FAPage      from "./pages/Enable2fapage";
 import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
+import ReturnRequestsPage from './pages/ReturnRequestsPage';
+import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
+import { WalletsPage } from "./pages/WalletsPage";
+import { WithdrawalsPage } from "./pages/WithdrawalsPage";
+import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
+import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
+import ProductModerationPage from "./pages/ProductModerationPage";
+import { ProductList } from "./pages/Public/Home";
+
+import SellerProductManagementPage from "./pages/SellerProductManagementPage";
+import StatisticsPage from "./pages/StatisticsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -73,10 +83,6 @@ const AppRoutes = [
     element: protect(<FetchData />)
   },
   {
-    path: "/products",
-    element: protect(<ProductList />)
-  },
-  {
     path: "/disputes",
     element: protect(<DisputesPage />)
   },
@@ -88,6 +94,38 @@ const AppRoutes = [
     path: "/disputes/:id",
     element: protect(<DisputeDetailPage />)
   },
+  {
+    path: "/wallets",
+    element: protect(<WalletsPage />)
+  },
+  {
+    path: "/withdrawals",
+    element: protect(<WithdrawalsPage />)
+  },
+  {
+    path: "/settlements",
+    element: protect(<PendingSettlementsPage />)
+  },
+  {
+    path: '/products',
+    element: protect(<ProductModerationPage/>)
+  },
+  {
+    path: '/review-monitoring',
+    element: protect(<ReviewMonitoringPage />)
+  },
+  {
+    path: "/public",
+    element: protect(<ProductList />)
+  },
+  {
+    path: "/seller-products",
+    element: protect(<SellerProductManagementPage />)
+  },
+  {
+    path: "/statistics",
+    element: protect(<StatisticsPage />)
+  }
 ];
 
-export default AppRoutes;
+export default AppRoutes;

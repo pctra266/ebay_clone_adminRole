@@ -106,7 +106,7 @@ public class Disputes : EndpointGroupBase
     public async Task<Results<Ok, BadRequest<string>, NotFound>> ResolveDispute(
         ISender sender,
         int id,
-        ResolveDisputeCommand command)
+        [Microsoft.AspNetCore.Mvc.FromBody] ResolveDisputeCommand command)
     {
         // Ensure the ID in the route matches the command
         if (command.DisputeId != id)

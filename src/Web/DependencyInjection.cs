@@ -28,6 +28,9 @@ public static class DependencyInjection
 
         builder.Services.AddRazorPages();
 
+        // Rate Limiting — 3 policies: strict / standard / authenticated
+        builder.Services.AddAppRateLimiting();
+
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
@@ -90,7 +93,15 @@ public static class DependencyInjection
         {
             options.AddPolicy("FrontendPolicy", policy =>
             {
-                policy.WithOrigins("http://localhost:5001") // URL React dev server của bạn
+                policy
+                      // Dev: React chạy riêng ở localhost
+                      .WithOrigins(
+                          "http://localhost:3000",
+                          "http://localhost:5000",
+                          "http://localhost:5001",
+                          "https://localhost:5001",
+                          "https://localhost:44447"
+                      )
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using EbayClone.Application.Common.Interfaces;
@@ -48,13 +48,36 @@ public class ResolveProductViolationCommandHandler : IRequestHandler<ResolveProd
             product.ViolationType = request.ViolationType ?? "Other"; // Gắn cờ vi phạm bản quyền
             MarkReportsAs(product.Reports, "Resolved");
 
-            // 2. Gửi Email tự động cho người bán
-            if (!string.IsNullOrEmpty(product.Seller?.Email))
+            var seller = product.Seller;
+            if (seller != null)
             {
-                await _emailService.SendEmailAsync(
-                    product.Seller.Email,
-                    "CẢNH BÁO VI PHẠM BẢN QUYỀN (VeRO)",
-                    $"Sản phẩm '{product.Title}' của bạn đã bị xóa do vi phạm sở hữu trí tuệ. Tái phạm sẽ khóa Shop.");
+                seller.ViolationCount += 1;
+
+                if (seller.ViolationCount >= 3)
+                {
+                    seller.Status = "Banned";
+                    seller.BannedReason = "Tài khoản bị khóa tự động do có quá nhiều vi phạm đăng bán sản phẩm theo quyết định của Admin.";
+                    seller.BannedAt = DateTime.UtcNow;
+
+                    if (!string.IsNullOrEmpty(seller.Email))
+                    {
+                        await _emailService.SendEmailAsync(
+                            seller.Email,
+                            "TÀI KHOẢN ĐÃ BỊ KHÓA VĨNH VIỄN",
+                            $"Tài khoản của bạn đã bị khóa do vi phạm bản quyền/hàng cấm nhiều lần. Sản phẩm '{product.Title}' là vi phạm thứ {seller.ViolationCount}. Vui lòng liên hệ Admin.");
+                    }
+                }
+                else
+                {
+                    // 2. Gửi Email tự động cho người bán
+                    if (!string.IsNullOrEmpty(seller.Email))
+                    {
+                        await _emailService.SendEmailAsync(
+                            seller.Email,
+                            "CẢNH BÁO VI PHẠM BẢN QUYỀN (VeRO)",
+                            $"Sản phẩm '{product.Title}' của bạn đã bị xóa do vi phạm sở hữu trí tuệ. Bạn đã vi phạm {seller.ViolationCount}/3 lần. Nếu chạm mốc 3 lần, tài khoản sẽ bị khóa.");
+                    }
+                }
             }
         }
         else if (request.Action == ViolationResolutionAction.Hide)
@@ -75,6 +98,7 @@ public class ResolveProductViolationCommandHandler : IRequestHandler<ResolveProd
         }
         else if (request.Action == ViolationResolutionAction.Reject)
         {
+            product.Status = "Active";
             product.ReportCount = 0;
             product.ViolationType = null; 
             MarkReportsAs(product.Reports, "Rejected");

@@ -78,5 +78,7 @@ public static class DependencyInjection
             options.AddPolicy(Policies.ViewAuditLogs, policy =>
                 policy.RequireRole(Roles.SuperAdmin));
         });
+
+        builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
     }
 }

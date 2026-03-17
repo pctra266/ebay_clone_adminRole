@@ -5,6 +5,9 @@ const endpoints = {
     broadcasts: `${API_BASE}/Broadcasts`,
     adminRoles: `${API_BASE}/AdminRoles`,
     auditLogs: `${API_BASE}/AuditLogs`,
+    wallets: `${API_BASE}/Wallets`,
+    financials: `${API_BASE}/Financials`,
+    categories: `${API_BASE}/Categories`,
 };
 
 export default endpoints;
@@ -16,6 +19,19 @@ export const ENDPOINTS = {
         BASE: "/api/products",
         MANAGED: "/api/products/managed",
         DETAIL: (id) => `/api/products/${id}`,
+        // GET, POST danh sách chung
+        BASE: '/api/products', 
+        
+        // GET danh sách quản lý (Màn hình 5)
+        MANAGED: '/api/products/managed',
+        
+        // GET danh sách sản phẩm theo seller
+        SELLER: (id) => `/api/products/seller/${id}`,
+        
+        // Cần truyền ID (PUT, DELETE, GET by ID) -> Dùng arrow function
+        DETAIL: (id) => `/api/products/${id}`, 
+        
+        // Các tính năng đặc thù
         VIOLATION_DETAILS: (id) => `/api/products/managed/${id}/violation-details`,
         RESOLVE_VIOLATION: (id) => `/api/products/managed/${id}/resolve-violation`,
     },
@@ -32,4 +48,10 @@ export const ENDPOINTS = {
     // USERS: { BASE: '/api/users', ... },
     // ORDERS: { ... }
 
+    
+    REVIEWS: {
+        BASE: '/api/reviews',
+        FLAGGED: '/api/reviews/flagged',
+        STATUS: (id) => `/api/reviews/${id}/status`,
+    }
 };

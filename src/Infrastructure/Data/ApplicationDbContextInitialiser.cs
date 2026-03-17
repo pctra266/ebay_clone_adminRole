@@ -1,4 +1,4 @@
-﻿using EbayClone.Domain.Constants;
+using EbayClone.Domain.Constants;
 using EbayClone.Infrastructure.Data.Seeders;
 using EbayClone.Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
@@ -137,7 +137,10 @@ public class ApplicationDbContextInitialiser
             typeof(ProductsSeeder),
             typeof(StoresSeeder),
             typeof(AddressesSeeder),
-            typeof(DisputesSeeder)
+            typeof(DisputesSeeder),
+            typeof(ReturnRequestsSeeder),
+            typeof(FinanceDemoSeeder),
+            typeof(StatsDemoSeeder)
         };
 
         // Create seeder instances and sort by Order property

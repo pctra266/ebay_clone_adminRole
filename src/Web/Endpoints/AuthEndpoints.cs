@@ -3,6 +3,7 @@ using EbayClone.Application.Authentication.Commands.Enable2FA;
 using EbayClone.Application.Authentication.Commands.Login;
 using EbayClone.Application.Authentication.Commands.Verify2FA;
 using EbayClone.Application.Authentication.Commands.Verify2FASetup;
+using EbayClone.Web.Infrastructure;
 
 namespace EbayClone.Web.Endpoints;
 
@@ -10,12 +11,26 @@ public class Auth : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder group)
     {
-        group.MapPost("login", Login);
-        group.MapPost("verify-2fa", Verify2FA);
-        group.MapPost("logout", Logout);
-        group.MapGet("me", Me).RequireAuthorization();
-        group.MapPost("enable-2fa", Enable2FA).RequireAuthorization();
-        group.MapPost("verify-2fa-setup", Verify2FASetup).RequireAuthorization();
+        // 🔴 STRICT (5 req/min) — chống brute-force
+        group.MapPost("login", Login)
+             .RequireRateLimiting(RateLimitingExtensions.StrictPolicy);
+
+        group.MapPost("verify-2fa", Verify2FA)
+             .RequireRateLimiting(RateLimitingExtensions.StrictPolicy);
+
+        // 🟡 STANDARD (60 req/min)
+        group.MapPost("logout", Logout)
+             .RequireRateLimiting(RateLimitingExtensions.StandardPolicy);
+
+        group.MapGet("me", Me).RequireAuthorization()
+             .RequireRateLimiting(RateLimitingExtensions.StandardPolicy);
+
+        // 🟢 AUTHENTICATED (200 req/min theo UserId)
+        group.MapPost("enable-2fa", Enable2FA).RequireAuthorization()
+             .RequireRateLimiting(RateLimitingExtensions.AuthenticatedPolicy);
+
+        group.MapPost("verify-2fa-setup", Verify2FASetup).RequireAuthorization()
+             .RequireRateLimiting(RateLimitingExtensions.AuthenticatedPolicy);
     }
 
     public async Task<IResult> Login(ISender sender, LoginCommand command, HttpContext http)

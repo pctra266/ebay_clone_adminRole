@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -34,13 +34,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                 name: "FK_WithdrawalRequests_User_SellerId",
                 table: "WithdrawalRequests");
 
-            migrationBuilder.DropColumn(
-                name: "ReportReason",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ReportedBy",
-                table: "Product");
+            migrationBuilder.Sql("IF EXISTS (SELECT * FROM sys.columns WHERE Name = 'ReportReason' AND Object_ID = OBJECT_ID('Product')) BEGIN ALTER TABLE [Product] DROP COLUMN [ReportReason]; END");
+            migrationBuilder.Sql("IF EXISTS (SELECT * FROM sys.columns WHERE Name = 'ReportedBy' AND Object_ID = OBJECT_ID('Product')) BEGIN ALTER TABLE [Product] DROP COLUMN [ReportedBy]; END");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TransactionId",
@@ -236,17 +231,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                 oldMaxLength: 100,
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "ReportReason",
-                table: "Product",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ReportedBy",
-                table: "Product",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.Sql("IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = 'ReportReason' AND Object_ID = OBJECT_ID('Product')) BEGIN ALTER TABLE [Product] ADD [ReportReason] nvarchar(max) NULL; END");
+            migrationBuilder.Sql("IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = 'ReportedBy' AND Object_ID = OBJECT_ID('Product')) BEGIN ALTER TABLE [Product] ADD [ReportedBy] nvarchar(max) NULL; END");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_FinancialTransactions_OrderTable_OrderId",

@@ -1,11 +1,13 @@
-﻿
+
 using EbayClone.Application.Common.Models;
 using EbayClone.Application.Products.Commands.CreateProduct;
+using EbayClone.Application.Products.Commands.CreateProductReport;
 using EbayClone.Application.Products.Commands.DeleteProduct;
 using EbayClone.Application.Products.Commands.ResolveProductViolation;
 using EbayClone.Application.Products.Commands.UpdateProduct;
 using EbayClone.Application.Products.Queries.DTOs;
 using EbayClone.Application.Products.Queries.GetProducts;
+using EbayClone.Application.Products.Queries.GetSellerProducts;
 using EbayClone.Application.Products.Queries.GetViolationDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +31,10 @@ public class Products : EndpointGroupBase
 
         // [MỚI] Màn hình 5: Lấy danh sách quản lý (có Lọc/Tab)
         group.MapGet("managed", GetManagedProducts); // GET /api/products/managed
+        group.MapPost("reports", CreateProductReport);
 
+        // [MỚI] Lấy danh sách sản phẩm của Seller
+        group.MapGet("seller/{sellerId}", GetSellerProducts);
     }
     public async Task<List<ProductDto>> GetProducts(ISender sender)
     {
@@ -57,6 +62,12 @@ public class Products : EndpointGroupBase
         return Results.NoContent();
     }
 
+    public async Task<IResult> CreateProductReport(ISender sender, CreateProductReportCommand command)
+    {
+        await sender.Send(command);
+        return Results.NoContent();
+    }
+
     // 1. API cho Màn hình 5 (List)
     // Sử dụng [AsParameters] để map query string (?page=1&tab=Reported) vào Object Query
     public async Task<PaginatedList<ManagedProductDto>> GetManagedProducts(ISender sender, [AsParameters] GetManagedProductsQuery query)
@@ -74,5 +85,11 @@ public class Products : EndpointGroupBase
         if (id != command.ProductId) return Results.BadRequest();
         await sender.Send(command);
         return Results.NoContent();
+    }
+
+    public async Task<PaginatedList<ProductDto>> GetSellerProducts(ISender sender, int sellerId, [AsParameters] GetSellerProductsQuery query)
+    {
+        query.SellerId = sellerId;
+        return await sender.Send(query);
     }
 }

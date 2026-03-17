@@ -1017,9 +1017,18 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("createdAt");
+
+                    b.Property<string>("EvidenceImages")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRefundedByEbayFund")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("int")
@@ -1029,9 +1038,24 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("reason");
 
+                    b.Property<string>("ResolutionAction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ResolvedByAdminId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReturnLabelUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShopSolution")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("status");
 
                     b.Property<int?>("UserId")
@@ -1118,6 +1142,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("DisputedBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("LockedBalance")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PendingBalance")
@@ -1259,6 +1286,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<string>("IpWhitelist")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsReviewRestricted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
@@ -1272,6 +1302,18 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("password");
+
+                    b.Property<int>("PerformanceScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ProductBanUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReviewBanUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReviewViolationCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Role")
                         .HasMaxLength(20)

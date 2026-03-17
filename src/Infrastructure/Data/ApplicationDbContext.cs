@@ -48,7 +48,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
 
 
-
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return base.SaveChangesAsync(cancellationToken);
@@ -353,7 +352,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
             entity.Property(e => e.OrderId).HasColumnName("orderId");
             entity.Property(e => e.Reason).HasColumnName("reason");
             entity.Property(e => e.Status)
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("userId");
 

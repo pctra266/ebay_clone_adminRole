@@ -59,10 +59,36 @@ export const productService = {
         }
     },
 
+    reportProduct: async (id, payload) => {
+        try {
+            const response = await axios.post(
+                ENDPOINTS.PRODUCTS.BASE + '/reports',
+                payload
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi báo cáo sản phẩm:", error);
+            throw error;
+        }
+    },
 
     // ===============================
     // 2. Managed Products (Màn hình 5)
     // ===============================
+
+    // GET /api/products/seller/{id}
+    getSellerProducts: async (sellerId, params = { pageNumber: 1, pageSize: 10 }) => {
+        try {
+            const response = await axios.get(
+                ENDPOINTS.PRODUCTS.SELLER(sellerId),
+                { params }
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách sản phẩm quản lý:", error);
+            throw error;
+        }
+    },
 
     // GET /api/products/managed?page=1&tab=Reported
     getManagedProducts: async (params) => {
