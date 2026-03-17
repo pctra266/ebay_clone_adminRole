@@ -19,8 +19,21 @@ export function AuthProvider({ children }) {
       .finally(()  => setLoading(false));
   }, []); // ✅ chỉ gọi 1 lần khi app khởi động
 
+  const logout = async () => {
+    try {
+      await fetch("/api/Auth/logout", { method: "POST", credentials: "include" });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      window.localStorage.removeItem("ebayclone_admin_id");
+      setUser(null);
+      setIsAuth(false);
+      window.location.href = "/login";
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, isAuth, setUser }}>
+    <AuthContext.Provider value={{ user, loading, isAuth, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

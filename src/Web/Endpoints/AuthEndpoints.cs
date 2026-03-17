@@ -58,10 +58,13 @@ public class Auth : EndpointGroupBase
 
     public async Task<IResult> Verify2FA(ISender sender, Verify2FACommand command, HttpContext http)
     {
-        var token = await sender.Send(command);
+        var result = await sender.Send(command);
+
+        if (!result.Success)
+            return Results.Ok(result);
 
         // ✅ Set cookie sau khi 2FA thành công
-        http.Response.Cookies.Append("auth_token", token, new CookieOptions
+        http.Response.Cookies.Append("auth_token", result.Token!, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,

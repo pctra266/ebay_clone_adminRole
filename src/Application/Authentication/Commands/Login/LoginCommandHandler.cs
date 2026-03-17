@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -45,6 +45,20 @@ public class LoginCommandHandler
                 Success = false,
                 ErrorMessage = "Email hoặc mật khẩu không đúng"
             };
+
+        // ❌ Check Banned Status
+        if (user.Status == "Banned")
+        {
+            var banMsg = "Tài khoản của bạn đã bị khóa";
+            if (!string.IsNullOrEmpty(user.BannedReason))
+                banMsg += $": {user.BannedReason}";
+            
+            return new LoginResponse
+            {
+                Success = false,
+                ErrorMessage = banMsg
+            };
+        }
 
         if (user.TwoFactorEnabled)
             return new LoginResponse
