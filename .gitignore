@@ -36,6 +36,10 @@ bld/
 # =========================================
 # CUSTOM: Protect sensitive configuration
 # =========================================
+
+# Ignore environment files
+.env
+.env.*
 # Ignore appsettings with real connection strings
 **/appsettings.Development.json
 # Keep the example file as reference
