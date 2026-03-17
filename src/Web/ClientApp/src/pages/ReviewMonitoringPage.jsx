@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './ReviewMonitoring.css';
-import axios from 'axios';
 import { reviewsService } from '../services/reviewsService';
 
 export const ReviewMonitoringPage = () => {
-    const [stats, setStats] = useState(null);
     const [flaggedReviews, setFlaggedReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pageNumber, setPageNumber] = useState(1);
@@ -18,9 +16,6 @@ export const ReviewMonitoringPage = () => {
     const fetchData = async (page) => {
         setLoading(true);
         try {
-            const statsRes = await axios.get('/api/stats/dashboard');
-            setStats(statsRes.data);
-
             const response = await reviewsService.getFlaggedReviews(page);
             setFlaggedReviews(response.items);
             setPagination({
@@ -52,45 +47,9 @@ export const ReviewMonitoringPage = () => {
     return (
         <div className="review-monitoring-container">
             <header className="page-header">
-                <h1>Giám sát đánh giá & Thống kê</h1>
-                <p>Theo dõi các đánh giá bị gắn cờ và hiệu suất của sàn</p>
+                <h1>Giám sát đánh giá</h1>
+                <p>Theo dõi và quản lý các đánh giá bị gắn cờ.</p>
             </header>
-
-            <section className="stats-grid">
-                <div className="stat-card revenue">
-                    <h3>Doanh thu</h3>
-                    <div className="stat-values">
-                        <div className="stat-item">
-                            <span>Hôm nay</span>
-                            <strong>${stats?.dailyRevenue.toLocaleString()}</strong>
-                        </div>
-                        <div className="stat-item">
-                            <span>Tháng này</span>
-                            <strong>${stats?.monthlyRevenue.toLocaleString()}</strong>
-                        </div>
-                        <div className="stat-item">
-                            <span>Quý này</span>
-                            <strong>${stats?.quarterlyRevenue.toLocaleString()}</strong>
-                        </div>
-                    </div>
-                    <div className="stat-icon">💰</div>
-                </div>
-
-                <div className="stat-card users">
-                    <h3>Người dùng</h3>
-                    <div className="stat-values">
-                        <div className="stat-item">
-                            <span>Tổng số</span>
-                            <strong>{stats?.totalUsers}</strong>
-                        </div>
-                        <div className="stat-item">
-                            <span>Mới (tháng này)</span>
-                            <strong>+{stats?.newUsersThisMonth}</strong>
-                        </div>
-                    </div>
-                    <div className="stat-icon">👥</div>
-                </div>
-            </section>
 
             <section className="reviews-section">
                 <h2>Đánh giá cần xử lý</h2>

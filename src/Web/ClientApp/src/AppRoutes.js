@@ -23,6 +23,7 @@ import { ProductList } from "./pages/Public/Home";
 import EbayProductDetail from "./pages/EbayProductDetail";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
+import StatisticsPage from "./pages/StatisticsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -126,7 +127,11 @@ const AppRoutes = [
     path: "/product/:id",
     element: <EbayProductDetail />,
     noLayout: true
+  },
+  {
+    path: "/statistics",
+    element: protect(<StatisticsPage />)
   }
 ];
 
-export default AppRoutes;
+export default AppRoutes;

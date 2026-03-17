@@ -178,8 +178,10 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
 
             if (sellerWallet != null)
             {
-                // Move money: DisputedBalance ? Refunded
-                sellerWallet.DisputedBalance -= refundAmount;
+                // Move money: DisputedBalance -> Refunded
+                // Ensure DisputedBalance doesn't go negative if it wasn't tracked properly before
+                var amountToDeduct = Math.Min(sellerWallet.DisputedBalance, refundAmount);
+                sellerWallet.DisputedBalance -= amountToDeduct;
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
@@ -193,19 +195,21 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
                     seller.ViolationCount++;
                 }
             }
-        }
 
-        // Create refund transaction
-        var refundTransaction = new FinancialTransaction
-        {
-            SellerId = dispute.RaisedBy ?? 0,
-            Type = "Refund",
-            Amount = refundAmount,
-            Description = $"Refund for dispute {dispute.CaseId}",
-            OrderId = dispute.OrderId,
-            Date = DateTime.UtcNow
-        };
-        _context.FinancialTransactions.Add(refundTransaction);
+            // Create refund transaction
+            var refundTransaction = new FinancialTransaction
+            {
+                UserId = sellerId.Value,
+                SellerId = sellerId.Value,
+                Type = "Refund",
+                Amount = refundAmount,
+                BalanceAfter = sellerWallet?.AvailableBalance ?? 0,
+                Description = $"Refund for dispute {dispute.CaseId}",
+                OrderId = dispute.OrderId,
+                Date = DateTime.UtcNow
+            };
+            _context.FinancialTransactions.Add(refundTransaction);
+        }
 
         dispute.RefundProcessedAt = DateTime.UtcNow;
         dispute.RefundTransactionId = Guid.NewGuid().ToString(); // Simulated payment gateway ID
@@ -223,8 +227,9 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             {
                 var frozenAmount = dispute.Amount ?? 0;
                 
-                // Move money: DisputedBalance ? AvailableBalance
-                sellerWallet.DisputedBalance -= frozenAmount;
+                // Move money: DisputedBalance -> AvailableBalance
+                var amountToRestore = Math.Min(sellerWallet.DisputedBalance, frozenAmount);
+                sellerWallet.DisputedBalance -= amountToRestore;
 
                 sellerWallet.CreditAvailable(frozenAmount);
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
@@ -254,27 +259,28 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             if (sellerWallet != null)
             {
                 // Seller keeps part, refunds part
-                sellerWallet.DisputedBalance -= disputedAmount;
+                var amountToDeductFromDispute = Math.Min(sellerWallet.DisputedBalance, disputedAmount);
+                sellerWallet.DisputedBalance -= amountToDeductFromDispute;
 
                 sellerWallet.CreditAvailable(sellerKeeps);
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
+
+            // Create refund transaction for buyer
+            var refundTransaction = new FinancialTransaction
+            {
+                UserId = sellerId.Value,
+                SellerId = sellerId.Value,
+                Type = "PartialRefund",
+                Amount = refundAmount,
+                BalanceAfter = sellerWallet?.AvailableBalance ?? 0,
+                Description = $"Partial refund for dispute {dispute.CaseId} (Split decision)",
+                OrderId = dispute.OrderId,
+                Date = DateTime.UtcNow
+            };
+            _context.FinancialTransactions.Add(refundTransaction);
         }
-
-        // Create refund transaction for buyer
-        var refundTransaction = new FinancialTransaction
-        {
-
-            SellerId = dispute.RaisedBy ?? 0,
-            Type = "PartialRefund",
-            Amount = refundAmount,
-            Description = $"Partial refund for dispute {dispute.CaseId} (Split decision)",
-            OrderId = dispute.OrderId,
-
-            Date = DateTime.UtcNow
-        };
-        _context.FinancialTransactions.Add(refundTransaction);
 
         dispute.RefundProcessedAt = DateTime.UtcNow;
         dispute.RefundTransactionId = Guid.NewGuid().ToString();

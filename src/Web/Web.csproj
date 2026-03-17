@@ -8,6 +8,7 @@
     <RootNamespace>EbayClone.Web</RootNamespace>
     <AssemblyName>EbayClone.Web</AssemblyName>
     <TargetFramework>net10.0</TargetFramework>
+  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
