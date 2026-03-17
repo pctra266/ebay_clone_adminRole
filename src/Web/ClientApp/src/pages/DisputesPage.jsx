@@ -373,7 +373,7 @@ export function DisputesPage() {
                             <i className="fas fa-hand-paper">Take</i>
                           </button>
                         )}
-                        {dispute.assignedTo === adminId && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+                        {dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
                           <Link
                             to={`/disputes/${dispute.id}`}
                             className="btn btn-sm btn-success"
