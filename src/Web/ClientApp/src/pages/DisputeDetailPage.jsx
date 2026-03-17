@@ -192,7 +192,7 @@ export function DisputeDetailPage() {
               Assign to Me
             </button>
           )}
-          {dispute.assignedTo === adminId && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+          {dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
             <button
               type="button"
               className="btn btn-success"
