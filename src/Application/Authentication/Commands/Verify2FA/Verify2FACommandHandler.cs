@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -9,7 +9,7 @@ using EbayClone.Application.Common.Interfaces;
 namespace EbayClone.Application.Authentication.Commands.Verify2FA
 {
     public class Verify2FACommandHandler
-        : IRequestHandler<Verify2FACommand, string>
+        : IRequestHandler<Verify2FACommand, Verify2FAResponse>
     {
         private readonly IApplicationDbContext _context;
         private readonly IJwtService _jwtService;
@@ -23,7 +23,7 @@ namespace EbayClone.Application.Authentication.Commands.Verify2FA
             _jwtService = jwtService;
         }
 
-        public async Task<string> Handle(
+        public async Task<Verify2FAResponse> Handle(
             Verify2FACommand request,
             CancellationToken cancellationToken)
         {
@@ -31,15 +31,20 @@ namespace EbayClone.Application.Authentication.Commands.Verify2FA
                 .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
 
             if (user == null || string.IsNullOrEmpty(user.TwoFactorSecret))
-                throw new Exception("Invalid user");
+                return new Verify2FAResponse { Success = false, ErrorMessage = "Người dùng không hợp lệ" };
+
+            // ❌ Check Banned Status (thêm check ở đây để bảo mật)
+            if (user.Status == "Banned")
+                return new Verify2FAResponse { Success = false, ErrorMessage = "Tài khoản đã bị khóa" };
 
             var totp = new Totp(Base32Encoding.ToBytes(user.TwoFactorSecret));
 
             if (!totp.VerifyTotp(request.Code, out long timeStepMatched))
-                throw new Exception("Invalid 2FA code");
+                return new Verify2FAResponse { Success = false, ErrorMessage = "Mã 2FA không đúng hoặc đã hết hạn" };
 
             // Nếu hợp lệ → tạo JWT
-            return _jwtService.GenerateToken(user);
+            var token = _jwtService.GenerateToken(user);
+            return new Verify2FAResponse { Success = true, Token = token };
         }
     }
 }

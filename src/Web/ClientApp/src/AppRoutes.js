@@ -32,7 +32,8 @@ const AppRoutes = [
   // ── Public ───────────────────────────────────────────────────────
   {
     path: "/login",
-    element: <LoginPage />
+    element: <LoginPage />,
+    noLayout: true
   },
 
   // ── Cần login nhưng chưa cần 2FA ─────────────────────────────────

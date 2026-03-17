@@ -218,8 +218,11 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok || data.success === false) {
-        throw new Error(data.errorMessage || "Mã 2FA không đúng");
+      if (!data.success) {
+        setError(data.errorMessage || "Mã 2FA không đúng");
+        setCode("");
+        triggerShake();
+        return;
       }
 
       // ✅ Không lưu token — server đã set HttpOnly cookie
@@ -227,7 +230,7 @@ export default function LoginPage() {
       await sleep(1200);
       window.location.href = "/dashboard";
     } catch (err) {
-      setError(err.message);
+      setError("Không thể kết nối đến server. Vui lòng thử lại.");
       setCode("");
       triggerShake();
     } finally {
