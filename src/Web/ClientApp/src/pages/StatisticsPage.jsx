@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
 import reportService from "../services/reportService";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -218,20 +221,12 @@ function KpiCard({ icon, label, value, color = "#0064d2", currency = false }) {
 // ────────────────────────────────────────────────────────────────────────────
 // Export helpers
 // ────────────────────────────────────────────────────────────────────────────
-function exportCsv(rows, filename) {
+function exportExcel(rows, filename) {
   if (!rows || rows.length === 0) return;
-  const headers = Object.keys(rows[0]);
-  const csv = [
-    headers.join(","),
-    ...rows.map((r) => headers.map((h) => JSON.stringify(r[h] ?? "")).join(","))
-  ].join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "BaoCao");
+  XLSX.writeFile(wb, filename);
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -412,26 +407,43 @@ export default function StatisticsPage() {
   // ── Export ──────────────────────────────────────────────────────────────
   const handleExport = (type) => {
     const { start, end } = getDateRange();
-    const filename = `bao-cao-${type}-${start}-${end}.csv`;
+    const filename = `bao-cao-${type}-${start}-${end}.xlsx`;
     if (type === "revenue") {
-      exportCsv(
+      exportExcel(
         (revenueData?.dailyRevenue ?? []).map((d) => ({ Ngày: d.date, "Doanh thu (VND)": d.amount })),
         filename
       );
     } else if (type === "users") {
-      exportCsv(
+      exportExcel(
         (usersData?.dailyGrowth ?? []).map((d) => ({ Ngày: d.date, "Người mua": d.newBuyers, "Người bán": d.newSellers })),
         filename
       );
     } else if (type === "orders") {
-      exportCsv(
+      exportExcel(
         [{ "Hoàn thành": ordersData?.completed, "Giao thành công": ordersData?.delivered, "Hoàn trả": ordersData?.returned, "Tổng": ordersData?.total }],
         filename
       );
     }
   };
 
-  const handlePrint = () => window.print();
+  const handlePrintPdf = async () => {
+    const element = document.getElementById("pdf-export-area");
+    if (!element) return;
+    try {
+      setToast({ message: "Đang tạo PDF, vui lòng đợi...", type: "success" });
+      const canvas = await html2canvas(element, { scale: 1.5, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 10, pdfWidth, pdfHeight);
+      pdf.save(`Bao_Cao_Thong_Ke_${new Date().getTime()}.pdf`);
+    } catch (e) {
+      console.error("PDF generation failed", e);
+      setToast({ message: "Lỗi tạo PDF", type: "error" });
+    }
+  };
 
   const anyLoading = Object.values(loading).some(Boolean);
 
@@ -454,12 +466,15 @@ export default function StatisticsPage() {
           <button className="btn btn-outline-secondary btn-sm" onClick={fetchAll} disabled={anyLoading}>
             <i className={`bi bi-arrow-clockwise me-1 ${anyLoading ? "spin" : ""}`} />Làm mới
           </button>
-          <button className="btn btn-outline-danger btn-sm" onClick={handlePrint}>
+          <button className="btn btn-outline-danger btn-sm" onClick={handlePrintPdf}>
             <i className="bi bi-printer me-1" />In PDF
           </button>
         </div>
       </div>
 
+      {/* ── Export Wrapper ────────────────────────────────────────────────────── */}
+      <div id="pdf-export-area" className="bg-white" style={{ padding: "2px" }}>
+        
       {/* ── Date Filter ─────────────────────────────────────────────────────── */}
       <div className="card border-0 shadow-sm rounded-4 mb-4 p-3">
         <div className="d-flex flex-wrap align-items-center gap-2">
@@ -542,6 +557,7 @@ export default function StatisticsPage() {
             <OrdersTab data={ordersData} loading={loading.orders} onExport={handleExport} />
           )}
         </div>
+      </div>
       </div>
 
       {/* ── Print styles ────────────────────────────────────────────────────── */}
