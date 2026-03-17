@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
@@ -29,6 +29,15 @@ public partial class Review
     public DateTime? ModeratedAt { get; set; }
     
     public string? ModerationAction { get; set; } // 'Keep', 'Hide', NULL
+
+    // New fields for Seller Replies and Reports
+    public string? SellerReply { get; set; }
+    
+    public DateTime? SellerReplyCreatedAt { get; set; }
+    
+    public bool ReportedBySeller { get; set; } = false;
+    
+    public string? SellerReportReason { get; set; }
 
     public virtual Product? Product { get; set; }
 

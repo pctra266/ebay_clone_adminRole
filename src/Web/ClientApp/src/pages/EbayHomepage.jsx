@@ -1,23 +1,61 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import EbayFooter from '../components/EbayFooter';
 import HeroCarousel from '../components/HeroCarousel';
 import {
     dailyDeals,
-    featuredDeals,
     heroSlides,
     techDestinations,
     loyaltyBanner,
     motorsBanner,
-    trendingDestinations,
     colorBanner
 } from '../data/ebayMockData';
 import '../components/Ebay.css';
+import { productService } from '../services/productService';
 
 const EbayHomepage = () => {
     const techCarouselRef = useRef(null);
     const featuredCarouselRef = useRef(null);
     const trendingCarouselRef = useRef(null);
+
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const data = await productService.getAllProducts();
+                const allProducts = data.items || data || [];
+                setProducts(allProducts.filter(p => p.status === 'Active')); 
+            } catch (error) {
+                console.error("Không thể tải dữ liệu", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const parseImageUrl = (imgStr) => {
+        if (!imgStr) return 'https://via.placeholder.com/200';
+        try {
+            const parsed = JSON.parse(imgStr);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+            return imgStr;
+        } catch (e) {
+            return imgStr;
+        }
+    };
+
+    const formatPrice = (price) => {
+        return price ? `$${price.toFixed(2)}` : 'N/A';
+    };
+
+    const backendFeaturedDeals = products.slice(0, 15);
+    const backendTrending = products.slice(15, 30);
 
     const handleTechScroll = (direction) => {
         if (!techCarouselRef.current) {
@@ -197,7 +235,7 @@ const EbayHomepage = () => {
                     </aside>
                 )}
 
-                {featuredDeals.length > 0 && (
+                {backendFeaturedDeals.length > 0 && (
                     <aside
                         className="ebay-featured-deals"
                         aria-labelledby="ebay-featured-deals-title"
@@ -228,7 +266,7 @@ const EbayHomepage = () => {
 
                             <div className="ebay-featured-deals__viewport" ref={featuredCarouselRef}>
                                 <ul className="ebay-featured-deals__list" role="list">
-                                    {featuredDeals.map((deal) => (
+                                    {backendFeaturedDeals.map((deal) => (
                                         <li key={deal.id} className="ebay-featured-card">
                                             <article className="ebay-featured-card__article">
                                                 <div className="ebay-featured-card__media">
@@ -239,42 +277,29 @@ const EbayHomepage = () => {
                                                     >
                                                         <i className="bi bi-heart" aria-hidden="true" />
                                                     </button>
-                                                    <a
+                                                    <Link
                                                         className="ebay-featured-card__image-link"
-                                                        href="#"
+                                                        to={`/product/${deal.id}`}
                                                     >
-                                                        <img src={deal.image} alt={deal.title} loading="lazy" />
+                                                        <img src={parseImageUrl(deal.images)} alt={deal.title} loading="lazy" />
                                                         <span className="ebay-featured-card__scrim" aria-hidden="true" />
-                                                    </a>
+                                                    </Link>
                                                 </div>
 
-                                                <a
+                                                <Link
                                                     className="ebay-featured-card__info"
-                                                    href="#"
+                                                    to={`/product/${deal.id}`}
                                                 >
                                                     <span className="ebay-featured-card__title">{deal.title}</span>
 
                                                     <div className="ebay-featured-card__pricing">
-                                                        <span className="ebay-featured-card__price">{deal.price}</span>
-                                                        {deal.originalPrice && (
-                                                            <span className="ebay-featured-card__original">
-                                                                {deal.originalPrice}
-                                                            </span>
-                                                        )}
+                                                        <span className="ebay-featured-card__price">{formatPrice(deal.price)}</span>
                                                     </div>
-
-                                                    {(deal.discount || deal.badge || deal.note) && (
-                                                        <div className="ebay-featured-card__meta">
-                                                            {deal.discount && <span>{deal.discount}</span>}
-                                                            {deal.badge && <span>{deal.badge}</span>}
-                                                            {deal.note && <span>{deal.note}</span>}
-                                                        </div>
-                                                    )}
 
                                                     <span className="ebay-visually-hidden">
                                                         Opens in a new window or tab
                                                     </span>
-                                                </a>
+                                                </Link>
                                             </article>
                                         </li>
                                     ))}
@@ -293,7 +318,7 @@ const EbayHomepage = () => {
                     </aside>
                 )}
 
-                {trendingDestinations.length > 0 && (
+                {backendTrending.length > 0 && (
                     <aside
                         className="ebay-trending"
                         aria-labelledby="ebay-trending-title"
@@ -321,18 +346,18 @@ const EbayHomepage = () => {
 
                             <div className="ebay-trending__viewport" ref={trendingCarouselRef}>
                                 <ul className="ebay-trending__list" role="list">
-                                    {trendingDestinations.map((destination) => (
+                                    {backendTrending.map((destination) => (
                                         <li key={destination.id} className="ebay-trending-card">
-                                            <a
+                                            <Link
                                                 className="ebay-trending-card__link"
-                                                href="#"
+                                                to={`/product/${destination.id}`}
                                             >
                                                 <span className="ebay-trending-card__media">
-                                                    <img src={destination.image} alt={destination.alt} loading="lazy" />
+                                                    <img src={parseImageUrl(destination.images)} alt={destination.title} loading="lazy" />
                                                     <span className="ebay-trending-card__scrim" aria-hidden="true" />
                                                 </span>
-                                                <span className="ebay-trending-card__label">{destination.label}</span>
-                                            </a>
+                                                <span className="ebay-trending-card__label">{destination.title}</span>
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>

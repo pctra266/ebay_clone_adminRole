@@ -20,6 +20,7 @@ import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
+import EbayProductDetail from "./pages/EbayProductDetail";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 
@@ -120,6 +121,11 @@ const AppRoutes = [
   {
     path: "/seller-products",
     element: protect(<SellerProductManagementPage />)
+  },
+  {
+    path: "/product/:id",
+    element: <EbayProductDetail />,
+    noLayout: true
   }
 ];
 

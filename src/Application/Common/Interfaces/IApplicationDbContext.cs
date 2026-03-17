@@ -23,6 +23,7 @@ public interface IApplicationDbContext
     DbSet<Product> Products { get; }
     DbSet<ReturnRequest> ReturnRequests { get; }
     DbSet<Review> Reviews { get; }
+    DbSet<ReviewReport> ReviewReports { get; }
     DbSet<ShippingInfo> ShippingInfos { get; }
     DbSet<Store> Stores { get; }
 

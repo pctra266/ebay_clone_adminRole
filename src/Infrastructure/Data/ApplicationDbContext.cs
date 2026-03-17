@@ -31,6 +31,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
     public virtual DbSet<Review> Reviews { get; set; }
+    public virtual DbSet<ReviewReport> ReviewReports { get; set; }
     public virtual DbSet<ShippingInfo> ShippingInfos { get; set; }
     public virtual DbSet<Store> Stores { get; set; }
     public new virtual DbSet<User> Users { get; set; }
