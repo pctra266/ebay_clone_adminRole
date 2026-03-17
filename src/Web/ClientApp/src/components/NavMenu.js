@@ -22,7 +22,7 @@ const SidebarLink = ({ to, icon, children }) => {
 };
 
 export const NavMenu = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -53,15 +53,30 @@ export const NavMenu = () => {
           <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Tranh chấp</SidebarLink>
           <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Báo cáo</SidebarLink>
           <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Thống kê</SidebarLink>
+          <SidebarLink to="/return-requests" icon="bi bi-cart">Đơn hoàn hàng</SidebarLink>
           <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Thông báo</SidebarLink>
           <SidebarLink to="/admin-roles" icon="bi bi-gear">Cài đặt</SidebarLink>
         </ul>
       </div>
       <div className="sidebar-footer p-3 border-top bg-white d-flex flex-column gap-2">
-         <a className="sidebar-link border-0 w-100" href="/Identity/Account/Manage">
-           <i className="bi bi-person-circle"></i>
-           <span>Tài khoản</span>
-         </a>
+         {user && (
+           <div className="d-flex align-items-center p-2 rounded mb-1" style={{ backgroundColor: '#f8f9fa' }}>
+             <div 
+               className="rounded-circle text-white d-flex justify-content-center align-items-center bg-primary"
+               style={{ width: '40px', height: '40px', fontSize: '1.2rem', flexShrink: 0 }}
+             >
+               {user.email ? user.email.charAt(0).toUpperCase() : <i className="bi bi-person"></i>}
+             </div>
+             <div className="ms-2 overflow-hidden w-100">
+               <div className="fw-bold text-truncate text-dark" title={user.fullName || user.userName || user.email || 'Admin'} style={{ fontSize: '0.9rem' }}>
+                 {user.fullName || user.userName || 'Admin'}
+               </div>
+               <div className="text-muted text-truncate" title={user.email} style={{ fontSize: '0.8rem' }}>
+                 {user.email}
+               </div>
+             </div>
+           </div>
+         )}
          <button 
            className="sidebar-link border-0 w-100 text-start bg-transparent text-danger" 
            onClick={handleLogout}

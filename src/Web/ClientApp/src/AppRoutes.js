@@ -132,6 +132,14 @@ const AppRoutes = [
   {
     path: "/statistics",
     element: protect(<StatisticsPage />)
+  },
+  {
+    path: "/return-requests",
+    element: protect(<ReturnRequestsPage />)
+  },
+  {
+    path: "/return-requests/:id",
+    element: protect(<ReturnRequestDetailPage />)
   }
 ];
 

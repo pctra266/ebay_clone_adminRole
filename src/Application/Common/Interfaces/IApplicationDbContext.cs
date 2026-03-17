@@ -3,6 +3,9 @@
 
 using Microsoft.EntityFrameworkCore;
 
+
+using Microsoft.EntityFrameworkCore;
+
 namespace EbayClone.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
@@ -45,6 +48,10 @@ public interface IApplicationDbContext
     DbSet<FinancialTransaction> FinancialTransactions { get; }
     DbSet<DisputeMessage> DisputeMessages { get; }
 
+
     // 2. Hàm lưu thay đổi (Quan trọng nhất)
+
+  
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
+
