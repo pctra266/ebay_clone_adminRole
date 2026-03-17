@@ -53,6 +53,7 @@ export const NavMenu = () => {
           <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Tranh chấp</SidebarLink>
           <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Báo cáo</SidebarLink>
           <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Thống kê</SidebarLink>
+          <SidebarLink to="/return-requests" icon="bi bi-cart">Đơn hoàn hàng</SidebarLink>
           <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Thông báo</SidebarLink>
           <SidebarLink to="/admin-roles" icon="bi bi-gear">Cài đặt</SidebarLink>
         </ul>
