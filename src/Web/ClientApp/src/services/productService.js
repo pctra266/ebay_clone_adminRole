@@ -13,7 +13,7 @@ export const productService = {
             const response = await axios.get(ENDPOINTS.PRODUCTS.BASE);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách sản phẩm:", error);
+            console.error("Error fetching product list:", error);
             throw error;
         }
     },
@@ -24,7 +24,7 @@ export const productService = {
             const response = await axios.get(ENDPOINTS.PRODUCTS.DETAIL(id));
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+            console.error("Error fetching product details:", error);
             throw error;
         }
     },
@@ -38,7 +38,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi tạo sản phẩm:", error);
+            console.error("Error creating product:", error);
             throw error;
         }
     },
@@ -52,7 +52,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật sản phẩm:", error);
+            console.error("Error updating product:", error);
             throw error;
         }
     },
@@ -65,7 +65,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xoá sản phẩm:", error);
+            console.error("Error deleting product:", error);
             throw error;
         }
     },
@@ -78,7 +78,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi báo cáo sản phẩm:", error);
+            console.error("Error reporting product:", error);
             throw error;
         }
     },
@@ -96,7 +96,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách sản phẩm quản lý:", error);
+            console.error("Error fetching managed product list:", error);
             throw error;
         }
     },
@@ -110,7 +110,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách quản lý:", error);
+            console.error("Error fetching administration list:", error);
             throw error;
         }
     },
@@ -123,7 +123,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết vi phạm:", error);
+            console.error("Error fetching violation details:", error);
             throw error;
         }
     },
@@ -137,7 +137,7 @@ export const productService = {
             );
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xử lý vi phạm:", error);
+            console.error("Error resolving violation:", error);
             throw error;
         }
     }

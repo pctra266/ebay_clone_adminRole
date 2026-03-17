@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { productService } from '../services/productService'; // Đảm bảo đường dẫn này đúng với dự án của bạn
+import { productService } from '../services/productService'; // Ensure this path is correct for your project
 import { categoryService } from '../services/categoryService';
 
 
@@ -26,7 +26,7 @@ const StatusBadge = ({ status }) => {
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 const ReviewModal = ({ product, onClose, onResolve }) => {
-    // decision bây giờ sẽ lưu số (1, 2 hoặc 3) thay vì chữ
+    // decision will now store a number (1, 2, or 3) instead of a string
     const [decision, setDecision] = useState(null);
     const [note, setNote] = useState('');
     const [loading, setLoading] = useState(false);
@@ -35,11 +35,11 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
     useEffect(() => {
         const fetchDetails = async () => {
             try {
-                // Giả định bạn có hàm getViolationDetails
+                // Assuming you have a getViolationDetails function
                 const data = await productService.getViolationDetails(product.id);
                 setDetails(data);
             } catch (e) {
-                console.error('Lỗi khi tải chi tiết vi phạm:', e);
+                console.error('Error loading violation details:', e);
             }
         };
         fetchDetails();
@@ -49,23 +49,23 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
         if (!decision) return;
         setLoading(true);
         try {
-            // ĐÃ SỬA Ở ĐÂY: Payload chuẩn xác 100% theo Record C# Backend
+            // FIXED HERE: Payload matches 100% with C# Backend Record
             const payload = {
                 productId: product.id,
-                action: decision,       // Truyền số 1 (Xóa), 2 (Ẩn), hoặc 3 (Từ chối báo cáo)
-                adminNote: note,        // Đổi key từ 'note' thành 'adminNote'
-                violationType: "Khác"   // Có thể fix cứng tạm hoặc làm thêm dropdown sau
+                action: decision,       // Send number 1 (Delete), 2 (Hide), or 3 (Reject report)
+                adminNote: note,        // Change key from 'note' to 'adminNote'
+                violationType: "Other"   // Can be hardcoded for now or add a dropdown later
             };
 
-            // Gọi API thật để gửi quyết định xử lý
+            // Call real API to send resolution decision
             await productService.resolveViolation(product.id, payload);
 
-            // Báo cho component cha biết để update lại list giao diện
+            // Notify parent component to update the UI list
             onResolve(product.id, decision);
             onClose();
         } catch (e) {
-            console.error('Lỗi khi gửi quyết định xử lý:', e);
-            alert('Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');
+            console.error('Error sending resolution decision:', e);
+            alert('An error occurred during processing. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -73,9 +73,9 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
 
     // Cấu hình các nút bấm dựa theo Enum của C#
     const ACTION_BUTTONS = [
-        { id: 1, label: '🗑 Xóa & Cảnh báo', color: '#991B1B', border: '#EF4444', bg: '#FEF2F2', activeBg: '#FCA5A5' },
-        { id: 2, label: '👁️ Tạm ẩn bài', color: '#92400E', border: '#F59E0B', bg: '#FFFBEB', activeBg: '#FDE68A' },
-        { id: 3, label: '✅ Bỏ qua (Báo cáo sai)', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' },
+        { id: 1, label: '🗑 Delete & Warn', color: '#991B1B', border: '#EF4444', bg: '#FEF2F2', activeBg: '#FCA5A5' },
+        { id: 2, label: '👁️ Hide Product', color: '#92400E', border: '#F59E0B', bg: '#FFFBEB', activeBg: '#FDE68A' },
+        { id: 3, label: '✅ Ignore (False Report)', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' },
         { id: 4, label: '🔄 Restore', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' }
     ];
 
@@ -93,7 +93,7 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                 {/* Header */}
                 <div style={{ background: 'linear-gradient(135deg,#1e3a5f,#2563eb)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, margin: 0 }}>Đang xem xét</p>
+                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, margin: 0 }}>Under Review</p>
                         <h3 style={{ color: '#fff', margin: '4px 0 0', fontSize: 16, fontFamily: "'Sora', sans-serif" }}>
                             #{product.id} · {product.title}
                         </h3>
@@ -115,7 +115,7 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                     {details ? (
                         <div style={{ marginBottom: 20 }}>
                             <p style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>
-                                Danh sách báo cáo ({details?.reports?.length || 0})
+                                Reports List ({details?.reports?.length || 0})
                             </p>
                             <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: 12, maxHeight: 180, overflowY: 'auto' }}>
                                 {details?.reports && details.reports.length > 0 ? (
@@ -131,12 +131,12 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                                                     </span>
                                                 </div>
                                                 <div style={{ fontSize: 12, color: '#78350F', marginBottom: r.proofDocumentUrl ? 6 : 0 }}>
-                                                    ⏱ {new Date(r.createdAt).toLocaleString('vi-VN')}
+                                                    ⏱ {new Date(r.createdAt).toLocaleString('en-US')}
                                                 </div>
                                                 {r.proofDocumentUrl && (
                                                     <div style={{ fontSize: 12 }}>
                                                         <a href={r.proofDocumentUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 500 }}>
-                                                            📎 Xem bằng chứng
+                                                            📎 View Proof
                                                         </a>
                                                     </div>
                                                 )}
@@ -144,18 +144,18 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <p style={{ margin: 0, fontSize: 13, color: '#92400E' }}>Không có dữ liệu báo cáo chi tiết.</p>
+                                    <p style={{ margin: 0, fontSize: 13, color: '#92400E' }}>No detailed report data found.</p>
                                 )}
                             </div>
                         </div>
                     ) : (
                         <div style={{ marginBottom: 20, textAlign: 'center', color: '#64748B', fontSize: 13, padding: '20px 0' }}>
-                            ⏳ Đang tải chi tiết vi phạm...
+                            ⏳ Loading violation details...
                         </div>
                     )}
 
                     {/* Decision Buttons */}
-                    <p style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>Quyết định xử lý</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>Resolution Decision</p>
                     <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
                         {ACTION_BUTTONS.map(btn => (
                             <button
@@ -177,20 +177,20 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                     <textarea
                         value={note}
                         onChange={e => setNote(e.target.value)}
-                        placeholder="Ghi chú của Admin (Bắt buộc nếu xoá/tạm ẩn)..."
+                        placeholder="Admin Notes (Required if delete/hide)..."
                         rows={3}
                         style={{ width: '100%', borderRadius: 8, border: '1.5px solid #E2E8F0', padding: '10px 12px', fontSize: 13, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1E293B' }}
                     />
 
                     {/* Footer Actions */}
                     <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                        <button onClick={onClose} style={{ flex: 1, padding: '11px 0', borderRadius: 8, border: '1.5px solid #E2E8F0', background: '#fff', color: '#64748B', cursor: 'pointer', fontWeight: 600 }}>Huỷ</button>
+                        <button onClick={onClose} style={{ flex: 1, padding: '11px 0', borderRadius: 8, border: '1.5px solid #E2E8F0', background: '#fff', color: '#64748B', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
                         <button onClick={handleSubmit} disabled={!decision || loading} style={{
                             flex: 2, padding: '11px 0', borderRadius: 8, border: 'none', cursor: decision ? 'pointer' : 'not-allowed',
                             background: decision ? 'linear-gradient(135deg,#2563eb,#1d4ed8)' : '#CBD5E1',
                             color: '#fff', fontWeight: 700, fontSize: 14, transition: 'all 0.2s',
                         }}>
-                            {loading ? '⏳ Đang xử lý...' : '✅ Xác nhận quyết định'}
+                            {loading ? '⏳ Processing...' : '✅ Confirm Decision'}
                         </button>
                     </div>
                 </div>
@@ -210,14 +210,14 @@ export const ProductModerationPage = () => {
     const [search, setSearch] = useState('');
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [page, setPage] = useState(1);
-    const [totalItems, setTotalItems] = useState(0); // Thêm state quản lý tổng số item để phân trang
+    const [totalItems, setTotalItems] = useState(0); // Added state to manage total item count for pagination
     const PER_PAGE = 5;
     const totalPages = Math.ceil(totalItems / PER_PAGE) || 1;
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            // Cách 3: Chạy song song cả 2 API
-            // Promise.all nhận vào một mảng các Promise và trả về mảng kết quả tương ứng
+            // Option 3: Run both APIs in parallel
+            // Promise.all takes an array of Promises and returns corresponding results
             const [productData, categoriesData] = await Promise.all([
                 productService.getManagedProducts({
                     pageNumber: page,
@@ -227,20 +227,20 @@ export const ProductModerationPage = () => {
                 categoryService.getAllCategories()
             ]);
 
-            // Xử lý dữ liệu Products
-            // Giả định API trả về { items: [], totalCount: 0 } hoặc chỉ là mảng []
+            // Process Products data
+            // Assuming API returns { items: [], totalCount: 0 } or just an array []
             const items = productData.items || productData;
             const total = productData.totalCount || (productData.items ? productData.items.length : productData.length);
 
             setProducts(items);
             setTotalItems(total);
 
-            // Xử lý dữ liệu Categories
+            // Process Categories data
             setCategories(categoriesData);
 
-            console.log('Tải dữ liệu thành công:', { items, total });
+            console.log('Data loaded successfully:', { items, total });
         } catch (err) {
-            console.error('Không thể tải dữ liệu:', err);
+            console.error('Cannot load data:', err);
             // Bạn có thể set một thông báo lỗi tại đây để hiển thị lên UI
         } finally {
             setLoading(false);
@@ -250,30 +250,30 @@ export const ProductModerationPage = () => {
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
     const handleResolve = (id, decision) => {
-        // Cập nhật lại UI dựa trên quyết định
+        // Update UI based on decision
         setProducts(prev => prev.map(p =>
             p.id === id ? { ...p, status: decision === 'Approve' ? 'Resolved' : decision === 'Remove' ? 'Rejected' : 'Resolved' } : p
         ));
 
-        // Tuỳ chọn: Bạn cũng có thể gọi lại fetchProducts() ở đây để đồng bộ 100% với server
+        // Optional: You can also call fetchProducts() here for 100% synchronization with the server
         // fetchProducts(); 
     };
 
     const isFiltering = categoryFilter !== '' || shopFilter !== 'All' || search !== '';
-    // Nếu lọc qua API thì phần filter client này có thể bỏ qua hoặc để lại nếu bạn chỉ fetch toàn bộ
+    // If filtering via API, this client-side filter can be skipped or left if you fetch everything
     const filtered = products.filter(p => {
-        // 1. Kiểm tra Category (Lưu ý: kiểm tra p.category có tồn tại không)
+        // 1. Check Category (Note: check if p.category exists)
         const matchCat = categoryFilter === '' || p.categoryName === categoryFilter;
-        // 2. Kiểm tra Shop
+        // 2. Check Shop
         const matchShop = shopFilter === 'All' || shopFilter.includes('All') || p.shopName === shopFilter;
 
-        // 3. Kiểm tra Search (Dùng optional chaining ?. để tránh lỗi nếu title null)
+        // 3. Check Search (Use optional chaining ?. to avoid error if title is null)
         const matchSearch = search === '' ||
             p.title?.toLowerCase().includes(search.toLowerCase()) ||
             String(p.id).includes(search);
 
-        // 4. QUAN TRỌNG: Bỏ kiểm tra p.status === 'Pending Review' 
-        // vì Server đã lọc theo activeTab cho bạn rồi.
+        // 4. IMPORTANT: Skip checking p.status === 'Pending Review' 
+        // because the Server already filtered by activeTab for you.
         return matchCat && matchShop && matchSearch;
     });
 
@@ -281,7 +281,7 @@ export const ProductModerationPage = () => {
     const displayTotalItems = isFiltering ? filtered.length : totalItems;
     const filteredTotalPages = Math.ceil(displayTotalItems / PER_PAGE) || 1;
 
-    // Quyết định mảng sản phẩm sẽ hiển thị ra table
+    // Decide which product array to display in the table
     const displayProducts = isFiltering ? filtered : products;
     return (
         <>
@@ -306,7 +306,7 @@ export const ProductModerationPage = () => {
                             <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg,#1e3a5f,#2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🛡️</div>
                             <div>
                                 <h1 style={{ margin: 0, fontSize: 22, fontFamily: "'Sora', sans-serif", fontWeight: 700, color: '#0F172A' }}>Reported Product Moderation</h1>
-                                <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>Quản lý và xử lý các sản phẩm bị báo cáo vi phạm</p>
+                                <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>Manage and resolve reported products</p>
                             </div>
                         </div>
                     </div>
@@ -342,8 +342,8 @@ export const ProductModerationPage = () => {
                                 value={categoryFilter}
                                 onChange={(e) => {
                                     const selectedId = e.target.value;
-                                    setCategoryFilter(selectedId); // Lưu ID vào state
-                                    alert('ID đã chọn: ' + selectedId);
+                                    setCategoryFilter(selectedId); // Save ID to state
+                                    console.log('Selected ID:', selectedId);
                                 }}
                                 style={{
                                     padding: '8px 32px 8px 12px',
@@ -359,10 +359,10 @@ export const ProductModerationPage = () => {
                                     backgroundPosition: 'right 10px center'
                                 }}
                             >
-                                {/* Option mặc định cho tất cả danh mục */}
+                                {/* Default option for all categories */}
                                 <option value="">Filter by Category (All)</option>
 
-                                {/* Map danh sách categories */}
+                                {/* Map categories list */}
                                 {categories.map((c) => (
                                     <option key={c.tagId || c.id} value={c.tagName || c.name}>
                                         {c.tagName || c.name}
@@ -400,7 +400,7 @@ export const ProductModerationPage = () => {
                                         <tr>
                                             <td colSpan={6} style={{ textAlign: 'center', padding: 48, color: '#94A3B8', fontSize: 14 }}>
                                                 <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
-                                                Không tìm thấy sản phẩm nào.
+                                                No products found.
                                             </td>
                                         </tr>
                                     ) : (
@@ -439,7 +439,7 @@ export const ProductModerationPage = () => {
                                 Showing {displayTotalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, displayTotalItems)} of {displayTotalItems} items
                             </span>
 
-                            {/* Thêm điều kiện filteredTotalPages > 1 ở đây */}
+                            {/* Added condition filteredTotalPages > 1 here */}
                             {filteredTotalPages > 1 && (
                                 <div style={{ display: 'flex', gap: 6 }}>
                                     {Array.from({ length: filteredTotalPages }, (_, index) => index + 1).map(p => (

@@ -44,18 +44,18 @@ export const NavMenu = () => {
       <div className="sidebar-menu">
         <ul className="navbar-nav w-100">
           <SidebarLink to="/dashboard" icon="bi bi-speedometer2">Dashboard</SidebarLink>
-          <SidebarLink to="/users" icon="bi bi-people">Người dùng</SidebarLink>
-          <SidebarLink to="/products" icon="bi bi-box-seam">Sản phẩm</SidebarLink>
-          <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Đánh giá</SidebarLink>
-          <SidebarLink to="/settlements" icon="bi bi-cart-check">Đơn hàng</SidebarLink>
-          <SidebarLink to="/wallets" icon="bi bi-wallet2">Ví tiền</SidebarLink>
-          <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Rút tiền</SidebarLink>
-          <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Tranh chấp</SidebarLink>
-          <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Báo cáo</SidebarLink>
-          <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Thống kê</SidebarLink>
-          <SidebarLink to="/return-requests" icon="bi bi-cart">Đơn hoàn hàng</SidebarLink>
-          <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Thông báo</SidebarLink>
-          <SidebarLink to="/admin-roles" icon="bi bi-gear">Cài đặt</SidebarLink>
+          <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
+          <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
+          <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
+          <SidebarLink to="/settlements" icon="bi bi-cart-check">Orders</SidebarLink>
+          <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
+          <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
+          <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
+          <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
+          <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
+          <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
+          <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
+          <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
         </ul>
       </div>
       <div className="sidebar-footer p-3 border-top bg-white d-flex flex-column gap-2">
@@ -83,7 +83,7 @@ export const NavMenu = () => {
            style={{ cursor: 'pointer' }}
          >
            <i className="bi bi-box-arrow-right"></i>
-           <span>Đăng xuất</span>
+           <span>Logout</span>
          </button>
       </div>
     </nav>

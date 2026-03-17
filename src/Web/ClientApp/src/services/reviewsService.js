@@ -8,7 +8,7 @@ export const reviewsService = {
             const response = await axios.post(ENDPOINTS.REVIEWS.BASE, payload);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi gửi đánh giá:", error);
+            console.error("Error submitting review:", error);
             throw error;
         }
     },
@@ -19,7 +19,7 @@ export const reviewsService = {
             const response = await axios.get(`${ENDPOINTS.REVIEWS.FLAGGED}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách đánh giá bị gắn cờ:", error);
+            console.error("Error fetching flagged reviews:", error);
             throw error;
         }
     },
@@ -30,7 +30,7 @@ export const reviewsService = {
             const response = await axios.put(ENDPOINTS.REVIEWS.STATUS(id), payload);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật trạng thái đánh giá:", error);
+            console.error("Error updating review status:", error);
             throw error;
         }
     },
@@ -41,7 +41,7 @@ export const reviewsService = {
             const response = await axios.post(ENDPOINTS.REVIEWS.REPLY(id), payload);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi phản hồi đánh giá:", error);
+            console.error("Error responding to review:", error);
             throw error;
         }
     },
@@ -52,7 +52,7 @@ export const reviewsService = {
             const response = await axios.post(ENDPOINTS.REVIEWS.REPORT(id), payload);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi báo cáo đánh giá:", error);
+            console.error("Error reporting review:", error);
             throw error;
         }
     }

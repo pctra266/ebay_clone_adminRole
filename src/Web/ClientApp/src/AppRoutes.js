@@ -43,7 +43,8 @@ const AppRoutes = [
       <ProtectedRoute skip2FACheck>
         <Enable2FAPage />
       </ProtectedRoute>
-    )
+    ),
+    noLayout: true
   },
 
   // ── Cần login + bắt buộc có 2FA ──────────────────────────────────
