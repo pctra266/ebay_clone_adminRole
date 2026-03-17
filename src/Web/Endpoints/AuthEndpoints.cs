@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using EbayClone.Application.Authentication.Commands.Enable2FA;
 using EbayClone.Application.Authentication.Commands.Login;
 using EbayClone.Application.Authentication.Commands.Verify2FA;

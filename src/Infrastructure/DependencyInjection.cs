@@ -55,7 +55,7 @@ public static class DependencyInjection
                 policy.RequireRole(Roles.Monitor, Roles.SuperAdmin));
 
             options.AddPolicy(Policies.ManageUsers, policy =>
-                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin, Roles.Administrator, "Admin"));
 
             options.AddPolicy(Policies.ManageProducts, policy =>
                 policy.RequireRole(Roles.Support, Roles.SuperAdmin));
