@@ -266,8 +266,16 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
                 .HasMaxLength(20)
                 .HasColumnName("status");
             entity.Property(e => e.TotalPrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("totalPrice");
+
+            entity.Property(e => e.PlatformFee)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("platformFee");
+
+            entity.Property(e => e.SellerEarnings)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("sellerEarnings");
 
             entity.HasOne(d => d.Address).WithMany(p => p.OrderTables)
                 .HasForeignKey(d => d.AddressId)

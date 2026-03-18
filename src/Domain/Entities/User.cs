@@ -60,6 +60,10 @@ public partial class User
     
     public string? VerificationDocuments { get; set; } // JSON: CCCD, Business License
 
+    // Auto-approval Tracking Fields
+    public string? CCCD { get; set; } // Identifies a unique citizen
+    public double? Latitude { get; set; } // Registration/Last Login Latitude
+    public double? Longitude { get; set; } // Registration/Last Login Longitude
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
     public virtual ICollection<Bid> Bids { get; set; } = new List<Bid>();
