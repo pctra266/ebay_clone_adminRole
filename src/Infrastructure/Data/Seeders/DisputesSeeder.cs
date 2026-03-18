@@ -20,11 +20,13 @@ public class DisputesSeeder : ISeeder
 
     public async Task SeedAsync()
     {
-        if (_context.Disputes.Any())
+        if (_context.Disputes.Count() >= 6)
         {
-            _logger.LogInformation("Disputes already seeded, skipping...");
+            _logger.LogInformation("Disputes already seeded with 6+ records, skipping...");
             return;
         }
+
+        bool hasInitial3 = _context.Disputes.Any();
 
         var johnBuyer = await _context.Users.FirstOrDefaultAsync(u => u.Username == "john_buyer");
         var techSeller = await _context.Users.FirstOrDefaultAsync(u => u.Username == "tech_seller_pro");
@@ -70,10 +72,45 @@ public class DisputesSeeder : ISeeder
                 CanDisputeUntil = DateTime.UtcNow.AddDays(28),
                 PlatformFee = 19.41m,
                 SellerEarnings = 131.09m
+            },
+            new OrderTable // For Dispute 4
+            {
+                BuyerId = johnBuyer.Id,
+                OrderDate = DateTime.UtcNow.AddDays(-20),
+                TotalPrice = 500.00m,
+                Status = "Delivered",
+                CompletedAt = DateTime.UtcNow.AddDays(-15),
+                CanDisputeUntil = DateTime.UtcNow.AddDays(15),
+                PlatformFee = 60.00m,
+                SellerEarnings = 440.00m
+            },
+            new OrderTable // For Dispute 5
+            {
+                BuyerId = johnBuyer.Id,
+                OrderDate = DateTime.UtcNow.AddDays(-2),
+                TotalPrice = 80.00m,
+                Status = "Shipped",
+                PlatformFee = 8.00m,
+                SellerEarnings = 72.00m
+            },
+            new OrderTable // For Dispute 6
+            {
+                BuyerId = johnBuyer.Id,
+                OrderDate = DateTime.UtcNow.AddDays(-10),
+                TotalPrice = 350.00m,
+                Status = "Delivered",
+                CompletedAt = DateTime.UtcNow.AddDays(-5),
+                CanDisputeUntil = DateTime.UtcNow.AddDays(25),
+                PlatformFee = 35.00m,
+                SellerEarnings = 315.00m
             }
         };
 
-        _context.OrderTables.AddRange(sampleOrders);
+        if (!hasInitial3)
+        {
+            _context.OrderTables.AddRange(sampleOrders.Take(3));
+        }
+        _context.OrderTables.AddRange(sampleOrders.Skip(3));
         await _context.SaveChangesAsync();
 
         // Create disputes
@@ -136,7 +173,6 @@ public class DisputesSeeder : ISeeder
                 LastViewedAt = DateTime.UtcNow.AddHours(-1)
             },
 
-            // CASE 3: Medium Priority - INAD (Wrong Item) - Awaiting Seller
             new Dispute
             {
                 CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-003",
@@ -156,10 +192,85 @@ public class DisputesSeeder : ISeeder
                 DeliveryStatus = "Delivered",
                 RequiresReturn = true,
                 ViewCount = 0
+            },
+            new Dispute
+            {
+                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-004",
+                OrderId = sampleOrders[3].Id,
+                RaisedBy = johnBuyer.Id,
+                Type = DisputeTypes.Other,
+                Subcategory = "MissingParts",
+                Description = "The console arrived safely, but the power cord is missing.",
+                DesiredOutcome = "PartialRefund",
+                Amount = 50.00m,
+                Priority = DisputePriorities.Low,
+                Status = DisputeStatuses.Open,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                Deadline = DateTime.UtcNow.AddHours(72),
+                IsHighValue = false,
+                ViewCount = 1
+            },
+            new Dispute
+            {
+                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-005",
+                OrderId = sampleOrders[4].Id,
+                RaisedBy = johnBuyer.Id,
+                Type = DisputeTypes.Damaged,
+                Subcategory = "ShatteredScreen",
+                Description = "The TV was completely destroyed during shipping. The screen is shattered.",
+                DesiredOutcome = "FullRefund",
+                Amount = 80.00m,
+                Priority = DisputePriorities.High,
+                Status = DisputeStatuses.AssignedToAdmin,
+                AssignedTo = 1,
+                AssignedAt = DateTime.UtcNow.AddHours(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-2),
+                FirstResponseAt = DateTime.UtcNow.AddDays(-1),
+                EscalatedAt = DateTime.UtcNow.AddHours(-5),
+                Deadline = DateTime.UtcNow.AddHours(12),
+                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"broken_tv.jpg\",\"description\":\"Shattered TV screen\"}]",
+                RequiresReturn = false,
+                IsHighValue = false,
+                ViewCount = 5
+            },
+            new Dispute
+            {
+                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-006",
+                OrderId = sampleOrders[5].Id,
+                RaisedBy = johnBuyer.Id,
+                Type = DisputeTypes.Counterfeit,
+                Subcategory = "FakeBrand",
+                Description = "The Airpods are clearly fake. They don't even have a valid serial number.",
+                DesiredOutcome = "FullRefund",
+                Amount = 350.00m,
+                Priority = DisputePriorities.Medium,
+                Status = DisputeStatuses.Resolved,
+                Winner = DisputeWinners.Buyer,
+                ResolvedBy = 1,
+                ResolvedAt = DateTime.UtcNow.AddHours(-10),
+                AdminNotes = "Buyer provided conclusive proof from Apple Store that the serial number is invalid. Full refund issued.",
+                RefundAmount = 350.00m,
+                RefundMethod = "OriginalPayment",
+                RefundProcessedAt = DateTime.UtcNow.AddHours(-9),
+                RefundTransactionId = "TXN-FAKE-12345",
+                CreatedAt = DateTime.UtcNow.AddDays(-6),
+                FirstResponseAt = DateTime.UtcNow.AddDays(-5),
+                EscalatedAt = DateTime.UtcNow.AddDays(-2),
+                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"fake_airpods.jpg\",\"description\":\"Fake Airpods\"}]",
+                RequiresReturn = false,
+                IsHighValue = false,
+                IsVeRO = true,
+                ViewCount = 8
             }
         };
 
-        _context.Disputes.AddRange(disputes);
+        if (!hasInitial3)
+        {
+            _context.Disputes.AddRange(disputes.Take(3));
+            await _context.SaveChangesAsync();
+        }
+
+        _context.Disputes.AddRange(disputes.Skip(3));
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Seeded {Count} Sample Disputes", disputes.Count);
@@ -244,9 +355,11 @@ public class DisputesSeeder : ISeeder
             }
         };
 
-        _context.DisputeMessages.AddRange(messages);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Seeded {Count} Dispute Messages", messages.Count);
+        if (!hasInitial3)
+        {
+            _context.DisputeMessages.AddRange(messages);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Seeded {Count} Dispute Messages", messages.Count);
+        }
     }
 }

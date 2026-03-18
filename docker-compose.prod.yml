@@ -26,6 +26,17 @@ services:
       retries: 10
       start_period: 40s
 
+  # ── Redis — SignalR Backplane ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ebay_redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   # ── API (pull image từ GHCR, không build local) ─────────────
   api:
     image: ghcr.io/pctra266/ebay_clone_adminrole:latest
@@ -34,6 +45,8 @@ services:
       - "5000:8080"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Production}"
@@ -45,6 +58,8 @@ services:
       EmailSettings__SenderPassword: "${EMAIL_PASSWORD}"
       EmailSettings__SmtpServer: "smtp.gmail.com"
       EmailSettings__Port: "587"
+      # Redis backplane cho SignalR (load balancing real-time)
+      Redis__ConnectionString: "redis:6379"
     restart: unless-stopped
 
 volumes:

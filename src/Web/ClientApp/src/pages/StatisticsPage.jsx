@@ -9,11 +9,11 @@ import html2canvas from "html2canvas";
 // ────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────────────────────────────────
-const fmt = (n) => (n != null ? Number(n).toLocaleString("vi-VN") : 0);
+const fmt = (n) => (n != null ? Number(n).toLocaleString("en-US") : 0);
 const fmtCurrency = (n) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(n ?? 0);
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n ?? 0);
 const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+  new Date(d).toLocaleDateString("en-US", { day: "2-digit", month: "2-digit" });
 
 function toIso(date) {
   return date.toISOString().split("T")[0];
@@ -46,7 +46,7 @@ function getPresetRange(preset) {
 // ────────────────────────────────────────────────────────────────────────────
 function BarChart({ data, valueKey = "amount", labelKey = "date", color = "#0064d2" }) {
   if (!data || data.length === 0)
-    return <EmptyChart message="Không có dữ liệu doanh thu trong khoảng thời gian này." />;
+    return <EmptyChart message="No revenue data available for this period." />;
 
   const vals = data.map((d) => d[valueKey] ?? 0);
   const max = Math.max(...vals) || 1;
@@ -87,7 +87,7 @@ function BarChart({ data, valueKey = "amount", labelKey = "date", color = "#0064
 
 function LineChart({ data, keys, colors, labels }) {
   if (!data || data.length === 0)
-    return <EmptyChart message="Không có dữ liệu người dùng trong khoảng thời gian này." />;
+    return <EmptyChart message="No user data available for this period." />;
 
   const H = 180, W = 600, padB = 30, padT = 10;
   const allVals = data.flatMap((d) => keys.map((k) => d[k] ?? 0));
@@ -129,7 +129,7 @@ function DonutChart({ slices }) {
   // slices: [{label, value, color}]
   const total = slices.reduce((s, sl) => s + sl.value, 0);
   if (total === 0)
-    return <EmptyChart message="Không có đơn hàng trong khoảng thời gian này." />;
+    return <EmptyChart message="No order data available for this period." />;
 
   const R = 80, cx = 100, cy = 100, stroke = 42;
   let startAngle = -90;
@@ -166,7 +166,7 @@ function DonutChart({ slices }) {
         <text x={cx} y={cy - 6} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#333">
           {fmt(total)}
         </text>
-        <text x={cx} y={cy + 12} textAnchor="middle" fontSize="9" fill="#888">Tổng đơn</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fontSize="9" fill="#888">Total Orders</text>
       </svg>
       <div className="d-flex flex-column gap-2">
         {paths.map((p) => (
@@ -225,7 +225,7 @@ function exportExcel(rows, filename) {
   if (!rows || rows.length === 0) return;
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "BaoCao");
+  XLSX.utils.book_append_sheet(wb, ws, "Report");
   XLSX.writeFile(wb, filename);
 }
 
@@ -238,15 +238,15 @@ function RevenueTab({ data, loading, onExport }) {
     <div>
       <div className="row g-3 mb-4">
         <div className="col-md-4">
-          <KpiCard icon="bi bi-cash-stack" label="Tổng doanh thu" value={data?.totalRevenue} color="#0064d2" currency />
+          <KpiCard icon="bi bi-cash-stack" label="Total Revenue" value={data?.totalRevenue} color="#0064d2" currency />
         </div>
         <div className="col-md-4">
-          <KpiCard icon="bi bi-receipt" label="Tổng giao dịch" value={data?.totalTransactions} color="#86b817" />
+          <KpiCard icon="bi bi-receipt" label="Total Transactions" value={data?.totalTransactions} color="#86b817" />
         </div>
         <div className="col-md-4">
           <KpiCard
             icon="bi bi-graph-up"
-            label="Doanh thu trung bình/ngày"
+            label="Average Daily Revenue"
             value={data?.dailyRevenue?.length ? data.totalRevenue / data.dailyRevenue.length : 0}
             color="#e53238"
             currency
@@ -255,9 +255,9 @@ function RevenueTab({ data, loading, onExport }) {
       </div>
       <div className="card border-0 shadow-sm rounded-4 p-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h6 className="fw-bold mb-0">Doanh thu theo ngày</h6>
+          <h6 className="fw-bold mb-0">Daily Revenue</h6>
           <button className="btn btn-sm btn-outline-success" onClick={() => onExport("revenue")}>
-            <i className="bi bi-file-earmark-excel me-1" />Xuất Excel
+            <i className="bi bi-file-earmark-excel me-1" />Export Excel
           </button>
         </div>
         <BarChart data={data?.dailyRevenue} valueKey="amount" labelKey="date" color="#0064d2" />
@@ -272,15 +272,15 @@ function UsersTab({ data, loading, onExport }) {
     <div>
       <div className="row g-3 mb-4">
         <div className="col-md-4">
-          <KpiCard icon="bi bi-person-plus" label="Người mua mới" value={data?.totalNewBuyers} color="#0064d2" />
+          <KpiCard icon="bi bi-person-plus" label="New Buyers" value={data?.totalNewBuyers} color="#0064d2" />
         </div>
         <div className="col-md-4">
-          <KpiCard icon="bi bi-shop" label="Người bán mới" value={data?.totalNewSellers} color="#86b817" />
+          <KpiCard icon="bi bi-shop" label="New Sellers" value={data?.totalNewSellers} color="#86b817" />
         </div>
         <div className="col-md-4">
           <KpiCard
             icon="bi bi-people"
-            label="Tổng người dùng mới"
+            label="Total New Users"
             value={(data?.totalNewBuyers ?? 0) + (data?.totalNewSellers ?? 0)}
             color="#e53238"
           />
@@ -288,16 +288,16 @@ function UsersTab({ data, loading, onExport }) {
       </div>
       <div className="card border-0 shadow-sm rounded-4 p-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h6 className="fw-bold mb-0">Tăng trưởng người dùng mới</h6>
+          <h6 className="fw-bold mb-0">New User Growth</h6>
           <button className="btn btn-sm btn-outline-success" onClick={() => onExport("users")}>
-            <i className="bi bi-file-earmark-excel me-1" />Xuất Excel
+            <i className="bi bi-file-earmark-excel me-1" />Export Excel
           </button>
         </div>
         <LineChart
           data={data?.dailyGrowth}
           keys={["newBuyers", "newSellers"]}
           colors={["#0064d2", "#86b817"]}
-          labels={["Người mua", "Người bán"]}
+          labels={["Buyers", "Sellers"]}
         />
       </div>
     </div>
@@ -307,31 +307,31 @@ function UsersTab({ data, loading, onExport }) {
 function OrdersTab({ data, loading, onExport }) {
   if (loading) return <TabLoading />;
   const slices = [
-    { label: "Hoàn thành", value: data?.completed ?? 0, color: "#86b817" },
-    { label: "Giao thành công", value: data?.delivered ?? 0, color: "#0064d2" },
-    { label: "Hoàn trả", value: data?.returned ?? 0, color: "#e53238" },
+    { label: "Completed", value: data?.completed ?? 0, color: "#86b817" },
+    { label: "Delivered", value: data?.delivered ?? 0, color: "#0064d2" },
+    { label: "Returned", value: data?.returned ?? 0, color: "#e53238" },
   ];
   return (
     <div>
       <div className="row g-3 mb-4">
         <div className="col-md-3">
-          <KpiCard icon="bi bi-check-circle" label="Hoàn thành" value={data?.completed} color="#86b817" />
+          <KpiCard icon="bi bi-check-circle" label="Completed" value={data?.completed} color="#86b817" />
         </div>
         <div className="col-md-3">
-          <KpiCard icon="bi bi-truck" label="Giao thành công" value={data?.delivered} color="#0064d2" />
+          <KpiCard icon="bi bi-truck" label="Delivered" value={data?.delivered} color="#0064d2" />
         </div>
         <div className="col-md-3">
-          <KpiCard icon="bi bi-arrow-counterclockwise" label="Hoàn trả" value={data?.returned} color="#e53238" />
+          <KpiCard icon="bi bi-arrow-counterclockwise" label="Returned" value={data?.returned} color="#e53238" />
         </div>
         <div className="col-md-3">
-          <KpiCard icon="bi bi-cart3" label="Tổng đơn" value={data?.total} color="#f5af02" />
+          <KpiCard icon="bi bi-cart3" label="Total Orders" value={data?.total} color="#f5af02" />
         </div>
       </div>
       <div className="card border-0 shadow-sm rounded-4 p-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h6 className="fw-bold mb-0">Tỷ lệ phân bổ đơn hàng</h6>
+          <h6 className="fw-bold mb-0">Order Distribution Ratio</h6>
           <button className="btn btn-sm btn-outline-success" onClick={() => onExport("orders")}>
-            <i className="bi bi-file-earmark-excel me-1" />Xuất Excel
+            <i className="bi bi-file-earmark-excel me-1" />Export Excel
           </button>
         </div>
         <DonutChart slices={slices} />
@@ -352,10 +352,10 @@ function TabLoading() {
 // Main Page
 // ────────────────────────────────────────────────────────────────────────────
 const PRESETS = [
-  { key: "today", label: "Hôm nay" },
-  { key: "week",  label: "Tuần này" },
-  { key: "month", label: "Tháng này" },
-  { key: "quarter", label: "Quý này" },
+  { key: "today", label: "Today" },
+  { key: "week",  label: "This Week" },
+  { key: "month", label: "This Month" },
+  { key: "quarter", label: "This Quarter" },
   { key: "custom", label: "Custom" },
 ];
 
@@ -391,13 +391,13 @@ export default function StatisticsPage() {
     ]);
 
     if (rev.status === "fulfilled") setRevenueData(rev.value);
-    else setToast({ message: "Lỗi tải doanh thu: " + rev.reason?.message, type: "error" });
+    else setToast({ message: "Error loading revenue: " + rev.reason?.message, type: "error" });
 
     if (usr.status === "fulfilled") setUsersData(usr.value);
-    else setToast({ message: "Lỗi tải người dùng: " + usr.reason?.message, type: "error" });
+    else setToast({ message: "Error loading user growth: " + usr.reason?.message, type: "error" });
 
     if (ord.status === "fulfilled") setOrdersData(ord.value);
-    else setToast({ message: "Lỗi tải đơn hàng: " + ord.reason?.message, type: "error" });
+    else setToast({ message: "Error loading order stats: " + ord.reason?.message, type: "error" });
 
     setLoading({ revenue: false, users: false, orders: false });
   }, [getDateRange]);
@@ -407,20 +407,20 @@ export default function StatisticsPage() {
   // ── Export ──────────────────────────────────────────────────────────────
   const handleExport = (type) => {
     const { start, end } = getDateRange();
-    const filename = `bao-cao-${type}-${start}-${end}.xlsx`;
+    const filename = `report-${type}-${start}-${end}.xlsx`;
     if (type === "revenue") {
       exportExcel(
-        (revenueData?.dailyRevenue ?? []).map((d) => ({ Ngày: d.date, "Doanh thu (VND)": d.amount })),
+        (revenueData?.dailyRevenue ?? []).map((d) => ({ Date: d.date, "Revenue (USD)": d.amount })),
         filename
       );
     } else if (type === "users") {
       exportExcel(
-        (usersData?.dailyGrowth ?? []).map((d) => ({ Ngày: d.date, "Người mua": d.newBuyers, "Người bán": d.newSellers })),
+        (usersData?.dailyGrowth ?? []).map((d) => ({ Date: d.date, "Buyers": d.newBuyers, "Sellers": d.newSellers })),
         filename
       );
     } else if (type === "orders") {
       exportExcel(
-        [{ "Hoàn thành": ordersData?.completed, "Giao thành công": ordersData?.delivered, "Hoàn trả": ordersData?.returned, "Tổng": ordersData?.total }],
+        [{ "Completed": ordersData?.completed, "Delivered": ordersData?.delivered, "Returned": ordersData?.returned, "Total": ordersData?.total }],
         filename
       );
     }
@@ -430,7 +430,7 @@ export default function StatisticsPage() {
     const element = document.getElementById("pdf-export-area");
     if (!element) return;
     try {
-      setToast({ message: "Đang tạo PDF, vui lòng đợi...", type: "success" });
+      setToast({ message: "Generating PDF, please wait...", type: "success" });
       const canvas = await html2canvas(element, { scale: 1.5, useCORS: true });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
@@ -438,10 +438,10 @@ export default function StatisticsPage() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, "PNG", 0, 10, pdfWidth, pdfHeight);
-      pdf.save(`Bao_Cao_Thong_Ke_${new Date().getTime()}.pdf`);
+      pdf.save(`Statistical_Report_${new Date().getTime()}.pdf`);
     } catch (e) {
       console.error("PDF generation failed", e);
-      setToast({ message: "Lỗi tạo PDF", type: "error" });
+      setToast({ message: "PDF generation error", type: "error" });
     }
   };
 
@@ -459,15 +459,15 @@ export default function StatisticsPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
         <div>
-          <h1 className="h3 fw-bold mb-1">Báo cáo Thống kê</h1>
-          <p className="text-secondary mb-0 small">Phân tích doanh thu, người dùng và đơn hàng theo thời gian.</p>
+          <h1 className="h3 fw-bold mb-1">Statistical Reports</h1>
+          <p className="text-secondary mb-0 small">Analyze revenue, users, and orders over time.</p>
         </div>
         <div className="d-flex gap-2">
           <button className="btn btn-outline-secondary btn-sm" onClick={fetchAll} disabled={anyLoading}>
-            <i className={`bi bi-arrow-clockwise me-1 ${anyLoading ? "spin" : ""}`} />Làm mới
+            <i className={`bi bi-arrow-clockwise me-1 ${anyLoading ? "spin" : ""}`} />Refresh
           </button>
           <button className="btn btn-outline-danger btn-sm" onClick={handlePrintPdf}>
-            <i className="bi bi-printer me-1" />In PDF
+            <i className="bi bi-printer me-1" />Print PDF
           </button>
         </div>
       </div>
@@ -479,7 +479,7 @@ export default function StatisticsPage() {
       <div className="card border-0 shadow-sm rounded-4 mb-4 p-3">
         <div className="d-flex flex-wrap align-items-center gap-2">
           <span className="text-secondary small fw-medium me-1">
-            <i className="bi bi-calendar3 me-1" />Khoảng thời gian:
+            <i className="bi bi-calendar3 me-1" />Date Range:
           </span>
           {PRESETS.map((p) => (
             <button
@@ -522,9 +522,9 @@ export default function StatisticsPage() {
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="card-header bg-white border-bottom px-4 pt-3 pb-0 d-flex gap-1">
           {[
-            { key: "revenue", icon: "bi bi-cash-stack",   label: "Doanh thu" },
+            { key: "revenue", icon: "bi bi-cash-stack",   label: "Revenue" },
             { key: "users",   icon: "bi bi-people",        label: "Users" },
-            { key: "orders",  icon: "bi bi-cart3",         label: "Đơn hàng" },
+            { key: "orders",  icon: "bi bi-cart3",         label: "Orders" },
           ].map((tab) => (
             <button
               key={tab.key}

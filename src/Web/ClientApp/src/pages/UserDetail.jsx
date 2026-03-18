@@ -19,7 +19,7 @@ export const UserDetail = () => {
             const data = await userService.getUserById(id);
             setUser(data);
         } catch (err) {
-            setError(err?.response?.data?.title || err?.message || "Load user detail failed.");
+            setError(err?.response?.data?.title || err?.message || "Loading user detail failed.");
         } finally {
             setLoading(false);
         }
@@ -30,7 +30,7 @@ export const UserDetail = () => {
     }, [loadDetail]);
 
     const onBan = async () => {
-        const reason = window.prompt("Nhap ly do chan nguoi dung:");
+        const reason = window.prompt("Enter ban reason for user:");
         if (!reason) return;
 
         try {
@@ -53,20 +53,20 @@ export const UserDetail = () => {
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h2>Ho so nguoi dung</h2>
+                <h2>User Profile</h2>
                 <button type="button" className="btn btn-outline-secondary" onClick={() => navigate("/users")}>
-                    Quay lai
+                    Back
                 </button>
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
-            {loading && <p>Dang tai thong tin chi tiet...</p>}
+            {loading && <p>Loading detailed information...</p>}
 
             {!loading && user && (
                 <>
                     <div className="card mb-3">
                         <div className="card-body">
-                            <h5 className="card-title">Thong tin ca nhan</h5>
+                            <h5 className="card-title">Personal Information</h5>
                             <div className="row">
                                 <div className="col-md-4"><strong>ID:</strong> {user.id}</div>
                                 <div className="col-md-4"><strong>Username:</strong> {user.username || "-"}</div>
@@ -75,16 +75,16 @@ export const UserDetail = () => {
                                 <div className="col-md-4"><strong>Approval:</strong> {user.approvalStatus}</div>
                                 <div className="col-md-4"><strong>Role:</strong> {user.role || "-"}</div>
                                 <div className="col-md-4"><strong>Masked Phone:</strong> {user.maskedPhone || "-"}</div>
-                                <div className="col-md-4"><strong>Masked CCCD:</strong> {user.maskedNationalId || "-"}</div>
+                                <div className="col-md-4"><strong>Masked National ID:</strong> {user.maskedNationalId || "-"}</div>
                             </div>
                             <div className="mt-3">
                                 {user.status === "Banned" ? (
                                     <button type="button" className="btn btn-warning" onClick={onUnban}>
-                                        Mo khoa nguoi dung
+                                        Unban User
                                     </button>
                                 ) : (
                                     <button type="button" className="btn btn-danger" onClick={onBan}>
-                                        Chan nguoi dung
+                                        Ban User
                                     </button>
                                 )}
                             </div>
@@ -93,7 +93,7 @@ export const UserDetail = () => {
 
                     <div className="card mb-3">
                         <div className="card-body">
-                            <h5 className="card-title">Lich su don hang</h5>
+                            <h5 className="card-title">Order History</h5>
                             <div className="table-responsive">
                                 <table className="table table-striped">
                                     <thead>
@@ -114,7 +114,7 @@ export const UserDetail = () => {
                                             </tr>
                                         )) : (
                                             <tr>
-                                                <td colSpan="4" className="text-center text-muted">Khong co don hang.</td>
+                                                <td colSpan="4" className="text-center text-muted">No orders found.</td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -125,7 +125,7 @@ export const UserDetail = () => {
 
                     <div className="card">
                         <div className="card-body">
-                            <h5 className="card-title">Lich su vi pham</h5>
+                            <h5 className="card-title">Violation History</h5>
                             <div className="table-responsive">
                                 <table className="table table-striped">
                                     <thead>
@@ -150,7 +150,7 @@ export const UserDetail = () => {
                                             </tr>
                                         )) : (
                                             <tr>
-                                                <td colSpan="4" className="text-center text-muted">Khong co lich su vi pham.</td>
+                                                <td colSpan="4" className="text-center text-muted">No violation history.</td>
                                             </tr>
                                         )}
                                     </tbody>

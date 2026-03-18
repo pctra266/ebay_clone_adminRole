@@ -32,7 +32,8 @@ const AppRoutes = [
   // ── Public ───────────────────────────────────────────────────────
   {
     path: "/login",
-    element: <LoginPage />
+    element: <LoginPage />,
+    noLayout: true
   },
 
   // ── Cần login nhưng chưa cần 2FA ─────────────────────────────────
@@ -42,7 +43,8 @@ const AppRoutes = [
       <ProtectedRoute skip2FACheck>
         <Enable2FAPage />
       </ProtectedRoute>
-    )
+    ),
+    noLayout: true
   },
 
   // ── Cần login + bắt buộc có 2FA ──────────────────────────────────
@@ -131,6 +133,14 @@ const AppRoutes = [
   {
     path: "/statistics",
     element: protect(<StatisticsPage />)
+  },
+  {
+    path: "/return-requests",
+    element: protect(<ReturnRequestsPage />)
+  },
+  {
+    path: "/return-requests/:id",
+    element: protect(<ReturnRequestDetailPage />)
   }
 ];
 

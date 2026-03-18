@@ -104,7 +104,7 @@ export function UserDetailPage() {
                 <div className="col-md-4"><strong>Approval:</strong> {user.approvalStatus}</div>
                 <div className="col-md-4"><strong>Role:</strong> {user.role || "-"}</div>
                 <div className="col-md-4"><strong>Masked Phone:</strong> {user.maskedPhone || "-"}</div>
-                <div className="col-md-4"><strong>Masked CCCD:</strong> {user.maskedNationalId || "-"}</div>
+                <div className="col-md-4"><strong>Masked National ID:</strong> {user.maskedNationalId || "-"}</div>
                 <div className="col-md-4"><strong>Violation Count:</strong> {user.violationCount}</div>
               </div>
             </div>

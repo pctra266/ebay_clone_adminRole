@@ -4,6 +4,7 @@ import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
 import { getCurrentAdminId } from "../services/adminSession";
 import { disputeService } from "../services/disputeService";
+import { useDisputeHub } from "../hooks/useDisputeHub";
 
 const statusTabs = [
   { label: "All", value: "" },
@@ -49,9 +50,9 @@ export function DisputesPage() {
   const [descending, setDescending] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(15);
-  const [disputesData, setDisputesData] = useState({ 
-    items: [], 
-    totalCount: 0, 
+  const [disputesData, setDisputesData] = useState({
+    items: [],
+    totalCount: 0,
     totalPages: 0,
     hasNextPage: false,
     hasPreviousPage: false
@@ -91,6 +92,19 @@ export function DisputesPage() {
   useEffect(() => {
     loadDisputes();
   }, [loadDisputes]);
+
+  // ── Real-time: nhận event khi bất kỳ admin nào resolve dispute ──
+  // Redis backplane đảm bảo nhận được ngay cả khi admin đó kết nối vào pod khác
+  const handleDisputeResolved = useCallback((data) => {
+    setToast({
+      message: `⚖️ Dispute ${data.caseId} resolved! Winner: ${data.winner}`,
+      type: "success"
+    });
+    // Tự động refresh danh sách để phản ánh trạng thái mới nhất
+    loadDisputes();
+  }, [loadDisputes]);
+
+  useDisputeHub(handleDisputeResolved);
 
   const handleAssignDispute = async (disputeId) => {
     try {
@@ -143,12 +157,12 @@ export function DisputesPage() {
 
   const formatDeadline = (deadline) => {
     if (!deadline) return "-";
-    
+
     const deadlineDate = new Date(deadline);
     const now = new Date();
     const timeDiff = deadlineDate.getTime() - now.getTime();
     const hoursLeft = Math.floor(timeDiff / (1000 * 3600));
-    
+
     if (hoursLeft < 0) {
       return <span className="text-danger">Overdue</span>;
     } else if (hoursLeft < 24) {
@@ -198,9 +212,9 @@ export function DisputesPage() {
           <div className="row g-3">
             <div className="col-md-3">
               <label className="form-label">Priority</label>
-              <select 
-                className="form-select" 
-                value={priority} 
+              <select
+                className="form-select"
+                value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
                 {priorityOptions.map(option => (
@@ -210,9 +224,9 @@ export function DisputesPage() {
             </div>
             <div className="col-md-3">
               <label className="form-label">Type</label>
-              <select 
-                className="form-select" 
-                value={type} 
+              <select
+                className="form-select"
+                value={type}
                 onChange={(e) => setType(e.target.value)}
               >
                 {typeOptions.map(option => (
@@ -232,9 +246,9 @@ export function DisputesPage() {
             </div>
             <div className="col-md-2">
               <label className="form-label">Sort By</label>
-              <select 
-                className="form-select" 
-                value={sortBy} 
+              <select
+                className="form-select"
+                value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
                 {sortOptions.map(option => (
@@ -243,13 +257,13 @@ export function DisputesPage() {
               </select>
             </div>
           </div>
-          
+
           <div className="row g-3 mt-2">
             <div className="col-md-6">
               <div className="form-check">
-                <input 
-                  className="form-check-input" 
-                  type="checkbox" 
+                <input
+                  className="form-check-input"
+                  type="checkbox"
                   id="onlyMyDisputes"
                   checked={onlyMyDisputes}
                   onChange={(e) => setOnlyMyDisputes(e.target.checked)}
@@ -259,9 +273,9 @@ export function DisputesPage() {
                 </label>
               </div>
               <div className="form-check">
-                <input 
-                  className="form-check-input" 
-                  type="checkbox" 
+                <input
+                  className="form-check-input"
+                  type="checkbox"
                   id="onlyUrgent"
                   checked={onlyUrgent}
                   onChange={(e) => setOnlyUrgent(e.target.checked)}
@@ -273,9 +287,9 @@ export function DisputesPage() {
             </div>
             <div className="col-md-6">
               <div className="form-check">
-                <input 
-                  className="form-check-input" 
-                  type="checkbox" 
+                <input
+                  className="form-check-input"
+                  type="checkbox"
                   id="descending"
                   checked={descending}
                   onChange={(e) => setDescending(e.target.checked)}
@@ -286,7 +300,7 @@ export function DisputesPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="d-flex gap-2 mt-3">
             <button type="button" className="btn btn-primary" onClick={applyFilters}>
               <i className="fas fa-search me-2"></i>Apply Filters
@@ -322,7 +336,7 @@ export function DisputesPage() {
                 {(disputesData.items || []).map((dispute) => (
                   <tr key={dispute.id}>
                     <td>
-                      <Link 
+                      <Link
                         to={`/disputes/${dispute.id}`}
                         className="fw-bold text-decoration-none"
                       >
@@ -346,7 +360,7 @@ export function DisputesPage() {
                     </td>
                     <td>
                       <div>
-                        <div className="fw-medium" style={{maxWidth: '200px'}}>
+                        <div className="fw-medium" style={{ maxWidth: '200px' }}>
                           {dispute.productTitle || "-"}
                         </div>
                         {dispute.productPrice && (
@@ -370,15 +384,24 @@ export function DisputesPage() {
                             onClick={() => handleAssignDispute(dispute.id)}
                             title="Assign to me"
                           >
-                            <i className="fas fa-hand-paper"></i>
+                            <i className="fas fa-hand-paper">Take</i>
                           </button>
+                        )}
+                        {dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+                          <Link
+                            to={`/disputes/${dispute.id}`}
+                            className="btn btn-sm btn-success"
+                            title="Resolve Case"
+                          >
+                            <i className="fas fa-gavel">Resolve</i>
+                          </Link>
                         )}
                         <Link
                           to={`/disputes/${dispute.id}`}
                           className="btn btn-sm btn-outline-secondary"
                           title="View details"
                         >
-                          <i className="fas fa-eye"></i>
+                          <i className="fas fa-eye me-1"></i> View
                         </Link>
                       </div>
                     </td>

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
 import { getCurrentAdminId } from "../services/adminSession";
 import { disputeService } from "../services/disputeService";
+import { useDisputeHub } from "../hooks/useDisputeHub";
 
 export function DisputeDetailPage() {
   const { id } = useParams();
@@ -27,6 +28,21 @@ export function DisputeDetailPage() {
   useEffect(() => {
     loadDisputeDetail();
   }, [id]);
+
+  // ── Real-time: nếu admin khác resolve CHÍNH dispute này ──
+  // Redis backplane đảm bảo nhận được dù admin đó ở pod nào
+  const handleDisputeResolved = useCallback((data) => {
+    if (String(data.disputeId) === String(id)) {
+      setToast({
+        message: `⚖️ Case ${data.caseId} đã được resolve! Winner: ${data.winner}. Đang tải lại...`,
+        type: "success"
+      });
+      // Tự động reload chi tiết để phản ánh trạng thái mới
+      loadDisputeDetail();
+    }
+  }, [id]);
+
+  useDisputeHub(handleDisputeResolved);
 
   const loadDisputeDetail = async () => {
     setLoading(true);

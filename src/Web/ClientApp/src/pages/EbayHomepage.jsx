@@ -30,7 +30,7 @@ const EbayHomepage = () => {
                 const allProducts = data.items || data || [];
                 setProducts(allProducts.filter(p => p.status === 'Active')); 
             } catch (error) {
-                console.error("Không thể tải dữ liệu", error);
+                console.error("Could not load data", error);
             } finally {
                 setLoading(false);
             }

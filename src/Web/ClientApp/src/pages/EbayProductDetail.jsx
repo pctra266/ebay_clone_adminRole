@@ -47,7 +47,7 @@ const EbayProductDetail = () => {
                     }
                 }
             } catch (error) {
-                console.error("Lỗi tải chi tiết sản phẩm:", error);
+                console.error("Error loading product details:", error);
             } finally {
                 setLoading(false);
             }
@@ -82,10 +82,10 @@ const EbayProductDetail = () => {
                 rating: reviewRating,
                 comment: reviewComment
             });
-            alert("Đánh giá của bạn đã được gửi!");
+            alert("Your review has been sent!");
             window.location.reload();
         } catch (error) {
-            alert(error.response?.data || "Có lỗi xảy ra khi gửi đánh giá. Vui lòng kiểm tra lại xem bạn đã mua sản phẩm này chưa.");
+            alert(error.response?.data || "An error occurred while sending the review. Please check if you have purchased this product.");
         }
     };
 
@@ -95,14 +95,14 @@ const EbayProductDetail = () => {
                 sellerId: user.userId,
                 reply: sellerReplyText
             });
-            alert("Đã gửi phản hồi!");
+            alert("Response sent!");
             setReplyingTo(null);
             setSellerReplyText('');
             // Refresh data
             const updated = await productService.getProductById(id);
             setProduct(updated);
         } catch (error) {
-            alert("Lỗi khi phản hồi.");
+            alert("Error while responding.");
         }
     };
 
@@ -113,13 +113,13 @@ const EbayProductDetail = () => {
                 reason: reportReason,
                 description: reportDescription
             });
-            alert("Đã báo cáo đánh giá này cho admin.");
+            alert("Reported this review to admin.");
             setReportingReview(null);
             setReportReason('Other');
             setReportDescription('');
             // Optional: refresh or just keep as is since it's a report
         } catch (error) {
-            alert("Lỗi khi báo cáo.");
+            alert("Error while reporting.");
         }
     };
 
@@ -350,7 +350,7 @@ const EbayProductDetail = () => {
                                                     style={{ background: 'none', border: 'none', color: '#767676', cursor: 'pointer', padding: 0, fontSize: '13px' }}
                                                     onClick={() => {
                                                         if (!isAuth) {
-                                                            alert("Vui lòng đăng nhập để báo cáo.");
+                                                            alert("Please login to report.");
                                                             return;
                                                         }
                                                         setReportingReview(reportingReview === review.id ? null : review.id);
