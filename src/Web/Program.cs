@@ -2,6 +2,7 @@ using EbayClone.Infrastructure.Data;
 using System;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Services;
+using EbayClone.Web.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,8 +51,14 @@ app.UseSwaggerUi(settings =>
     settings.Path = "/api";
 });
 
-app.MapFallbackToFile("index.html");
+// ── SignalR Hubs ─────────────────────────────────────────────────
+// ① MapHub phải đến TRƯỜC MapFallbackToFile
+//   vì fallback bắt mọi route chưa match — kể cả /hubs/dispute/negotiate
+// Redis backplane đảm bảo message được route đúng khi chạy 2+ pods.
+app.MapHub<DisputeHub>("/hubs/dispute");
 
 app.MapEndpoints();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();

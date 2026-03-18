@@ -4,15 +4,17 @@ const { env } = require('process');
 const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
   env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:5001';
 
+// Các path cần proxy về ASP.NET Core backend
 const context = [
   "/api",
   "/Identity",
   "/weatherforecast",
-  "/WeatherForecast"
+  "/WeatherForecast",
+  "/hubs"     // SignalR hubs — bắt buộc để negotiate + WebSocket hoạt động
 ];
 
 const onError = (err, req, resp, target) => {
-    console.error(`${err.message}`);
+    console.error(`${err.message}`)
 }
 
 module.exports = function (app) {
@@ -23,8 +25,8 @@ module.exports = function (app) {
     // the ASP NET Core webserver is unavailable
     onError: onError,
     secure: false,
-    // Uncomment this line to add support for proxying websockets
-    //ws: true, 
+    // Bật WebSocket proxy — bắt buộc để SignalR hoạt động qua dev server
+    ws: true,
     headers: {
       Connection: 'Keep-Alive'
     }

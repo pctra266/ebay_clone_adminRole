@@ -4,10 +4,12 @@ using Azure.Identity;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Data;
 using EbayClone.Infrastructure.Services;
+using EbayClone.Web.Hubs;
 using EbayClone.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -83,7 +85,22 @@ public static class DependencyInjection
             {
                 OnMessageReceived = ctx =>
                 {
+                    // 1. Đọc token từ cookie (cho SPA thông thường)
                     ctx.Token = ctx.Request.Cookies["auth_token"];
+
+                    // 2. Nếu không có cookie, đọc từ query string (cho SignalR WebSocket)
+                    // Browsers không thể gửi Authorization header khi upgrade WS
+                    if (string.IsNullOrEmpty(ctx.Token))
+                    {
+                        var accessToken = ctx.Request.Query["access_token"];
+                        var path = ctx.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs"))
+                        {
+                            ctx.Token = accessToken;
+                        }
+                    }
+
                     return Task.CompletedTask;
                 }
             };
@@ -107,6 +124,22 @@ public static class DependencyInjection
                       .AllowCredentials(); // ✅ bắt buộc để cookie hoạt động
             });
         });
+
+        // ── SignalR + Redis Backplane ───────────────────────────────────────────
+        // DisputeHub + DisputeNotifier ở đây vì cần reference Hub (không thể ở Infrastructure)
+        var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
+
+        var signalRBuilder = builder.Services.AddSignalR();
+
+        if (!string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            signalRBuilder.AddStackExchangeRedis(redisConnectionString, options =>
+            {
+                options.Configuration.ChannelPrefix = RedisChannel.Literal("ebay-dispute");
+            });
+        }
+
+        builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

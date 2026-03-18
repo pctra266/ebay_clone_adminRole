@@ -50,15 +50,18 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
     private readonly IApplicationDbContext _context;
     private readonly IUser _currentUser;
     private readonly ILogger<ResolveDisputeCommandHandler> _logger;
+    private readonly IDisputeNotifier _disputeNotifier;
 
     public ResolveDisputeCommandHandler(
         IApplicationDbContext context,
         IUser currentUser,
-        ILogger<ResolveDisputeCommandHandler> logger)
+        ILogger<ResolveDisputeCommandHandler> logger,
+        IDisputeNotifier disputeNotifier)
     {
         _context = context;
         _currentUser = currentUser;
         _logger = logger;
+        _disputeNotifier = disputeNotifier;
     }
 
     public async Task<int> Handle(ResolveDisputeCommand request, CancellationToken cancellationToken)
@@ -150,6 +153,16 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         _logger.LogInformation(
             "Dispute {CaseId} resolved by Admin {AdminId}. Winner: {Winner}, Refund: {Refund}",
             dispute.CaseId, adminId, request.Winner, request.RefundAmount);
+
+        // Push real-time notification đến tất cả admin đang online qua SignalR.
+        // Redis backplane đảm bảo cả những admin nối vào pod khác cũng nhận được.
+        await _disputeNotifier.NotifyDisputeResolvedAsync(
+            dispute.Id,
+            dispute.CaseId ?? string.Empty,
+            request.Winner,
+            request.RefundAmount ?? 0,
+            adminId ?? 0,
+            cancellationToken);
 
         // TODO: Send notifications (email/SMS) - Phase 3
         if (request.SendNotifications)

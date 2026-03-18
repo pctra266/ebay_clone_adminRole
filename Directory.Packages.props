@@ -54,6 +54,8 @@
     <PackageVersion Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
     <PackageVersion Include="SpecFlow.NUnit" Version="3.9.74" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EfcoreVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="$(AspnetVersion)" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.41" />
     <PackageVersion Include="Testcontainers.MsSql" Version="4.8.1" />
   </ItemGroup>
 </Project>
