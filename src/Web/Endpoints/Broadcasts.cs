@@ -14,25 +14,24 @@ public class Broadcasts : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.RequireAuthorization(Policies.ManageBroadcasts);
-        groupBuilder.MapGet("", GetBroadcasts);
-        groupBuilder.MapPost("", SendBroadcast);
-        groupBuilder.MapPost("schedule", ScheduleBroadcast);
+        // Admin endpoints group with ManageBroadcasts policy
+        var manageGroup = groupBuilder.MapGroup("").RequireAuthorization(Policies.ManageBroadcasts);
+        manageGroup.MapGet("", GetBroadcasts);
+        manageGroup.MapPost("", SendBroadcast);
+        manageGroup.MapPost("schedule", ScheduleBroadcast);
 
         // New endpoint for users to read active broadcasts:
-        var activeGroup = groupBuilder.MapGroup("active");
+        var activeGroup = groupBuilder.MapGroup("active").RequireAuthorization(); // Any authenticated user can access
         activeGroup.MapGet("", GetActiveBroadcasts);
-        // Note: Intentionally do NOT put Policies.ManageBroadcasts on this activeGroup 
-        // because regular users need to see them.
     }
 
     public async Task<Ok<List<BroadcastDto>>> GetActiveBroadcasts(
         ISender sender,
         ClaimsPrincipal user)
     {
-        // Get the user's role from JWT claims
-        var role = user.FindFirstValue(ClaimTypes.Role);
-        var result = await sender.Send(new EbayClone.Application.Broadcasts.Queries.GetActiveBroadcasts.GetActiveBroadcastsQuery(role));
+        // Get the user's roles from JWT claims
+        var roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+        var result = await sender.Send(new EbayClone.Application.Broadcasts.Queries.GetActiveBroadcasts.GetActiveBroadcastsQuery(roles));
         return TypedResults.Ok(result);
     }
 

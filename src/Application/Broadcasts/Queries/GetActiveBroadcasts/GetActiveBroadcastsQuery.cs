@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace EbayClone.Application.Broadcasts.Queries.GetActiveBroadcasts;
 
-public record GetActiveBroadcastsQuery(string? UserRole) : IRequest<List<BroadcastDto>>;
+public record GetActiveBroadcastsQuery(List<string> UserRoles) : IRequest<List<BroadcastDto>>;
 
 public class GetActiveBroadcastsQueryHandler : IRequestHandler<GetActiveBroadcastsQuery, List<BroadcastDto>>
 {
@@ -26,10 +26,10 @@ public class GetActiveBroadcastsQueryHandler : IRequestHandler<GetActiveBroadcas
             .Where(n => n.Status == "Sent" || (n.Status == "Scheduled" && n.ScheduledAt <= now))
             .AsQueryable();
 
-        // If UserRole is provided, return broadcasts for All or specifically for their role
-        if (!string.IsNullOrEmpty(request.UserRole))
+        // If UserRoles is provided, return broadcasts for All or specifically for their roles
+        if (request.UserRoles != null && request.UserRoles.Any())
         {
-            query = query.Where(n => string.IsNullOrEmpty(n.UserRole) || n.UserRole == request.UserRole);
+            query = query.Where(n => string.IsNullOrEmpty(n.UserRole) || request.UserRoles.Contains(n.UserRole));
         }
         else
         {
