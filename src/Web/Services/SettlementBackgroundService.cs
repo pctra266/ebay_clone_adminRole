@@ -1,4 +1,4 @@
-using EbayClone.Application.Financials.Commands.SettlePendingFunds;
+﻿using EbayClone.Application.Financials.Commands.SettlePendingFunds;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,14 +34,23 @@ public class SettlementBackgroundService : BackgroundService
                 {
                     _logger.LogInformation("Auto-settled funds for {Count} orders.", settledCount);
                 }
+                
+                // Di chuyển Task.Delay vào trong khối try-catch
+                // Run settlement checks every 1 hour
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Khi stoppingToken bị hủy, Task.Delay sẽ quăng exception này.
+                // Catch ở đây để cho phép vòng lặp thoát một cách êm ái.
+                break;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred executing SettlePendingFundsCommand.");
             }
-
-            // Run settlement checks every 1 hour
-            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
         }
+        
+        _logger.LogInformation("SettlementBackgroundService is stopping.");
     }
 }
