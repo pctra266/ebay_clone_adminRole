@@ -60,6 +60,8 @@ public partial class User
     
     public string? VerificationDocuments { get; set; } // JSON: CCCD, Business License
 
+    public string SellerLevel { get; set; } = "BelowStandard"; // 'TopRated', 'AboveStandard', 'BelowStandard'
+
     // Auto-approval Tracking Fields
     public string? CCCD { get; set; } // Identifies a unique citizen
     public double? Latitude { get; set; } // Registration/Last Login Latitude

@@ -20,7 +20,9 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
         // 1. Find orders that are delivered and past the dispute window
         // For simplicity, we use DateTime.UtcNow. In production, this might be a scheduled job.
         var eligibleOrders = await _context.OrderTables
-            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && o.CanDisputeUntil < DateTime.UtcNow)
+            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && 
+                        ((o.EstimatedSettlementDate != null && o.EstimatedSettlementDate <= DateTime.UtcNow) ||
+                         (o.EstimatedSettlementDate == null && o.CanDisputeUntil < DateTime.UtcNow)))
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
             .ToListAsync(cancellationToken);

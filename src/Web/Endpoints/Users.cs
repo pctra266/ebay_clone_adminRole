@@ -27,6 +27,20 @@ public class Users : EndpointGroupBase
         group.MapPost("{id:int}/unban", UnbanUser);
         group.MapPost("{id:int}/approve", ApproveUser);
         group.MapPost("{id:int}/reject", RejectUser);
+        group.MapPost("evaluate-sellers", EvaluateSellers);
+    }
+
+    public async Task<Results<Ok<int>, BadRequest<string>>> EvaluateSellers(ISender sender)
+    {
+        try
+        {
+            var result = await sender.Send(new EbayClone.Application.Sellers.Commands.EvaluateSellerLevels.EvaluateSellerLevelsCommand());
+            return TypedResults.Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 
     public async Task<Ok<PaginatedList<UserBriefDto>>> GetUsers(

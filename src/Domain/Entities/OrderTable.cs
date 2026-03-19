@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EbayClone.Domain.Entities;
@@ -21,6 +21,8 @@ public partial class OrderTable
     public DateTime? CompletedAt { get; set; } // When buyer received order
     
     public DateTime? CanDisputeUntil { get; set; } // Dispute deadline
+    
+    public DateTime? EstimatedSettlementDate { get; set; } // When funds can be released according to SellerLevel
     
     public decimal? PlatformFee { get; set; } // Platform commission
     

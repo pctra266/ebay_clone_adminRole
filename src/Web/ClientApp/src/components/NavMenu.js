@@ -64,6 +64,7 @@ export const NavMenu = () => {
               <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
+              <SidebarLink to="/seller-performance" icon="bi bi-speedometer">Seller Performance</SidebarLink>
             </>
           )}
         </ul>
