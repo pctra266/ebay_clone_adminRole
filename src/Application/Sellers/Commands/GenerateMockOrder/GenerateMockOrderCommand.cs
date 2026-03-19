@@ -56,8 +56,8 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        var orderDate = DateTime.UtcNow.AddDays(-15);
-        var completedAt = DateTime.UtcNow.AddDays(-10);
+        var orderDate = DateTime.UtcNow.AddHours(-1);
+        var completedAt = DateTime.UtcNow;
         var status = "Delivered";
 
         if (request.OrderType == "LateShipment")
@@ -70,10 +70,10 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
         var sellerEarnings = request.Amount - platformFee;
 
         // hold days rule
-        int holdDays = seller.SellerLevel switch
+        int holdDays = (seller.SellerLevel?.ToLowerInvariant()) switch
         {
-            "TopRated" => 0,
-            "AboveStandard" => 3,
+            "toprated" => 0,
+            "abovestandard" => 3,
             _ => 21
         };
 
