@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import financeService from '../services/financeService';
 import { ToastMessage } from '../components/ToastMessage';
 
@@ -76,7 +77,12 @@ export const WalletsPage = () => {
                                         <div className="fw-bold">{wallet.sellerName}</div>
                                         <small className="text-muted">ID: {wallet.sellerId}</small>
                                     </td>
-                                    <td className="text-end text-warning">{formatCurrency(wallet.pendingBalance)}</td>
+                                    <td className="text-end">
+                                        <Link to={`/wallets/pending/${wallet.sellerId}`} className="text-warning text-decoration-none">
+                                            {formatCurrency(wallet.pendingBalance)}
+                                            <i className="fas fa-external-link-alt ms-1 small"></i>
+                                        </Link>
+                                    </td>
                                     <td className="text-end text-success fw-bold">{formatCurrency(wallet.availableBalance)}</td>
                                     <td className="text-end text-danger">{formatCurrency(wallet.lockedBalance)}</td>
                                     <td className="text-end">{formatCurrency(wallet.totalEarnings)}</td>

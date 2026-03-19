@@ -39,6 +39,10 @@ const financeService = {
         return await apiRequest(`${endpoints.financials}/settle-order/${id}`, {
             method: 'POST'
         });
+    },
+
+    getSellerPendingFunds: async (sellerId) => {
+        return await apiRequest(`${endpoints.financials}/pending/${sellerId}`);
     }
 };
 

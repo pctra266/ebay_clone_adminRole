@@ -26,6 +26,7 @@ import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import { AdminSellerPerformancePage } from "./pages/AdminSellerPerformancePage";
 import { MockPurchasePage } from "./pages/MockPurchasePage";
+import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -150,6 +151,10 @@ const AppRoutes = [
   {
     path: "/mock-purchase",
     element: protect(<MockPurchasePage />)
+  },
+  {
+    path: "/wallets/pending/:sellerId",
+    element: protect(<SellerPendingFundsPage />)
   }
 ];
 
