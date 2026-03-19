@@ -199,3 +199,132 @@ a:hover {
   background-color: var(--ebay-blue);
   color: #fff;
 }
+
+/* --- Modern Glassmorphism & Dashboard Redesign --- */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --glass-blur: blur(12px);
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow);
+  border-radius: 1.5rem !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+}
+
+.metric-card-modern {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.metric-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(45deg, var(--ebay-black), #555);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  color: var(--ebay-gray);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.bg-gradient-blue { background: linear-gradient(135deg, #0064d2 0%, #00b4db 100%); color: #fff; }
+.bg-gradient-green { background: linear-gradient(135deg, #15833b 0%, #2ecc71 100%); color: #fff; }
+.bg-gradient-yellow { background: linear-gradient(135deg, #f6af02 0%, #ffcc33 100%); color: #fff; }
+.bg-gradient-red { background: linear-gradient(135deg, #e0103a 0%, #ff4b2b 100%); color: #fff; }
+
+.action-center-item {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--ebay-border);
+  transition: all 0.2s ease;
+  background: #fff;
+  text-decoration: none !important;
+  display: flex;
+  align-items: center;
+  color: inherit;
+  margin-bottom: 0.75rem;
+}
+
+.action-center-item:hover {
+  border-color: var(--ebay-blue);
+  background: rgba(0, 100, 210, 0.02);
+  transform: translateX(4px);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+
+/* Custom Date Range Styles */
+.date-presets-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.date-preset-btn {
+  border-radius: 999px;
+  padding: 0.4rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid var(--ebay-border);
+  background: #fff;
+  color: var(--ebay-gray);
+}
+
+.date-preset-btn:hover {
+  border-color: var(--ebay-blue);
+  color: var(--ebay-blue);
+}
+
+.date-preset-btn.active {
+  background: var(--ebay-blue);
+  color: #fff !important;
+  border-color: var(--ebay-blue);
+  box-shadow: 0 4px 12px rgba(0, 100, 210, 0.2);
+}
