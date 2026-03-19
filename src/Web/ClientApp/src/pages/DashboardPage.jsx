@@ -67,7 +67,7 @@ export function DashboardPage() {
 
   const RevenueChart = ({ data }) => {
     if (!data || data.length === 0) return <div>No data available</div>;
-    
+
     const maxRevenue = Math.max(...data.map(d => d.revenue)) || 100;
     const height = 180;
 
@@ -82,10 +82,10 @@ export function DashboardPage() {
             const barHeight = (day.revenue / maxRevenue) * (height - 40);
             return (
               <div key={index} className="d-flex flex-column align-items-center" style={{ flex: 1 }}>
-                <div 
-                  className="rounded-pill" 
-                  style={{ 
-                    height: `${Math.max(barHeight, 8)}px`, 
+                <div
+                  className="rounded-pill"
+                  style={{
+                    height: `${Math.max(barHeight, 8)}px`,
                     width: '32px',
                     transition: 'height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     background: 'var(--ebay-blue)',
@@ -111,9 +111,6 @@ export function DashboardPage() {
           <h1 className="h3 fw-bold mb-1">Dashboard Overview</h1>
           <p className="text-secondary mb-0">Welcome back, Admin.</p>
         </div>
-        <button className="btn btn-outline-primary" onClick={fetchMetrics}>
-          <i className="bi bi-arrow-clockwise me-2"></i> Refresh
-        </button>
       </div>
 
       <ToastMessage
@@ -124,28 +121,28 @@ export function DashboardPage() {
 
       <div className="row g-4 mb-5">
         <div className="col-md-4">
-          <MetricCard 
-            title="Products" 
-            value={metrics?.totalProducts} 
-            icon="bi bi-box-seam" 
+          <MetricCard
+            title="Products"
+            value={metrics?.totalProducts}
+            icon="bi bi-box-seam"
             bgClass="bg-soft-blue"
             link="/products"
           />
         </div>
         <div className="col-md-4">
-          <MetricCard 
-            title="Users" 
-            value={metrics?.totalUsers} 
-            icon="bi bi-people" 
+          <MetricCard
+            title="Users"
+            value={metrics?.totalUsers}
+            icon="bi bi-people"
             bgClass="bg-soft-green"
             link="/users"
           />
         </div>
         <div className="col-md-4">
-          <MetricCard 
-            title="Orders (Today)" 
-            value={metrics?.totalOrdersToday} 
-            icon="bi bi-cart3" 
+          <MetricCard
+            title="Orders (Today)"
+            value={metrics?.totalOrdersToday}
+            icon="bi bi-cart3"
             bgClass="bg-soft-yellow"
             link="/settlements"
           />
@@ -154,7 +151,7 @@ export function DashboardPage() {
 
       <div className="row g-4 mb-5">
         <div className="col-lg-8">
-           <RevenueChart data={metrics?.weeklyRevenue} />
+          <RevenueChart data={metrics?.weeklyRevenue} />
         </div>
         <div className="col-lg-4">
           <h6 className="fw-bold mb-3 d-flex align-items-center">
@@ -162,46 +159,24 @@ export function DashboardPage() {
             Urgent Tasks
           </h6>
           <div className="d-flex flex-column gap-3">
-            <UrgentCard 
-              title="Pending Approval" 
-              value={metrics?.pendingAccountsCount} 
+            <UrgentCard
+              title="Pending Approval"
+              value={metrics?.pendingAccountsCount}
               icon="bi bi-person-badge"
               link="/users?tab=Pending"
             />
-            <UrgentCard 
-              title="Open Disputes" 
-              value={metrics?.openDisputesCount} 
+            <UrgentCard
+              title="Open Disputes"
+              value={metrics?.openDisputesCount}
               icon="bi bi-exclamation-octagon"
               link="/disputes?status=Open"
             />
-            <UrgentCard 
-              title="Return Requests" 
-              value={metrics?.newReturnRequestsCount} 
+            <UrgentCard
+              title="Return Requests"
+              value={metrics?.newReturnRequestsCount}
               icon="bi bi-arrow-counterclockwise"
               link="/return-requests"
             />
-          </div>
-        </div>
-      </div>
-
-      <div className="card border-0 bg-light rounded-4 overflow-hidden mt-5">
-        <div className="card-body p-4 d-flex align-items-center justify-content-between">
-          <div>
-            <h6 className="fw-bold mb-1">Admin Context Settings</h6>
-            <p className="text-secondary small mb-0">Set admin ID for system tasks.</p>
-          </div>
-          <div className="d-flex gap-2">
-            <input
-              className="form-control form-control-sm border-0"
-              style={{ maxWidth: 100, borderRadius: '8px' }}
-              type="number"
-              min="1"
-              value={adminIdInput}
-              onChange={(event) => setAdminIdInput(event.target.value)}
-            />
-            <button className="btn btn-sm btn-primary px-4" onClick={saveAdminId}>
-              Save ID
-            </button>
           </div>
         </div>
       </div>
