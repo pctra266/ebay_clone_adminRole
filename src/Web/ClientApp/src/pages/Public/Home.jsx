@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { productService } from '../../services/productService'; // Đảm bảo đường dẫn đúng
+import { productService } from '../../services/productService'; // Ensure correct path
 import { reviewsService } from '../../services/reviewsService';
 
 export const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // --- State cho Report Modal ---
+    // --- Report Modal State ---
     const [reportingProductId, setReportingProductId] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [reportData, setReportData] = useState({
@@ -16,7 +16,7 @@ export const ProductList = () => {
         priority: 'Low'
     });
 
-    // --- State cho Review Modal ---
+    // --- Review Modal State ---
     const [reviewingProductId, setReviewingProductId] = useState(null);
     const [reviewData, setReviewData] = useState({
         rating: 5,
@@ -27,13 +27,13 @@ export const ProductList = () => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                // Tuỳ thuộc vào API thực tế, ở đây mình giả định hàm lấy danh sách
+                // Depending on the actual API, we assume a list fetching function here
                 const data = await productService.getAllProducts();
-                // Nếu backend trả về phân trang, nhớ đổi thành data.items || data
+                // If backend returns pagination, remember to change to data.items || data
                 const allProducts = data.items || data || [];
                 setProducts(allProducts.filter(p => p.status === 'Active')); 
             } catch (error) {
-                console.error("Không thể tải dữ liệu", error);
+                console.error("Could not load data", error);
             } finally {
                 setLoading(false);
             }
@@ -42,19 +42,16 @@ export const ProductList = () => {
         fetchProducts();
     }, []);
 
-    // --- Hàm mở Modal ---
+    // --- Open Modal Function ---
     const handleOpenReport = (productId) => {
         setReportingProductId(productId);
         // Reset form mỗi khi mở pop-up mới
         setReportData({
-            reason: 'Counterfeit Item',
-            description: '',
-            evidenceFiles: '',
             priority: 'Low'
         });
     };
 
-    // --- Hàm đóng Modal ---
+    // --- Close Modal Function ---
     const handleCloseReport = () => {
         setReportingProductId(null);
     };
@@ -68,13 +65,13 @@ export const ProductList = () => {
         setReviewingProductId(null);
     };
 
-    // --- Hàm xử lý thay đổi input trong Form ---
+    // --- Input Change Handler in Form ---
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setReportData(prev => ({ ...prev, [name]: value }));
     };
 
-    // --- Hàm Submit Form Report ---
+    // --- Report Form Submission Handler ---
     const handleSubmitReport = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -82,24 +79,24 @@ export const ProductList = () => {
         try {
             const payload = {
                 productId: reportingProductId,
-                reporterUserId: 1, // TODO: Thay bằng ID user đang đăng nhập thực tế từ Context/Redux
-                reporterType: "User", // Hardcode theo yêu cầu BE
+                reporterUserId: 1, // TODO: Replace with actual logged-in user ID from Context/Redux
+                reporterType: "User", // Hardcoded per BE requirement
                 reason: reportData.reason,
                 description: reportData.description,
-                // Chuyển string URL thành mảng JSON string cho khớp với 'string? EvidenceFiles' của C#
+                // Convert URL string to JSON string array to match C# 'string? EvidenceFiles'
                 evidenceFiles: reportData.evidenceFiles ? JSON.stringify([reportData.evidenceFiles]) : null,
                 status: "Pending",
                 priority: reportData.priority
             };
 
-            // Gọi API bằng service bạn đã định nghĩa
+            // Call API using the service you defined
             await productService.reportProduct(reportingProductId, payload);
             
-            alert("Đã gửi báo cáo thành công!");
-            handleCloseReport(); // Đóng modal sau khi gửi thành công
+            alert("Report sent successfully!");
+            handleCloseReport(); // Close modal after successful submission
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi gửi báo cáo. Vui lòng thử lại.");
+            alert("Error sending report. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -119,38 +116,38 @@ export const ProductList = () => {
 
             await reviewsService.createReview(payload);
             
-            alert("Đã gửi đánh giá thành công! Đánh giá sẽ được kiểm duyệt nếu có nội dung nhạy cảm.");
+            alert("Review submitted successfully! It will be moderated if it contains sensitive content.");
             handleCloseReview();
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi gửi đánh giá.");
+            alert("Error submitting review.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     if (loading) {
-        return <p style={{ padding: 20 }}>Đang tải danh sách sản phẩm...</p>;
+        return <p style={{ padding: 20 }}>Loading products...</p>;
     }
 
     return (
         <div style={{ padding: 20, fontFamily: 'sans-serif' }}>
-            <h2>Danh sách Sản Phẩm (Gọi bằng Axios Custom)</h2>
+            <h2>Product List (Axios Custom)</h2>
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {products.length === 0 ? (
-                    <li>Chưa có sản phẩm nào.</li>
+                    <li>No products found.</li>
                 ) : (
                     products.map((product) => (
                         <li key={product.id} style={{ padding: '10px', borderBottom: '1px solid #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 500 }}>
                             <span>
-                                <strong>{product.title}</strong> - Giá: {product.price}
+                                <strong>{product.title}</strong> - Price: {product.price}
                             </span>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <button 
                                     onClick={() => handleOpenReview(product.id)}
                                     style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
                                 >
-                                    Đánh giá
+                                    Review
                                 </button>
                                 <button 
                                     onClick={() => handleOpenReport(product.id)}
@@ -175,43 +172,43 @@ export const ProductList = () => {
                         background: '#fff', padding: '24px', borderRadius: '8px', 
                         width: '100%', maxWidth: '400px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                     }}>
-                        <h3 style={{ marginTop: 0 }}>Báo cáo sản phẩm #{reportingProductId}</h3>
+                        <h3 style={{ marginTop: 0 }}>Report product #{reportingProductId}</h3>
                         
                         <form onSubmit={handleSubmitReport} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             
                             {/* Lý do báo cáo */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Lý do vi phạm</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Violation Reason</label>
                                 <select 
                                     name="reason" 
                                     value={reportData.reason} 
                                     onChange={handleInputChange}
                                     style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                                 >
-                                    <option value="Counterfeit Item">Hàng giả / Nhái</option>
-                                    <option value="Inappropriate Content">Nội dung không phù hợp</option>
-                                    <option value="Prohibited Item">Hàng cấm</option>
-                                    <option value="Other">Khác</option>
+                                    <option value="Counterfeit Item">Counterfeit / Fake</option>
+                                    <option value="Inappropriate Content">Inappropriate Content</option>
+                                    <option value="Prohibited Item">Prohibited Item</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 
                             {/* Mô tả chi tiết */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Mô tả chi tiết</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Detailed Description</label>
                                 <textarea 
                                     name="description" 
                                     value={reportData.description} 
                                     onChange={handleInputChange}
                                     required
                                     rows={3}
-                                    placeholder="Vui lòng cung cấp thêm thông tin..."
+                                    placeholder="Please provide more information..."
                                     style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' }}
                                 />
                             </div>
 
                             {/* Bằng chứng */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Link bằng chứng (Tuỳ chọn)</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Evidence Link (Optional)</label>
                                 <input 
                                     type="text" 
                                     name="evidenceFiles" 
@@ -224,17 +221,17 @@ export const ProductList = () => {
 
                             {/* Mức độ ưu tiên */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Mức độ ưu tiên</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px' }}>Priority</label>
                                 <select 
                                     name="priority" 
                                     value={reportData.priority} 
                                     onChange={handleInputChange}
                                     style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                                 >
-                                    <option value="Low">Thấp</option>
-                                    <option value="High">Cao</option>
+                                    <option value="Low">Low</option>
+                                    <option value="High">High</option>
                                 </select>
-                                <span style={{ fontSize: '11px', color: '#666' }}>*VeRO (chủ sở hữu bản quyền) sẽ luôn là Critical từ hệ thống.</span>
+                                <span style={{ fontSize: '11px', color: '#666' }}>*VeRO (copyright owners) will always be Critical from the system.</span>
                             </div>
 
                             {/* Nút hành động */}
@@ -244,14 +241,14 @@ export const ProductList = () => {
                                     onClick={handleCloseReport} 
                                     style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc', background: '#f9fafb', cursor: 'pointer' }}
                                 >
-                                    Huỷ
+                                    Cancel
                                 </button>
                                 <button 
                                     type="submit" 
                                     disabled={isSubmitting}
                                     style={{ flex: 1, padding: '10px', borderRadius: '4px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                                 >
-                                    {isSubmitting ? 'Đang gửi...' : 'Gửi Báo Cáo'}
+                                    {isSubmitting ? 'Sending...' : 'Send Report'}
                                 </button>
                             </div>
                         </form>
@@ -270,11 +267,11 @@ export const ProductList = () => {
                         background: '#fff', padding: '24px', borderRadius: '12px', 
                         width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
                     }}>
-                        <h3 style={{ marginTop: 0, color: '#1a1a1a' }}>Đánh giá sản phẩm #{reviewingProductId}</h3>
+                        <h3 style={{ marginTop: 0, color: '#1a1a1a' }}>Review product #{reviewingProductId}</h3>
                         
                         <form onSubmit={handleSubmitReview} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Số sao</label>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Star Rating</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <button
@@ -294,18 +291,18 @@ export const ProductList = () => {
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Nhận xét của bạn</label>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Your Feedback</label>
                                 <textarea 
                                     value={reviewData.comment} 
                                     onChange={(e) => setReviewData(prev => ({ ...prev, comment: e.target.value }))}
                                     required
                                     rows={4}
-                                    placeholder="Chia sẻ trải nghiệm của bạn..."
+                                    placeholder="Share your experience..."
                                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }}
                                 />
-                                {reviewData.comment && ["lừa đảo", "đmm", "chết"].some(w => reviewData.comment.toLowerCase().includes(w)) && (
+                                {reviewData.comment && ["scam", "fuck", "die"].some(w => reviewData.comment.toLowerCase().includes(w)) && (
                                     <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
-                                        ⚠️ Nội dung chứa từ ngữ nhạy cảm, sẽ bị hệ thống gắn cờ.
+                                        ⚠️ Content contains sensitive words, it will be flagged by the system.
                                     </p>
                                 )}
                             </div>
@@ -316,7 +313,7 @@ export const ProductList = () => {
                                     onClick={handleCloseReview} 
                                     style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
                                 >
-                                    Huỷ
+                                    Cancel
                                 </button>
                                 <button 
                                     type="submit" 
@@ -327,7 +324,7 @@ export const ProductList = () => {
                                         cursor: isSubmitting ? 'not-allowed' : 'pointer'
                                     }}
                                 >
-                                    {isSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                    {isSubmitting ? 'Sending...' : 'Submit Review'}
                                 </button>
                             </div>
                         </form>

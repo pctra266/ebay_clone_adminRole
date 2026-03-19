@@ -80,5 +80,7 @@ public static class DependencyInjection
         });
 
         builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
+
+        builder.Services.AddHostedService<AutoReviewUsersService>();
     }
 }

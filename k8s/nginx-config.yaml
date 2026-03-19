@@ -31,6 +31,14 @@ data:
         sendfile        on;
         keepalive_timeout  65;
 
+        # ── Map để tự động chọn Connection header đúng ──────────────
+        # Nếu request có Upgrade (WebSocket) → "upgrade"
+        # Nếu request thông thường (HTTP)    → "keep-alive"
+        map $http_upgrade $connection_upgrade {
+            default   upgrade;
+            ''        keep-alive;
+        }
+
         # ── Load Balance Upstream — Chia tải cho 2 Pods API ──
         upstream backend_api {
             server ebay-api-service:80;
@@ -47,12 +55,26 @@ data:
                 return 200 "healthy\n";
             }
 
-            # Proxy toàn bộ request vào API
+            # ── SignalR WebSocket — PHẢI đặt TRƯỚC location / ────────
+            # Redis backplane phân phối message giữa các pod qua Pub/Sub
+            location /hubs/ {
+                proxy_pass         http://backend_api;
+                proxy_http_version 1.1;
+                proxy_set_header   Upgrade $http_upgrade;
+                proxy_set_header   Connection $connection_upgrade;
+                proxy_set_header   Host $host;
+                proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header   X-Forwarded-Proto $scheme;
+                proxy_read_timeout 86400s; # 24h — giữ kết nối WS lâu dài
+                proxy_send_timeout 86400s;
+            }
+
+            # ── Proxy toàn bộ request HTTP thông thường ──────────────
             location / {
                 proxy_pass         http://backend_api;
                 proxy_http_version 1.1;
                 proxy_set_header   Upgrade $http_upgrade;
-                proxy_set_header   Connection keep-alive;
+                proxy_set_header   Connection $connection_upgrade;
                 proxy_set_header   Host $host;
                 proxy_cache_bypass $http_upgrade;
                 proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;

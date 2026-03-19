@@ -4,6 +4,7 @@ import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
 import { getCurrentAdminId } from "../services/adminSession";
 import { disputeService } from "../services/disputeService";
+import { useDisputeHub } from "../hooks/useDisputeHub";
 
 const statusTabs = [
   { label: "All", value: "" },
@@ -91,6 +92,19 @@ export function DisputesPage() {
   useEffect(() => {
     loadDisputes();
   }, [loadDisputes]);
+
+  // ── Real-time: nhận event khi bất kỳ admin nào resolve dispute ──
+  // Redis backplane đảm bảo nhận được ngay cả khi admin đó kết nối vào pod khác
+  const handleDisputeResolved = useCallback((data) => {
+    setToast({
+      message: `⚖️ Dispute ${data.caseId} resolved! Winner: ${data.winner}`,
+      type: "success"
+    });
+    // Tự động refresh danh sách để phản ánh trạng thái mới nhất
+    loadDisputes();
+  }, [loadDisputes]);
+
+  useDisputeHub(handleDisputeResolved);
 
   const handleAssignDispute = async (disputeId) => {
     try {
@@ -373,7 +387,7 @@ export function DisputesPage() {
                             <i className="fas fa-hand-paper">Take</i>
                           </button>
                         )}
-                        {dispute.assignedTo === adminId && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
+                        {dispute.assignedTo && dispute.status !== "Resolved" && dispute.status !== "Closed" && (
                           <Link
                             to={`/disputes/${dispute.id}`}
                             className="btn btn-sm btn-success"

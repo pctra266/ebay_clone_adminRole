@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { userService } from "../services/userService";
 
 const TAB_CONFIG = [
-    { key: "All", label: "Tat ca nguoi dung" },
-    { key: "PendingApproval", label: "Dang cho phe duyet" },
-    { key: "Banned", label: "Bi cam" },
+    { key: "All", label: "All Users" },
+    { key: "PendingApproval", label: "Pending Approval" },
+    { key: "Banned", label: "Banned" },
 ];
 
 export const UserList = () => {
@@ -31,7 +31,7 @@ export const UserList = () => {
             });
             setData(result);
         } catch (err) {
-            setError(err?.response?.data?.title || err?.message || "Load users failed.");
+            setError(err?.response?.data?.title || err?.message || "Loading users failed.");
         } finally {
             setLoading(false);
         }
@@ -55,7 +55,7 @@ export const UserList = () => {
     };
 
     const onBan = async (id) => {
-        const reason = window.prompt("Nhap ly do chan nguoi dung:");
+        const reason = window.prompt("Enter ban reason for user:");
         if (!reason) return;
 
         try {
@@ -77,7 +77,7 @@ export const UserList = () => {
 
     return (
         <div>
-            <h2>Quan ly nguoi dung</h2>
+            <h2>User Management</h2>
 
             <div className="d-flex gap-2 mb-3">
                 {TAB_CONFIG.map((item) => (
@@ -99,32 +99,32 @@ export const UserList = () => {
                 <div className="col-md-6">
                     <input
                         className="form-control"
-                        placeholder="Tim theo username/email..."
+                        placeholder="Search by username/email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
                 <div className="col-md-2">
                     <button type="button" className="btn btn-primary w-100" onClick={onSearch}>
-                        Tim kiem
+                        Search
                     </button>
                 </div>
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
             {loading ? (
-                <p>Dang tai danh sach nguoi dung...</p>
+                <p>Loading user list...</p>
             ) : (
                 <div className="table-responsive">
                     <table className="table table-striped">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Ten</th>
+                                <th>Username</th>
                                 <th>Email</th>
-                                <th>Trang thai</th>
-                                <th>Phe duyet</th>
-                                <th>Thao tac nhanh</th>
+                                <th>Status</th>
+                                <th>Approval</th>
+                                <th>Quick Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,7 +150,7 @@ export const UserList = () => {
                                                 className="btn btn-sm btn-success"
                                                 onClick={() => onApprove(u.id)}
                                             >
-                                                Phe duyet
+                                                Approve
                                             </button>
                                         )}
                                         {u.status === "Banned" ? (
@@ -159,7 +159,7 @@ export const UserList = () => {
                                                 className="btn btn-sm btn-warning"
                                                 onClick={() => onUnban(u.id)}
                                             >
-                                                Mo khoa
+                                                Unban
                                             </button>
                                         ) : (
                                             <button
@@ -167,14 +167,14 @@ export const UserList = () => {
                                                 className="btn btn-sm btn-danger"
                                                 onClick={() => onBan(u.id)}
                                             >
-                                                Chan
+                                                Ban
                                             </button>
                                         )}
                                     </td>
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center text-muted">Khong co du lieu.</td>
+                                    <td colSpan="6" className="text-center text-muted">No data found.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -183,7 +183,7 @@ export const UserList = () => {
             )}
 
             <div className="d-flex justify-content-between align-items-center">
-                <span className="text-muted">Tong: {data.totalCount || 0}</span>
+                <span className="text-muted">Total: {data.totalCount || 0}</span>
                 <div className="d-flex gap-2">
                     <button
                         type="button"
@@ -191,10 +191,10 @@ export const UserList = () => {
                         disabled={pageNumber <= 1}
                         onClick={() => setPageNumber((p) => p - 1)}
                     >
-                        Truoc
+                        Previous
                     </button>
                     <span className="small align-self-center">
-                        Trang {pageNumber}/{data.totalPages || 1}
+                        Page {pageNumber}/{data.totalPages || 1}
                     </span>
                     <button
                         type="button"
@@ -202,7 +202,7 @@ export const UserList = () => {
                         disabled={pageNumber >= (data.totalPages || 1)}
                         onClick={() => setPageNumber((p) => p + 1)}
                     >
-                        Sau
+                        Next
                     </button>
                 </div>
             </div>

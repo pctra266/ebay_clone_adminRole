@@ -210,7 +210,7 @@ export default function Enable2FAPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success)
-        throw new Error(data.message || "Không thể kích hoạt 2FA");
+        throw new Error(data.message || "Failed to enable 2FA");
 
       setQrCode(data.qrCode); // base64 PNG từ server
       setStep(2);
@@ -237,7 +237,7 @@ export default function Enable2FAPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success)
-        throw new Error(data.errorMessage || "Mã không hợp lệ, vui lòng thử lại");
+        throw new Error(data.errorMessage || "Invalid code, please try again");
 
       setStep(4);
     } catch (err) {
@@ -396,7 +396,7 @@ export default function Enable2FAPage() {
                 </button>
 
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/Login")}
                   style={{
                     width: "100%", marginTop: 10, padding: "13px",
                     fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans', sans-serif",

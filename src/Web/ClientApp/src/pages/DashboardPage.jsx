@@ -36,7 +36,7 @@ export function DashboardPage() {
     }
   };
 
-  if (loading) return <LoadingIndicator text="Đang tải dữ liệu tổng quan..." />;
+  if (loading) return <LoadingIndicator text="Loading overview data..." />;
 
   const MetricCard = ({ title, value, icon, bgClass, link }) => (
     <Link to={link || '#'} className="card metric-card text-decoration-none h-100 border-0 shadow-sm">
@@ -74,8 +74,8 @@ export function DashboardPage() {
     return (
       <div className="chart-container shadow-sm">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h5 className="fw-bold mb-0">Doanh thu 7 ngày qua</h5>
-          <span className="badge bg-soft-blue px-3 py-2 rounded-pill fw-bold">Tổng: ${(data.reduce((a, b) => a + b.revenue, 0)).toLocaleString()}</span>
+          <h5 className="fw-bold mb-0">Revenue last 7 days</h5>
+          <span className="badge bg-soft-blue px-3 py-2 rounded-pill fw-bold">Total: ${(data.reduce((a, b) => a + b.revenue, 0)).toLocaleString()}</span>
         </div>
         <div className="d-flex justify-content-between align-items-end" style={{ height: `${height}px`, paddingBottom: '25px' }}>
           {data.map((day, index) => {
@@ -108,11 +108,11 @@ export function DashboardPage() {
     <section>
       <div className="d-flex justify-content-between align-items-center mb-5">
         <div>
-          <h1 className="h3 fw-bold mb-1">Tổng quan Dashboard</h1>
-          <p className="text-secondary mb-0">Chào mừng bạn trở lại, Admin.</p>
+          <h1 className="h3 fw-bold mb-1">Dashboard Overview</h1>
+          <p className="text-secondary mb-0">Welcome back, Admin.</p>
         </div>
         <button className="btn btn-outline-primary" onClick={fetchMetrics}>
-          <i className="bi bi-arrow-clockwise me-2"></i> Làm mới
+          <i className="bi bi-arrow-clockwise me-2"></i> Refresh
         </button>
       </div>
 
@@ -125,7 +125,7 @@ export function DashboardPage() {
       <div className="row g-4 mb-5">
         <div className="col-md-4">
           <MetricCard 
-            title="Sản phẩm" 
+            title="Products" 
             value={metrics?.totalProducts} 
             icon="bi bi-box-seam" 
             bgClass="bg-soft-blue"
@@ -134,7 +134,7 @@ export function DashboardPage() {
         </div>
         <div className="col-md-4">
           <MetricCard 
-            title="Người dùng" 
+            title="Users" 
             value={metrics?.totalUsers} 
             icon="bi bi-people" 
             bgClass="bg-soft-green"
@@ -143,7 +143,7 @@ export function DashboardPage() {
         </div>
         <div className="col-md-4">
           <MetricCard 
-            title="Đơn hàng (Hôm nay)" 
+            title="Orders (Today)" 
             value={metrics?.totalOrdersToday} 
             icon="bi bi-cart3" 
             bgClass="bg-soft-yellow"
@@ -159,23 +159,23 @@ export function DashboardPage() {
         <div className="col-lg-4">
           <h6 className="fw-bold mb-3 d-flex align-items-center">
             <i className="bi bi-lightning-charge-fill text-danger me-2"></i>
-            Nhiệm vụ khẩn cấp
+            Urgent Tasks
           </h6>
           <div className="d-flex flex-column gap-3">
             <UrgentCard 
-              title="Tài khoản chờ duyệt" 
+              title="Pending Approval" 
               value={metrics?.pendingAccountsCount} 
               icon="bi bi-person-badge"
               link="/users?tab=Pending"
             />
             <UrgentCard 
-              title="Khiếu nại đang mở" 
+              title="Open Disputes" 
               value={metrics?.openDisputesCount} 
               icon="bi bi-exclamation-octagon"
               link="/disputes?status=Open"
             />
             <UrgentCard 
-              title="Yêu cầu hoàn trả" 
+              title="Return Requests" 
               value={metrics?.newReturnRequestsCount} 
               icon="bi bi-arrow-counterclockwise"
               link="/return-requests"
@@ -188,7 +188,7 @@ export function DashboardPage() {
         <div className="card-body p-4 d-flex align-items-center justify-content-between">
           <div>
             <h6 className="fw-bold mb-1">Admin Context Settings</h6>
-            <p className="text-secondary small mb-0">Thiết lập ID quản trị viên cho các tác vụ hệ thống.</p>
+            <p className="text-secondary small mb-0">Set admin ID for system tasks.</p>
           </div>
           <div className="d-flex gap-2">
             <input
@@ -200,7 +200,7 @@ export function DashboardPage() {
               onChange={(event) => setAdminIdInput(event.target.value)}
             />
             <button className="btn btn-sm btn-primary px-4" onClick={saveAdminId}>
-              Lưu ID
+              Save ID
             </button>
           </div>
         </div>

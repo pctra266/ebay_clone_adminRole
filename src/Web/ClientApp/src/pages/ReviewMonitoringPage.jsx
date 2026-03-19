@@ -47,21 +47,21 @@ export const ReviewMonitoringPage = () => {
     return (
         <div className="review-monitoring-container">
             <header className="page-header">
-                <h1>Giám sát đánh giá</h1>
-                <p>Theo dõi và quản lý các đánh giá bị gắn cờ.</p>
+                <h1>Review Monitoring</h1>
+                <p>Track and manage flagged reviews.</p>
             </header>
 
             <section className="reviews-section">
-                <h2>Đánh giá cần xử lý</h2>
+                <h2>Reviews to Process</h2>
                 <div className="table-wrapper">
                     <table className="review-table">
                         <thead>
                             <tr>
-                                <th>Người dùng</th>
-                                <th>Sản phẩm</th>
-                                <th>Đánh giá</th>
-                                <th>Lý do gắn cờ</th>
-                                <th>Hành động</th>
+                                <th>User</th>
+                                <th>Product</th>
+                                <th>Review</th>
+                                <th>Flag Reason</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,7 +102,7 @@ export const ReviewMonitoringPage = () => {
                                         )}
                                         {(!review.reportedBySeller && (!review.reports || review.reports.length === 0)) && (
                                             <span className="badge warning">
-                                                {review.flagReason || (review.rating === 1 ? '1 sao' : 'Hệ thống quét')}
+                                                {review.flagReason || (review.rating === 1 ? '1 star' : 'System scan')}
                                             </span>
                                         )}
                                     </td>
@@ -113,14 +113,14 @@ export const ReviewMonitoringPage = () => {
                                                 onClick={() => handleAction(review.id, 'Hidden', 'Hide')}
                                                 disabled={review.status === 'Hidden' || actionLoading[review.id]}
                                             >
-                                                {actionLoading[review.id] ? <span className="spinner-small"></span> : 'Ẩn'}
+                                                {actionLoading[review.id] ? <span className="spinner-small"></span> : 'Hide'}
                                             </button>
                                             <button 
                                                 className="btn btn-skip"
                                                 onClick={() => handleAction(review.id, 'Visible', 'Keep')}
                                                 disabled={review.status === 'Visible' || actionLoading[review.id]}
                                             >
-                                                {actionLoading[review.id] ? <span className="spinner-small"></span> : 'Bỏ qua'}
+                                                {actionLoading[review.id] ? <span className="spinner-small"></span> : 'Skip'}
                                             </button>
                                         </div>
                                     </td>
@@ -136,15 +136,15 @@ export const ReviewMonitoringPage = () => {
                         onClick={() => setPageNumber(prev => prev - 1)}
                         className="btn-page"
                     >
-                        Trước
+                        Previous
                     </button>
-                    <span className="page-info">Trang {pageNumber} / {pagination.totalPages}</span>
+                    <span className="page-info">Page {pageNumber} / {pagination.totalPages}</span>
                     <button 
                         disabled={!pagination.hasNextPage} 
                         onClick={() => setPageNumber(prev => prev + 1)}
                         className="btn-page"
                     >
-                        Sau
+                        Next
                     </button>
                 </div>
             </section>

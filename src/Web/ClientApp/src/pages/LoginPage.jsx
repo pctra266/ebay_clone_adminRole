@@ -180,7 +180,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!data.success) {
-        setError(data.errorMessage || "Email hoặc mật khẩu không đúng");
+        setError(data.errorMessage || "Invalid email or password");
         triggerShake();
         return;
       }
@@ -219,7 +219,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!data.success) {
-        setError(data.errorMessage || "Mã 2FA không đúng");
+        setError(data.errorMessage || "Incorrect 2FA code");
         setCode("");
         triggerShake();
         return;
