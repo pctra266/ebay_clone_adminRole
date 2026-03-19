@@ -38,10 +38,14 @@ export const OrderDistribution = ({ orderStats }) => {
         <Doughnut data={chartData} options={options} />
         <div style={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
           pointerEvents: 'none'
         }}>
           <div className="h4 fw-bold mb-0">{fmt(orderStats?.total)}</div>

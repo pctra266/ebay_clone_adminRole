@@ -61,7 +61,7 @@ export function DashboardPage() {
   if (loading && !metrics) return <LoadingIndicator text="Assembling your workspace..." />;
 
   return (
-    <section className="py-2">
+    <section className="py-2" id="dashboard-container">
       <ToastMessage
         message={toast.message}
         type={toast.type}
@@ -69,11 +69,16 @@ export function DashboardPage() {
       />
 
       {/* Header & Date Range Selection */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 p-3">
         <div>
           <div className="d-flex align-items-center gap-3 mb-1">
             <h1 className="h3 fw-bold mb-0">Main Dashboard</h1>
-            <DashboardActions metrics={metrics} stats={stats} dashboardId="dashboard-content" />
+            <DashboardActions 
+              metrics={metrics} 
+              stats={stats} 
+              dashboardId="dashboard-container" 
+              dateRange={formatDateRange()} 
+            />
           </div>
           <div className="d-flex align-items-center text-secondary small">
             <i className="bi bi-calendar3 me-2"></i>
@@ -115,7 +120,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-        <div id="dashboard-content" className="p-3 bg-light rounded-4">
+        <div className="p-3 bg-light rounded-4">
           {/* KPI Section - Easily extendable by adding more tiles or rows */}
           <MetricTiles metrics={metrics} />
 

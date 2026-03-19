@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { exportToExcel, exportToPDF } from '../../services/exportService';
 
-export const DashboardActions = ({ metrics, stats, dashboardId }) => {
+export const DashboardActions = ({ metrics, stats, dashboardId, dateRange }) => {
   const [exporting, setExporting] = useState(false);
 
   const handleExcelExport = () => {
-    const success = exportToExcel(metrics, stats);
+    const success = exportToExcel(metrics, stats, dateRange);
     if (!success) alert("Failed to export Excel.");
   };
 
