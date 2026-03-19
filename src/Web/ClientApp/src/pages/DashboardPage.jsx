@@ -47,10 +47,15 @@ function toIso(date) {
   return date.toISOString().split("T")[0];
 }
 
-function getPresetRange(preset) {
+function getPresetRange(preset, customStart, customEnd) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   switch (preset) {
+    case "custom":
+      return {
+        start: customStart ? new Date(customStart) : today,
+        end: customEnd ? new Date(customEnd) : today
+      };
     case "all":
       return { start: null, end: null };
     case "today":
@@ -117,12 +122,21 @@ export function DashboardPage() {
   const [stats, setStats] = useState({ revenue: null, users: null, orders: null });
   const [loading, setLoading] = useState(true);
   const [preset, setPreset] = useState("month");
+
+  // Custom date state
+  const tomorrowStr = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0];
+  const weekAgoStr = new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0];
+
+  const [customStart, setCustomStart] = useState(weekAgoStr);
+  const [customEnd, setCustomEnd] = useState(todayStr);
+
   const [toast, setToast] = useState({ message: "", type: "success" });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const range = getPresetRange(preset);
+      const range = getPresetRange(preset, customStart, customEnd);
       const start = toIso(range.start);
       const end = toIso(range.end);
 
@@ -146,7 +160,7 @@ export function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [preset]);
+  }, [preset, customStart, customEnd]);
 
   useEffect(() => {
     fetchData();
@@ -233,35 +247,45 @@ export function DashboardPage() {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-          <h1 className="h3 fw-bold mb-1">Unified Command Center</h1>
+          <h1 className="h3 fw-bold mb-1">Main Dashboard </h1>
           <p className="text-secondary small mb-0">Overview of operational health & performance.</p>
         </div>
 
-        <div className="date-presets-container bg-light p-1 rounded-pill shadow-sm">
-          {["today", "week", "month", "quarter", "all"].map((p) => (
+        <div className="date-presets-container bg-light p-1 rounded-pill shadow-sm d-flex align-items-center">
+          {["today", "week", "month", "quarter", "all", "custom"].map((p) => (
             <button
               key={p}
               onClick={() => setPreset(p)}
               className={`date-preset-btn ${preset === p ? "active" : ""}`}
             >
-              {p === 'today' ? 'Today' : p === 'week' ? 'Weekly' : p === 'month' ? 'Monthly' : p === 'quarter' ? 'Quarterly' : 'All Time'}
+              {p === 'today' ? 'Today' : p === 'week' ? 'Weekly' : p === 'month' ? 'Monthly' : p === 'quarter' ? 'Quarterly' : p === 'all' ? 'All Time' : 'Custom'}
             </button>
           ))}
+
+          {preset === "custom" && (
+            <div className="d-flex align-items-center ms-3 me-2 animate-fade-in" style={{ gap: '8px' }}>
+              <input
+                type="date"
+                className="form-control form-control-sm border-0 bg-white rounded-pill px-3"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+                style={{ fontSize: '0.75rem', width: '130px', height: '32px' }}
+              />
+              <span className="text-secondary small">→</span>
+              <input
+                type="date"
+                className="form-control form-control-sm border-0 bg-white rounded-pill px-3"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                style={{ fontSize: '0.75rem', width: '130px', height: '32px' }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
       {/* KPI Section */}
       <div className="row g-4 mb-5">
-        <div className="col-md-3">
-          <MetricTile
-            label="Total Revenue"
-            value={stats.revenue?.totalRevenue || 0}
-            icon="bi bi-bank"
-            gradient="bg-gradient-blue"
-            stagger="stagger-1"
-            currency
-          />
-        </div>
         <div className="col-md-3">
           <MetricTile
             label="Active Users"
@@ -282,7 +306,7 @@ export function DashboardPage() {
         </div>
         <div className="col-md-3">
           <MetricTile
-            label="Orders (Today)"
+            label="Orders"
             value={metrics?.totalOrdersToday}
             icon="bi bi-cart-check"
             gradient="bg-gradient-red"
