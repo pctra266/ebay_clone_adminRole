@@ -8,6 +8,7 @@ import { MetricTiles } from "../components/dashboard/MetricTiles";
 import { RevenueChart } from "../components/dashboard/RevenueChart";
 import { OrderDistribution } from "../components/dashboard/OrderDistribution";
 import { ActionCenter } from "../components/dashboard/ActionCenter";
+import { DashboardActions } from "../components/dashboard/DashboardActions";
 
 // Chart.js registration (Required once in the app, usually better in a central place but keeping it here for dashboard context)
 import {
@@ -58,7 +59,10 @@ export function DashboardPage() {
       {/* Header & Date Range Selection */}
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-          <h1 className="h3 fw-bold mb-1">Main Dashboard</h1>
+          <div className="d-flex align-items-center gap-3 mb-1">
+            <h1 className="h3 fw-bold mb-0">Main Dashboard</h1>
+            <DashboardActions metrics={metrics} stats={stats} dashboardId="dashboard-content" />
+          </div>
           <p className="text-secondary small mb-0">Overview of operational health & performance.</p>
         </div>
 
@@ -96,30 +100,32 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Section - Easily extendable by adding more tiles or rows */}
-      <MetricTiles metrics={metrics} />
+        <div id="dashboard-content" className="p-3 bg-light rounded-4">
+          {/* KPI Section - Easily extendable by adding more tiles or rows */}
+          <MetricTiles metrics={metrics} />
 
-      <div className="row g-4">
-        {/* Main Statistics Column */}
-        <div className="col-lg-8">
-          <div className="d-flex flex-column gap-4 h-100">
-            <RevenueChart revenueData={stats.revenue} />
+          <div className="row g-4">
+            {/* Main Statistics Column */}
+            <div className="col-lg-8">
+              <div className="d-flex flex-column gap-4 h-100">
+                <RevenueChart revenueData={stats.revenue} />
 
-            {/* [EXTENSION POINT] - Add more large charts here (e.g. User Growth Trend) */}
-            {/* <UserGrowthChart data={stats.users} /> */}
+                {/* [EXTENSION POINT] - Add more large charts here (e.g. User Growth Trend) */}
+                {/* <UserGrowthChart data={stats.users} /> */}
+              </div>
+            </div>
+
+            {/* Operational Widgets Column */}
+            <div className="col-lg-4">
+              <div className="d-flex flex-column gap-4 h-100">
+                <ActionCenter metrics={metrics} />
+                <OrderDistribution orderStats={stats.orders} />
+
+                {/* [EXTENSION POINT] - Add more side widgets here (e.g. Top Sellers, Recent Activity) */}
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Operational Widgets Column */}
-        <div className="col-lg-4">
-          <div className="d-flex flex-column gap-4 h-100">
-            <ActionCenter metrics={metrics} />
-            <OrderDistribution orderStats={stats.orders} />
-
-            {/* [EXTENSION POINT] - Add more side widgets here (e.g. Top Sellers, Recent Activity) */}
-          </div>
-        </div>
-      </div>
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
