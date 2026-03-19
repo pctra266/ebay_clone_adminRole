@@ -43,8 +43,20 @@ export function DashboardPage() {
     setCustomEnd,
     fetchData,
     toast,
-    setToast
+    setToast,
+    currentRange
   } = useDashboardData();
+
+  const formatDateRange = () => {
+    if (!currentRange || (!currentRange.start && !currentRange.end)) return "All Time Statistics";
+    
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const startStr = currentRange.start.toLocaleDateString('en-US', options);
+    const endStr = currentRange.end.toLocaleDateString('en-US', options);
+
+    if (startStr === endStr) return startStr;
+    return `${startStr} — ${endStr}`;
+  };
 
   if (loading && !metrics) return <LoadingIndicator text="Assembling your workspace..." />;
 
@@ -63,7 +75,10 @@ export function DashboardPage() {
             <h1 className="h3 fw-bold mb-0">Main Dashboard</h1>
             <DashboardActions metrics={metrics} stats={stats} dashboardId="dashboard-content" />
           </div>
-          <p className="text-secondary small mb-0">Overview of operational health & performance.</p>
+          <div className="d-flex align-items-center text-secondary small">
+            <i className="bi bi-calendar3 me-2"></i>
+            <span className="fw-medium">{formatDateRange()}</span>
+          </div>
         </div>
 
         <div className="date-presets-container bg-light p-1 rounded-pill shadow-sm d-flex align-items-center">

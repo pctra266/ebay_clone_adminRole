@@ -51,10 +51,13 @@ export function useDashboardData() {
 
   const [toast, setToast] = useState({ message: "", type: "success" });
 
+  const [currentRange, setCurrentRange] = useState({ start: null, end: null });
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const range = getPresetRange(preset, customStart, customEnd);
+      setCurrentRange(range);
       const start = toIso(range.start);
       const end = toIso(range.end);
 
@@ -96,6 +99,7 @@ export function useDashboardData() {
     setCustomEnd,
     fetchData,
     toast,
-    setToast
+    setToast,
+    currentRange
   };
 }
