@@ -27,9 +27,10 @@ public class StatsDemoSeeder : ISeeder
     public async Task SeedAsync()
     {
         // Idempotency guard
-        if (await _context.FinancialTransactions.AnyAsync(t => t.Description == "StatsDemoSeeder-v1"))
+        if (await _context.Users.AnyAsync(u => u.Email == "demo.user.1@stats.local") ||
+            await _context.FinancialTransactions.AnyAsync(t => t.Description == "StatsDemoSeeder-v1"))
         {
-            _logger.LogInformation("StatsDemoSeeder already ran, skipping.");
+            _logger.LogInformation("StatsDemoSeeder already ran or partially ran, skipping.");
             return;
         }
 

@@ -12,15 +12,12 @@ export function AdminSellerPerformancePage() {
   const loadSellers = async () => {
     setLoading(true);
     try {
-      // In a real app we'd fetch Seller metrics explicitly.
-      // Here we fetch all users and filter by Role == 'Seller' (or just show their level).
-      const data = await apiRequest('/api/Users?PageNumber=1&PageSize=1000&IsDescending=false');
+      // Fetch computed metrics directly
+      const data = await apiRequest('/api/Users/seller-metrics');
       
-      // Assume the API returns items in data.items
+      // The API returns an array directly
       let users = data.items || data;
-      // Filter out non-sellers? Or just show all? The backend EvaluateSellers command evaluates users with Role=="Seller" or who have Stores.
-      // Since GetUsers might returns sellerLevel, we can map it.
-      setSellers(users.filter(u => u.role === 'Seller'));
+      setSellers(users);
     } catch (error) {
       setToast({ message: error.message, type: "error" });
     } finally {
@@ -105,6 +102,11 @@ export function AdminSellerPerformancePage() {
                   <tr>
                     <th>ID</th>
                     <th>Seller Name</th>
+                    <th>Transactions</th>
+                    <th>Sales Vol.</th>
+                    <th>Unresolved</th>
+                    <th>Defect Rate</th>
+                    <th>Late Rate</th>
                     <th>Level</th>
                     <th>Status</th>
                     <th>Details</th>
@@ -115,6 +117,11 @@ export function AdminSellerPerformancePage() {
                     <tr key={s.id}>
                       <td>{s.id}</td>
                       <td>{s.username || s.email}</td>
+                      <td>{s.transactionCount}</td>
+                      <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(s.totalSales)}</td>
+                      <td>{s.unresolvedCases}</td>
+                      <td>{(s.defectRate * 100).toFixed(2)}%</td>
+                      <td>{(s.lateRate * 100).toFixed(2)}%</td>
                       <td>
                         {s.sellerLevel === 'TopRated' && <span className="badge bg-success">Top Rated</span>}
                         {s.sellerLevel === 'AboveStandard' && <span className="badge bg-warning text-dark">Above Standard</span>}
