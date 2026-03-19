@@ -25,12 +25,21 @@ public class GetOrderStatsQueryHandler : IRequestHandler<GetOrderStatsQuery, Ord
 
     public async Task<OrderStatsDto> Handle(GetOrderStatsQuery request, CancellationToken cancellationToken)
     {
-        var start = request.StartDate?.ToUniversalTime() ?? DateTime.UtcNow.Date;
-        var end   = request.EndDate?.ToUniversalTime()   ?? DateTime.UtcNow.Date.AddDays(1).AddTicks(-1);
+        var query = _context.OrderTables.AsNoTracking();
 
-        var orders = await _context.OrderTables
-            .AsNoTracking()
-            .Where(o => o.OrderDate != null && o.OrderDate >= start && o.OrderDate <= end)
+        if (request.StartDate.HasValue)
+        {
+            var start = request.StartDate.Value.ToUniversalTime();
+            query = query.Where(o => o.OrderDate >= start);
+        }
+
+        if (request.EndDate.HasValue)
+        {
+            var end = request.EndDate.Value.ToUniversalTime();
+            query = query.Where(o => o.OrderDate <= end);
+        }
+
+        var orders = await query
             .Select(o => o.Status)
             .ToListAsync(cancellationToken);
 

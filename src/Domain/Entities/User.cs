@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
+using EbayClone.Domain.Common;
 
 namespace EbayClone.Domain.Entities;
 
-public partial class User
+public partial class User : BaseAuditableEntity
 {
-    public int Id { get; set; }
+    public new int Id { get; set; }
 
     public string? Username { get; set; }
 

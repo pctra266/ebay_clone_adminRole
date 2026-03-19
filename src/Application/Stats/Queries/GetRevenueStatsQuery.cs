@@ -26,12 +26,21 @@ public class GetRevenueStatsQueryHandler : IRequestHandler<GetRevenueStatsQuery,
 
     public async Task<RevenueStatsDto> Handle(GetRevenueStatsQuery request, CancellationToken cancellationToken)
     {
-        var start = request.StartDate?.ToUniversalTime() ?? DateTime.UtcNow.Date;
-        var end   = request.EndDate?.ToUniversalTime()   ?? DateTime.UtcNow.Date.AddDays(1).AddTicks(-1);
-
         var query = _context.FinancialTransactions
             .AsNoTracking()
-            .Where(t => t.Type == "FeeDeduction" && t.Date >= start && t.Date <= end);
+            .Where(t => t.Type == "FeeDeduction");
+
+        if (request.StartDate.HasValue)
+        {
+            var start = request.StartDate.Value.ToUniversalTime();
+            query = query.Where(t => t.Date >= start);
+        }
+
+        if (request.EndDate.HasValue)
+        {
+            var end = request.EndDate.Value.ToUniversalTime();
+            query = query.Where(t => t.Date <= end);
+        }
 
         // Fetch raw rows – two columns only, then group client-side.
         // GroupBy(t => t.Date.Date) cannot be translated to SQL by EF Core.

@@ -43,6 +43,7 @@ const fmtCurrency = (n) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n ?? 0);
 
 function toIso(date) {
+  if (!date) return null;
   return date.toISOString().split("T")[0];
 }
 
@@ -50,6 +51,8 @@ function getPresetRange(preset) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   switch (preset) {
+    case "all":
+      return { start: null, end: null };
     case "today":
       return { start: today, end: today };
     case "week": {
@@ -119,12 +122,12 @@ export function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const currentMetrics = await dashboardService.getMetrics();
-      setMetrics(currentMetrics);
-
       const range = getPresetRange(preset);
       const start = toIso(range.start);
       const end = toIso(range.end);
+
+      const currentMetrics = await dashboardService.getMetrics(start, end);
+      setMetrics(currentMetrics);
 
       const [rev, usr, ord] = await Promise.allSettled([
         reportService.getRevenue(start, end),
@@ -152,7 +155,7 @@ export function DashboardPage() {
   if (loading && !metrics) return <LoadingIndicator text="Assembling your workspace..." />;
 
   // ── Chart.js Configurations ───────────────────────────────────────────────
-  
+
   // 1. Revenue Line Chart
   const revenueChartData = {
     labels: stats.revenue?.dailyRevenue?.map(d => new Date(d.date).toLocaleDateString("en-US", { day: '2-digit', month: 'short' })) || [],
@@ -188,10 +191,10 @@ export function DashboardPage() {
     },
     scales: {
       x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#888' } },
-      y: { 
-        beginAtZero: true, 
-        grid: { color: 'rgba(0,0,0,0.02)', drawBorder: false }, 
-        ticks: { font: { size: 10 }, color: '#888', callback: (v) => '$' + fmt(v) } 
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(0,0,0,0.02)', drawBorder: false },
+        ticks: { font: { size: 10 }, color: '#888', callback: (v) => '$' + fmt(v) }
       }
     }
   };
@@ -233,59 +236,56 @@ export function DashboardPage() {
           <h1 className="h3 fw-bold mb-1">Unified Command Center</h1>
           <p className="text-secondary small mb-0">Overview of operational health & performance.</p>
         </div>
-        
+
         <div className="date-presets-container bg-light p-1 rounded-pill shadow-sm">
-          {["today", "week", "month", "quarter"].map((p) => (
+          {["today", "week", "month", "quarter", "all"].map((p) => (
             <button
               key={p}
               onClick={() => setPreset(p)}
               className={`date-preset-btn ${preset === p ? "active" : ""}`}
             >
-              {p === 'today' ? 'Today' : p === 'week' ? 'Weekly' : p === 'month' ? 'Monthly' : 'Quarterly'}
+              {p === 'today' ? 'Today' : p === 'week' ? 'Weekly' : p === 'month' ? 'Monthly' : p === 'quarter' ? 'Quarterly' : 'All Time'}
             </button>
           ))}
-          <button className="btn btn-sm btn-light rounded-pill ms-2" onClick={fetchData}>
-            <i className={`bi bi-arrow-clockwise ${loading ? 'spin' : ''}`}></i>
-          </button>
         </div>
       </div>
 
       {/* KPI Section */}
       <div className="row g-4 mb-5">
         <div className="col-md-3">
-          <MetricTile 
-            label="Total Revenue" 
-            value={stats.revenue?.totalRevenue || 0} 
-            icon="bi bi-bank" 
-            gradient="bg-gradient-blue" 
+          <MetricTile
+            label="Total Revenue"
+            value={stats.revenue?.totalRevenue || 0}
+            icon="bi bi-bank"
+            gradient="bg-gradient-blue"
             stagger="stagger-1"
-            currency 
+            currency
           />
         </div>
         <div className="col-md-3">
-          <MetricTile 
-            label="Active Users" 
-            value={metrics?.totalUsers} 
-            icon="bi bi-people" 
-            gradient="bg-gradient-green" 
+          <MetricTile
+            label="Active Users"
+            value={metrics?.totalUsers}
+            icon="bi bi-people"
+            gradient="bg-gradient-green"
             stagger="stagger-2"
           />
         </div>
         <div className="col-md-3">
-          <MetricTile 
-            label="Total Products" 
-            value={metrics?.totalProducts} 
-            icon="bi bi-bag-check" 
-            gradient="bg-gradient-yellow" 
+          <MetricTile
+            label="Total Products"
+            value={metrics?.totalProducts}
+            icon="bi bi-bag-check"
+            gradient="bg-gradient-yellow"
             stagger="stagger-3"
           />
         </div>
         <div className="col-md-3">
-          <MetricTile 
-            label="Orders (Today)" 
-            value={metrics?.totalOrdersToday} 
-            icon="bi bi-cart-check" 
-            gradient="bg-gradient-red" 
+          <MetricTile
+            label="Orders (Today)"
+            value={metrics?.totalOrdersToday}
+            icon="bi bi-cart-check"
+            gradient="bg-gradient-red"
             stagger="stagger-4"
           />
         </div>
@@ -306,7 +306,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="py-2" style={{ height: 260 }}>
-               <Line data={revenueChartData} options={revenueChartOptions} />
+              <Line data={revenueChartData} options={revenueChartOptions} />
             </div>
           </GlassCard>
         </div>
@@ -314,63 +314,63 @@ export function DashboardPage() {
         {/* Side widgets */}
         <div className="col-lg-4">
           <div className="d-flex flex-column gap-4 h-100">
-             {/* Action Center */}
-             <GlassCard className="p-4">
-                <h6 className="fw-bold mb-3 d-flex align-items-center">
-                  <i className="bi bi-lightning-charge-fill text-warning me-2"></i>
-                  Action Center
-                </h6>
-                <div className="d-flex flex-column">
-                  <ActionItem 
-                    title="User Approvals" 
-                    count={metrics?.pendingAccountsCount} 
-                    icon="bi bi-person-check" 
-                    link="/users?tab=Pending"
-                    colorClass="blue"
-                  />
-                  <ActionItem 
-                    title="Active Disputes" 
-                    count={metrics?.openDisputesCount} 
-                    icon="bi bi-shield-lock" 
-                    link="/disputes?status=Open"
-                    colorClass="red"
-                  />
-                  <ActionItem 
-                    title="Return Requests" 
-                    count={metrics?.newReturnRequestsCount} 
-                    icon="bi bi-arrow-left-right" 
-                    link="/return-requests"
-                    colorClass="yellow"
-                  />
-                </div>
-             </GlassCard>
+            {/* Action Center */}
+            <GlassCard className="p-4">
+              <h6 className="fw-bold mb-3 d-flex align-items-center">
+                <i className="bi bi-lightning-charge-fill text-warning me-2"></i>
+                Action Center
+              </h6>
+              <div className="d-flex flex-column">
+                <ActionItem
+                  title="User Approvals"
+                  count={metrics?.pendingAccountsCount}
+                  icon="bi bi-person-check"
+                  link="/users?tab=Pending"
+                  colorClass="blue"
+                />
+                <ActionItem
+                  title="Active Disputes"
+                  count={metrics?.openDisputesCount}
+                  icon="bi bi-shield-lock"
+                  link="/disputes?status=Open"
+                  colorClass="red"
+                />
+                <ActionItem
+                  title="Return Requests"
+                  count={metrics?.newReturnRequestsCount}
+                  icon="bi bi-arrow-left-right"
+                  link="/return-requests"
+                  colorClass="yellow"
+                />
+              </div>
+            </GlassCard>
 
-             {/* Distribution */}
-             <GlassCard className="p-4 flex-grow-1">
-                <h6 className="fw-bold mb-4 text-center">Order Distribution</h6>
-                <div style={{ height: 180, position: 'relative' }}>
-                  <Doughnut data={orderDoughnutData} options={orderDoughnutOptions} />
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    textAlign: 'center',
-                    pointerEvents: 'none'
-                  }}>
-                    <div className="h4 fw-bold mb-0">{fmt(stats.orders?.total)}</div>
-                    <div className="text-secondary" style={{ fontSize: 9 }}>TOTAL</div>
+            {/* Distribution */}
+            <GlassCard className="p-4 flex-grow-1">
+              <h6 className="fw-bold mb-4 text-center">Order Distribution</h6>
+              <div style={{ height: 180, position: 'relative' }}>
+                <Doughnut data={orderDoughnutData} options={orderDoughnutOptions} />
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  textAlign: 'center',
+                  pointerEvents: 'none'
+                }}>
+                  <div className="h4 fw-bold mb-0">{fmt(stats.orders?.total)}</div>
+                  <div className="text-secondary" style={{ fontSize: 9 }}>TOTAL</div>
+                </div>
+              </div>
+              <div className="mt-4 d-flex flex-wrap gap-2 justify-content-center">
+                {orderDoughnutData.labels.map((l, i) => (
+                  <div key={i} className="d-flex align-items-center small bg-light px-2 py-1 rounded-pill">
+                    <span className="rounded-circle me-1" style={{ width: 8, height: 8, background: orderDoughnutData.datasets[0].backgroundColor[i] }}></span>
+                    <span className="text-secondary" style={{ fontSize: 10 }}>{l}: <strong>{fmt(orderDoughnutData.datasets[0].data[i])}</strong></span>
                   </div>
-                </div>
-                <div className="mt-4 d-flex flex-wrap gap-2 justify-content-center">
-                  {orderDoughnutData.labels.map((l, i) => (
-                    <div key={i} className="d-flex align-items-center small bg-light px-2 py-1 rounded-pill">
-                      <span className="rounded-circle me-1" style={{ width: 8, height: 8, background: orderDoughnutData.datasets[0].backgroundColor[i] }}></span>
-                      <span className="text-secondary" style={{ fontSize: 10 }}>{l}: <strong>{fmt(orderDoughnutData.datasets[0].data[i])}</strong></span>
-                    </div>
-                  ))}
-                </div>
-             </GlassCard>
+                ))}
+              </div>
+            </GlassCard>
           </div>
         </div>
       </div>
