@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import financeService from '../services/financeService';
 import { ToastMessage } from '../components/ToastMessage';
 
@@ -45,13 +46,6 @@ export const WalletsPage = () => {
                 onClose={() => setToast({ message: '', type: 'success' })} 
             />
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1 className="h3">Seller Wallets</h1>
-                <button className="btn btn-warning" onClick={handleSettle}>
-                    <i className="fas fa-sync-alt me-2"></i> Trigger Settlement
-                </button>
-            </div>
-
             <div className="card shadow-sm">
                 <div className="table-responsive">
                     <table className="table table-hover mb-0">
@@ -76,7 +70,12 @@ export const WalletsPage = () => {
                                         <div className="fw-bold">{wallet.sellerName}</div>
                                         <small className="text-muted">ID: {wallet.sellerId}</small>
                                     </td>
-                                    <td className="text-end text-warning">{formatCurrency(wallet.pendingBalance)}</td>
+                                    <td className="text-end">
+                                        <Link to={`/wallets/pending/${wallet.sellerId}`} className="text-warning text-decoration-none">
+                                            {formatCurrency(wallet.pendingBalance)}
+                                            <i className="fas fa-external-link-alt ms-1 small"></i>
+                                        </Link>
+                                    </td>
                                     <td className="text-end text-success fw-bold">{formatCurrency(wallet.availableBalance)}</td>
                                     <td className="text-end text-danger">{formatCurrency(wallet.lockedBalance)}</td>
                                     <td className="text-end">{formatCurrency(wallet.totalEarnings)}</td>

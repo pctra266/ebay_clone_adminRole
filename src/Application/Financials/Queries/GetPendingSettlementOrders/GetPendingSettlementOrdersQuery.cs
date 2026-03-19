@@ -14,6 +14,7 @@ public record PendingSettlementOrderDto
     public string? BuyerName { get; init; }
     public DateTime? CompletedAt { get; init; }
     public DateTime? CanDisputeUntil { get; init; }
+    public DateTime? EstimatedSettlementDate { get; init; }
 }
 
 public record GetPendingSettlementOrdersQuery : IRequest<List<PendingSettlementOrderDto>>;
@@ -30,7 +31,9 @@ public class GetPendingSettlementOrdersQueryHandler : IRequestHandler<GetPending
     public async Task<List<PendingSettlementOrderDto>> Handle(GetPendingSettlementOrdersQuery request, CancellationToken cancellationToken)
     {
         var orders = await _context.OrderTables
-            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && o.CanDisputeUntil < DateTime.UtcNow)
+            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && 
+                        ((o.EstimatedSettlementDate != null && o.EstimatedSettlementDate <= DateTime.UtcNow) ||
+                         (o.EstimatedSettlementDate == null && o.CanDisputeUntil < DateTime.UtcNow)))
             .Include(o => o.Buyer)
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
@@ -46,7 +49,8 @@ public class GetPendingSettlementOrdersQueryHandler : IRequestHandler<GetPending
             SellerName = o.OrderItems.FirstOrDefault()?.Product?.Seller?.Username ?? "Unknown Seller",
             BuyerName = o.Buyer?.Username ?? "Unknown Buyer",
             CompletedAt = o.CompletedAt,
-            CanDisputeUntil = o.CanDisputeUntil
+            CanDisputeUntil = o.CanDisputeUntil,
+            EstimatedSettlementDate = o.EstimatedSettlementDate
         }).ToList();
     }
 }

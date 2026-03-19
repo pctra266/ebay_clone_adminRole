@@ -7,6 +7,7 @@ using EbayClone.Application.Withdrawals.Queries.GetWithdrawalRequests;
 using EbayClone.Application.Withdrawals.Commands.RejectWithdrawal;
 using EbayClone.Application.Withdrawals.Commands.RequestWithdrawal;
 using EbayClone.Application.Financials.Queries.GetPendingSettlementOrders;
+using EbayClone.Application.Financials.Queries.GetSellerPendingFunds;
 using EbayClone.Application.Financials.Commands.SettleOrder;
 using EbayClone.Domain.Constants;
 using MediatR;
@@ -45,6 +46,8 @@ public class Financials : EndpointGroupBase
         group.MapGet("settlement-orders", GetPendingSettlementOrders);
         group.MapPost("settle-order/{id}", SettleOrder)
              .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
+
+        group.MapGet("pending/{sellerId:int}", GetSellerPendingFunds);
 
         // Reports
         group.MapGet("reports/revenue", GetRevenueReport)
@@ -102,6 +105,11 @@ public class Financials : EndpointGroupBase
     public async Task<RevenueReportDto> GetRevenueReport(ISender sender)
     {
         return await sender.Send(new GetRevenueReportQuery());
+    }
+
+    public async Task<List<SellerPendingFundDto>> GetSellerPendingFunds(ISender sender, int sellerId)
+    {
+        return await sender.Send(new GetSellerPendingFundsQuery(sellerId));
     }
 }
 

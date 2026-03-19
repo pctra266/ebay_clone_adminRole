@@ -1,4 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
+using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +21,9 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
         // 1. Find orders that are delivered and past the dispute window
         // For simplicity, we use DateTime.UtcNow. In production, this might be a scheduled job.
         var eligibleOrders = await _context.OrderTables
-            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && o.CanDisputeUntil < DateTime.UtcNow)
+            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && 
+                        ((o.EstimatedSettlementDate != null && o.EstimatedSettlementDate <= DateTime.UtcNow) ||
+                         (o.EstimatedSettlementDate == null && o.CanDisputeUntil < DateTime.UtcNow)))
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
             .ToListAsync(cancellationToken);
@@ -51,6 +54,20 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
                     {
                         wallet.MovePendingToAvailable(amountToSettle);
                         
+                        // Add a transaction record for auditability
+                        var transaction = new FinancialTransaction
+                        {
+                            SellerId = sellerId,
+                            UserId = sellerId,
+                            Type = "Settlement",
+                            Amount = amountToSettle,
+                            BalanceAfter = wallet.AvailableBalance,
+                            OrderId = order.Id,
+                            Description = $"Settled pending funds for order #{order.Id}",
+                            Date = DateTime.UtcNow
+                        };
+                        _context.FinancialTransactions.Add(transaction);
+
                         // Update order status to indicate funds are cleared
                         order.Status = "FundsCleared"; 
                         settledCount++;

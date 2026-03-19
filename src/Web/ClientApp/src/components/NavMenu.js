@@ -49,7 +49,6 @@ export const NavMenu = () => {
             <>
               <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
               <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
-              <SidebarLink to="/settlements" icon="bi bi-cart-check">Orders</SidebarLink>
               <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
               <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
             </>
@@ -64,6 +63,7 @@ export const NavMenu = () => {
               <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
+              <SidebarLink to="/seller-performance" icon="bi bi-speedometer">Seller Performance</SidebarLink>
             </>
           )}
         </ul>

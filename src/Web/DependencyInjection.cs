@@ -26,6 +26,9 @@ public static class DependencyInjection
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<ApplicationDbContext>();
 
+        builder.Services.AddHostedService<SellerEvaluationBackgroundService>();
+        builder.Services.AddHostedService<SettlementBackgroundService>();
+
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
         builder.Services.AddRazorPages();

@@ -106,6 +106,23 @@ export function UserDetailPage() {
                 <div className="col-md-4"><strong>Masked Phone:</strong> {user.maskedPhone || "-"}</div>
                 <div className="col-md-4"><strong>Masked National ID:</strong> {user.maskedNationalId || "-"}</div>
                 <div className="col-md-4"><strong>Violation Count:</strong> {user.violationCount}</div>
+                {user.role === "Seller" && (
+                  <>
+                    <div className="col-md-4"><strong>Seller Level:</strong> {user.sellerLevel || "BelowStandard"}</div>
+                    <div className="col-md-4">
+                      <button className="btn btn-sm btn-outline-primary" onClick={async () => {
+                        try {
+                           const res = await fetch('/api/Users/evaluate-sellers', {
+                             method: 'POST',
+                             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                           });
+                           if(res.ok) alert("Evaluation completed.");
+                           loadDetail();
+                        } catch(e) { }
+                      }}>Manually Evaluate</button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

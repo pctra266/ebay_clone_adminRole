@@ -738,15 +738,20 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("EstimatedSettlementDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime")
                         .HasColumnName("orderDate");
 
                     b.Property<decimal?>("PlatformFee")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("platformFee");
 
                     b.Property<decimal?>("SellerEarnings")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("sellerEarnings");
 
                     b.Property<string>("Status")
                         .HasMaxLength(20)
@@ -754,7 +759,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnName("status");
 
                     b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("totalPrice");
 
                     b.HasKey("Id")
@@ -1377,6 +1382,10 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("role");
+
+                    b.Property<string>("SellerLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
