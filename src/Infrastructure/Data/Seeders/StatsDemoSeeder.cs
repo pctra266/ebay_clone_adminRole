@@ -30,7 +30,24 @@ public class StatsDemoSeeder : ISeeder
         if (await _context.Users.AnyAsync(u => u.Email == "demo.user.1@stats.local") ||
             await _context.FinancialTransactions.AnyAsync(t => t.Description == "StatsDemoSeeder-v1"))
         {
-            _logger.LogInformation("StatsDemoSeeder already ran or partially ran, skipping.");
+            _logger.LogInformation("StatsDemoSeeder already ran, ensuring SellerLevel variety...");
+            
+            // Fixup: if they exist but are all BelowStandard, force some to TopRated/AboveStandard
+            var demoSellers = await _context.Users
+                .Where(u => (u.Email != null && u.Email.Contains("@stats.local")) && u.Role == "Seller")
+                .Take(10)
+                .ToListAsync();
+
+            if (demoSellers.Any() && demoSellers.All(s => s.SellerLevel == "BelowStandard"))
+            {
+                 for (int i = 0; i < demoSellers.Count; i++)
+                 {
+                     if (i < 3) demoSellers[i].SellerLevel = "TopRated";
+                     else if (i < 7) demoSellers[i].SellerLevel = "AboveStandard";
+                 }
+                 await _context.SaveChangesAsync();
+                 _logger.LogInformation("Updated levels for existing demo sellers.");
+            }
             return;
         }
 
@@ -47,6 +64,14 @@ public class StatsDemoSeeder : ISeeder
             var daysAgo = rng.Next(1, 91);
             var isSeller = (i % 3 == 0); // 20 sellers, 40 buyers
             var approvedAt = now.AddDays(-daysAgo).AddHours(rng.Next(0, 23));
+            var sellerLevel = "BelowStandard";
+            if (isSeller)
+            {
+                // Distribute levels: 1-5: TopRated, 6-15: AboveStandard, rest: BelowStandard
+                if (i <= 5) sellerLevel = "TopRated";
+                else if (i <= 15) sellerLevel = "AboveStandard";
+            }
+
             newUsers.Add(new User
             {
                 Username       = $"demo_{(isSeller ? "seller" : "buyer")}_{i:D3}",
@@ -57,7 +82,8 @@ public class StatsDemoSeeder : ISeeder
                 ApprovalStatus = "Approved",
                 ApprovedAt     = approvedAt,
                 IsVerified     = true,
-                TwoFactorEnabled = false
+                TwoFactorEnabled = false,
+                SellerLevel    = sellerLevel
             });
         }
         _context.Users.AddRange(newUsers);

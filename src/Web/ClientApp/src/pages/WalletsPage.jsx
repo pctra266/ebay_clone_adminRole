@@ -46,13 +46,6 @@ export const WalletsPage = () => {
                 onClose={() => setToast({ message: '', type: 'success' })} 
             />
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1 className="h3">Seller Wallets</h1>
-                <button className="btn btn-warning" onClick={handleSettle}>
-                    <i className="fas fa-sync-alt me-2"></i> Trigger Settlement
-                </button>
-            </div>
-
             <div className="card shadow-sm">
                 <div className="table-responsive">
                     <table className="table table-hover mb-0">

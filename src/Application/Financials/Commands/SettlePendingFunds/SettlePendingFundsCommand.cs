@@ -1,4 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
+using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +54,20 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
                     {
                         wallet.MovePendingToAvailable(amountToSettle);
                         
+                        // Add a transaction record for auditability
+                        var transaction = new FinancialTransaction
+                        {
+                            SellerId = sellerId,
+                            UserId = sellerId,
+                            Type = "Settlement",
+                            Amount = amountToSettle,
+                            BalanceAfter = wallet.AvailableBalance,
+                            OrderId = order.Id,
+                            Description = $"Settled pending funds for order #{order.Id}",
+                            Date = DateTime.UtcNow
+                        };
+                        _context.FinancialTransactions.Add(transaction);
+
                         // Update order status to indicate funds are cleared
                         order.Status = "FundsCleared"; 
                         settledCount++;

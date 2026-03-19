@@ -1,4 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
+using EbayClone.Application.Financials.Commands.SettlePendingFunds;
 using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,12 @@ public record GenerateMockOrderCommand : IRequest<bool>
 public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrderCommand, bool>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISender _sender;
 
-    public GenerateMockOrderCommandHandler(IApplicationDbContext context)
+    public GenerateMockOrderCommandHandler(IApplicationDbContext context, ISender sender)
     {
         _context = context;
+        _sender = sender;
     }
 
     public async Task<bool> Handle(GenerateMockOrderCommand request, CancellationToken cancellationToken)
@@ -139,6 +142,16 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Auto-trigger settlement to process the mock order if it's eligible (e.g. TopRated)
+        try
+        {
+            await _sender.Send(new SettlePendingFundsCommand(), cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Fail silently for mock orders if settlement trigger fails
+        }
 
         return true;
     }
