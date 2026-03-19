@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
-import { getAuthHeaders } from '../services/config';
+import { apiRequest } from '../services/httpClient';
 
 export function AdminSellerPerformancePage() {
   const [sellers, setSellers] = useState([]);
@@ -14,12 +14,8 @@ export function AdminSellerPerformancePage() {
     try {
       // In a real app we'd fetch Seller metrics explicitly.
       // Here we fetch all users and filter by Role == 'Seller' (or just show their level).
-      const response = await fetch('/api/Users', {
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) throw new Error("Failed to fetch sellers.");
+      const data = await apiRequest('/api/Users?PageNumber=1&PageSize=1000&IsDescending=false');
       
-      const data = await response.json();
       // Assume the API returns items in data.items
       let users = data.items || data;
       // Filter out non-sellers? Or just show all? The backend EvaluateSellers command evaluates users with Role=="Seller" or who have Stores.
@@ -40,14 +36,9 @@ export function AdminSellerPerformancePage() {
     if (!window.confirm("Are you sure you want to trigger evaluation for all sellers?")) return;
     setEvaluating(true);
     try {
-      const response = await fetch('/api/Users/evaluate-sellers', {
-        method: 'POST',
-        headers: getAuthHeaders()
+      const updatedCount = await apiRequest('/api/Users/evaluate-sellers', {
+        method: 'POST'
       });
-      if (!response.ok) {
-        throw new Error("Evaluation request failed.");
-      }
-      const updatedCount = await response.json();
       setToast({ message: `Evaluation complete. ${updatedCount} sellers updated.`, type: "success" });
       loadSellers();
     } catch (error) {
