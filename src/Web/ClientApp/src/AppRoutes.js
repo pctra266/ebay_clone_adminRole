@@ -25,6 +25,7 @@ import EbayProductDetail from "./pages/EbayProductDetail";
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import { AdminSellerPerformancePage } from "./pages/AdminSellerPerformancePage";
+import { MockPurchasePage } from "./pages/MockPurchasePage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -36,7 +37,6 @@ const AppRoutes = [
     element: <LoginPage />,
     noLayout: true
   },
-
   // ── Cần login nhưng chưa cần 2FA ─────────────────────────────────
   {
     path: "/enable2FA",
@@ -146,6 +146,10 @@ const AppRoutes = [
   {
     path: "/seller-performance",
     element: protect(<AdminSellerPerformancePage />)
+  },
+  {
+    path: "/mock-purchase",
+    element: protect(<MockPurchasePage />)
   }
 ];
 
