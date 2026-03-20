@@ -122,7 +122,7 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             _context.SellerWallets.Add(wallet);
         }
         
-        wallet.PendingBalance += sellerEarnings;
+        wallet.CreditPending(sellerEarnings);
         await _context.SaveChangesAsync(cancellationToken);
 
         // Handle specific metrics failures AFTER completed

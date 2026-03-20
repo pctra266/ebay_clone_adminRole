@@ -54,16 +54,14 @@ export const WalletsPage = () => {
                                 <th>Seller</th>
                                 <th className="text-end">Pending</th>
                                 <th className="text-end">Available</th>
-                                <th className="text-end">Locked</th>
-                                <th className="text-end">Total Earnings</th>
                                 <th className="text-end">Total Withdrawn</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="6" className="text-center py-4">Loading wallets...</td></tr>
+                                <tr><td colSpan="4" className="text-center py-4">Loading wallets...</td></tr>
                             ) : wallets.length === 0 ? (
-                                <tr><td colSpan="6" className="text-center py-4">No wallets found</td></tr>
+                                <tr><td colSpan="4" className="text-center py-4">No wallets found</td></tr>
                             ) : wallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td>
@@ -77,8 +75,6 @@ export const WalletsPage = () => {
                                         </Link>
                                     </td>
                                     <td className="text-end text-success fw-bold">{formatCurrency(wallet.availableBalance)}</td>
-                                    <td className="text-end text-danger">{formatCurrency(wallet.lockedBalance)}</td>
-                                    <td className="text-end">{formatCurrency(wallet.totalEarnings)}</td>
                                     <td className="text-end text-muted">{formatCurrency(wallet.totalWithdrawn)}</td>
                                 </tr>
                             ))}
