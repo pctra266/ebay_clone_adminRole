@@ -37,7 +37,7 @@ public class PushPayoutCommandHandler : IRequestHandler<PushPayoutCommand, Payou
             seller.BankAccountMock = "{\"bankName\": \"Manual Test Bank\", \"accountNumber\": \"TEST-999\", \"accountName\": \"" + seller.Username + "\"}";
         }
 
-        // 2. Inject Available Balance
+        // 2. Inject Available Balance if needed
         var wallet = await _context.SellerWallets.FirstOrDefaultAsync(w => w.SellerId == seller.Id, cancellationToken);
         if (wallet == null)
         {
@@ -45,23 +45,28 @@ public class PushPayoutCommandHandler : IRequestHandler<PushPayoutCommand, Payou
             _context.SellerWallets.Add(wallet);
         }
 
-        wallet.AvailableBalance += request.Amount;
-        
-        // Audit injection
-        _context.FinancialTransactions.Add(new FinancialTransaction
+        if (wallet.AvailableBalance < request.Amount)
         {
-            SellerId = seller.Id,
-            UserId = seller.Id,
-            Type = "Adjustment",
-            Amount = request.Amount,
-            BalanceAfter = wallet.AvailableBalance,
-            Description = $"[MockPush] Injected ${request.Amount:F2} for manual payout test.",
-            Date = DateTime.UtcNow
-        });
+            var injectionAmount = request.Amount - wallet.AvailableBalance;
+            wallet.AvailableBalance += injectionAmount;
 
-        await _context.SaveChangesAsync(cancellationToken);
+            // Audit injection
+            _context.FinancialTransactions.Add(new FinancialTransaction
+            {
+                SellerId = seller.Id,
+                UserId = seller.Id,
+                Type = "Adjustment",
+                Amount = injectionAmount,
+                BalanceAfter = wallet.AvailableBalance,
+                Description = $"[MockPush] Injected ${injectionAmount:F2} to cover manual payout test (Requested: ${request.Amount:F2}).",
+                Date = DateTime.UtcNow
+            });
 
-        // 3. Trigger targeted Payout Engine run
-        return await _sender.Send(new RunPayoutEngineCommand { SellerId = seller.Id }, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // 3. Trigger targeted Payout Engine run with specific amount
+        Console.WriteLine($"[PUSH_DEBUG] Triggering RunPayoutEngine for Seller {seller.Id} with Amount {request.Amount}");
+        return await _sender.Send(new RunPayoutEngineCommand(seller.Id, request.Amount), cancellationToken);
     }
 }

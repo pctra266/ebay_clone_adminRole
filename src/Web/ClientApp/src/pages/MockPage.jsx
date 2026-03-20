@@ -154,7 +154,7 @@ export function MockPage() {
                         <div className="mb-4">
                             <h5 className="fw-bold mb-2">2. Push Manual Payout</h5>
                             <p className="text-muted small">
-                                Simulate a direct withdrawal request. This injects <strong>Available Balance</strong> and immediately triggers a targeted run of the Payout Engine for this seller.
+                                Simulate a direct withdrawal request. This injects <strong>Available Balance</strong> (if needed) and immediately triggers a targeted run of the Payout Engine for this seller.
                             </p>
                         </div>
 
@@ -194,6 +194,11 @@ export function MockPage() {
                                     </div>
                                 </div>
                                 <div className="mt-3 x-small text-secondary text-center">
+                                    {payoutResult.message && (
+                                        <div className="mb-2 p-2 bg-white rounded border border-warning text-dark text-start">
+                                            <strong>Reason:</strong> {payoutResult.message}
+                                        </div>
+                                    )}
                                     Check <a href="/payout-engine" target="_blank">Payout Engine</a> for full logs & transaction ID.
                                 </div>
                             </div>

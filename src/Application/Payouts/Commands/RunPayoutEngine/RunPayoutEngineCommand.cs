@@ -10,9 +10,18 @@ namespace EbayClone.Application.Payouts.Commands.RunPayoutEngine;
 /// Trigger the Payout Engine for all eligible Sellers.
 /// Returns a PayoutEngineResult summarizing the session.
 /// </summary>
-public record RunPayoutEngineCommand : IRequest<PayoutEngineResult>
+public class RunPayoutEngineCommand : IRequest<PayoutEngineResult>
 {
-    public int? SellerId { get; init; }
+    public int? SellerId { get; set; }
+    public decimal AmountToWithdraw { get; set; } = -1; // -1 means all available funds
+
+    public RunPayoutEngineCommand() { }
+
+    public RunPayoutEngineCommand(int? sellerId, decimal amountToWithdraw)
+    {
+        SellerId = sellerId;
+        AmountToWithdraw = amountToWithdraw;
+    }
 }
 
 public record PayoutEngineResult(
@@ -22,7 +31,8 @@ public record PayoutEngineResult(
     int OnHold,
     int Skipped,
     decimal TotalDisbursed,
-    string SessionId
+    string SessionId,
+    string? Message = null
 );
 
 public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineCommand, PayoutEngineResult>
@@ -82,11 +92,17 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
 
         int successCount = 0, failedCount = 0, holdCount = 0, skippedCount = 0;
         decimal totalDisbursed = 0m;
+        string? diagnosticMessage = null;
 
         foreach (var wallet in wallets)
         {
             var seller = wallet.Seller;
-            if (seller == null) { skippedCount++; continue; }
+            if (seller == null) 
+            { 
+                if (request.SellerId.HasValue) diagnosticMessage = "Seller record not found.";
+                skippedCount++; 
+                continue; 
+            }
 
             // ── CONCURRENCY GUARD: skip if a Processing payout already exists ─
             bool alreadyProcessing = await _context.PayoutTransactions
@@ -98,6 +114,7 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
             {
                 _logger.LogWarning("[SKIP] Seller #{Id} ({Name}): Already has a Processing payout. Skipping to avoid double-payout.",
                     seller.Id, seller.Username);
+                if (request.SellerId.HasValue) diagnosticMessage = "Already has a 'Processing' payout session active.";
                 skippedCount++;
                 continue;
             }
@@ -107,6 +124,7 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
             {
                 _logger.LogInformation("[SKIP] Seller #{Id} ({Name}): Account {Status}.",
                     seller.Id, seller.Username, seller.Status);
+                if (request.SellerId.HasValue) diagnosticMessage = $"Account is {seller.Status}.";
                 skippedCount++;
                 continue;
             }
@@ -142,6 +160,8 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
                 _context.PayoutTransactions.Add(holdTx);
                 _logger.LogWarning("[HOLD] Seller #{Id} ({Name}): ${Amount} → Active dispute detected.",
                     seller.Id, seller.Username, wallet.AvailableBalance);
+                
+                if (request.SellerId.HasValue) diagnosticMessage = "ON HOLD: Active dispute detected on seller account.";
                 holdCount++;
                 continue;
             }
@@ -151,14 +171,29 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
             {
                 _logger.LogInformation("[SKIP] Seller #{Id} ({Name}): No bank account linked.",
                     seller.Id, seller.Username);
+                if (request.SellerId.HasValue) diagnosticMessage = "No bank account information linked to this seller.";
                 skippedCount++;
                 continue;
             }
 
-            var amountToPay = wallet.AvailableBalance;
+            var amountToPay = (request.AmountToWithdraw >= 0) 
+                ? request.AmountToWithdraw 
+                : wallet.AvailableBalance;
+
+            _logger.LogCritical("[PAYOUT_DEBUG] CALC: OverrideVal={Val}, WalletAvail={Av}, FinalToPay={Final}", 
+                request.AmountToWithdraw, wallet.AvailableBalance, amountToPay);
+
+            if (amountToPay > wallet.AvailableBalance)
+            {
+                if (request.SellerId.HasValue) diagnosticMessage = $"Requested amount (${amountToPay:F2}) exceeds available balance (${wallet.AvailableBalance:F2}).";
+                skippedCount++;
+                continue;
+            }
 
             // ── STEP 3: Lock funds → mark as Processing ───────────────────────
+            _logger.LogCritical("[PAYOUT_DEBUG] LOCKING: Amount={A}, CurrentAvailable={Av}", amountToPay, wallet.AvailableBalance);
             wallet.LockAvailableFunds(amountToPay); // AvailableBalance → LockedBalance
+            _logger.LogCritical("[PAYOUT_DEBUG] LOCKED: Available={Av}, Locked={Lv}", wallet.AvailableBalance, wallet.LockedBalance);
 
             var payoutTx = new PayoutTransaction
             {
@@ -176,11 +211,13 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
 
             // ── STEP 3: Call Mock Payment Gateway ─────────────────────────────
             var gatewayResult = await _gateway.ProcessAsync(amountToPay, seller.BankAccountMock);
+            _logger.LogCritical("[PAYOUT_DEBUG] GATEWAY: Success={S}, Error={E}", gatewayResult.Success, gatewayResult.ErrorMessage);
 
             // ── STEP 4: Post-processing ───────────────────────────────────────
             if (gatewayResult.Success)
             {
                 wallet.ConfirmWithdrawal(amountToPay); // LockedBalance → TotalWithdrawn
+                _logger.LogCritical("[PAYOUT_DEBUG] CONFIRMED: Available={Av}, TotalWithdrawn={Tw}", wallet.AvailableBalance, wallet.TotalWithdrawn);
                 payoutTx.Status = PayoutTransaction.StatusSuccess;
                 payoutTx.CompletedAt = DateTime.UtcNow;
 
@@ -200,6 +237,7 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
                 successCount++;
                 _logger.LogInformation("[SUCCESS] Seller #{Id} ({Name}): ${Amount} → bank ✓",
                     seller.Id, seller.Username, amountToPay);
+                if (request.SellerId.HasValue) diagnosticMessage = "Payout successful.";
             }
             else
             {
@@ -212,17 +250,23 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
                 failedCount++;
                 _logger.LogError("[FAILED] Seller #{Id} ({Name}): ${Amount} → {Error}",
                     seller.Id, seller.Username, amountToPay, gatewayResult.ErrorMessage);
+                if (request.SellerId.HasValue) diagnosticMessage = $"FAILED: {gatewayResult.ErrorMessage}";
             }
 
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        if (request.SellerId.HasValue && wallets.Count == 0)
+        {
+            diagnosticMessage = "Seller has no available balance or balance is below minimum threshold.";
+        }
+
         _logger.LogInformation(
-            "[INFO] Summary: {S} Success | {F} Failed | {H} Hold | {K} Skipped | TotalDisbursed: ${D:F2}",
+            "[INFO) Summary: {S} Success | {F} Failed | {H} Hold | {K} Skipped | TotalDisbursed: ${D:F2}",
             successCount, failedCount, holdCount, skippedCount, totalDisbursed);
         _logger.LogInformation("===== PAYOUT ENGINE SESSION END =====");
 
         return new PayoutEngineResult(
-            wallets.Count, successCount, failedCount, holdCount, skippedCount, totalDisbursed, sessionId);
+            wallets.Count, successCount, failedCount, holdCount, skippedCount, totalDisbursed, sessionId, diagnosticMessage);
     }
 }
