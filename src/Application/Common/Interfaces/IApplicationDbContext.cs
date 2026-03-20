@@ -39,7 +39,6 @@ public interface IApplicationDbContext
     DbSet<ProductReport> ProductReports { get; }
     DbSet<SellerWallet> SellerWallets { get; }
 
-    DbSet<WithdrawalRequest> WithdrawalRequests { get; }
     DbSet<PlatformFee> PlatformFees { get; }
     DbSet<AdminAction> AdminActions { get; }
     DbSet<Notification> Notifications { get; }

@@ -15,7 +15,6 @@ import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
 import { WalletsPage } from "./pages/WalletsPage";
-import { WithdrawalsPage } from "./pages/WithdrawalsPage";
 import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
@@ -102,10 +101,6 @@ const AppRoutes = [
   {
     path: "/wallets",
     element: protect(<WalletsPage />)
-  },
-  {
-    path: "/withdrawals",
-    element: protect(<WithdrawalsPage />)
   },
   {
     path: "/settlements",

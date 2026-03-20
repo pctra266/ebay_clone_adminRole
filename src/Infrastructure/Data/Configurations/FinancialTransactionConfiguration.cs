@@ -37,10 +37,5 @@ public class FinancialTransactionConfiguration : IEntityTypeConfiguration<Financ
             .WithMany()
             .HasForeignKey(x => x.OrderId)
             .OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasOne(x => x.Withdrawal)
-            .WithMany()
-            .HasForeignKey(x => x.WithdrawalId)
-            .OnDelete(DeleteBehavior.SetNull);
     }
 }

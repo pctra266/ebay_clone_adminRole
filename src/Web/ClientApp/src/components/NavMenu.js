@@ -58,7 +58,7 @@ export const NavMenu = () => {
             <>
               <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
               <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
-              <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
+              <SidebarLink to="/payout-engine" icon="bi bi-lightning-charge">Payout Engine</SidebarLink>
               <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>

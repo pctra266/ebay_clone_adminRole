@@ -39,7 +39,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     // New DbSets for eBay Admin features
     public virtual DbSet<ProductReport> ProductReports { get; set; }
     public virtual DbSet<SellerWallet> SellerWallets { get; set; }
-    public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
     public virtual DbSet<PlatformFee> PlatformFees { get; set; }
     public virtual DbSet<AdminAction> AdminActions { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -487,11 +486,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
             entity.HasOne(e => e.Order)
                 .WithMany()
                 .HasForeignKey(e => e.OrderId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(e => e.Withdrawal)
-                .WithMany()
-                .HasForeignKey(e => e.WithdrawalId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
