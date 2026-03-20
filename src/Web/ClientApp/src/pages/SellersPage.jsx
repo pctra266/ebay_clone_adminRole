@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import financeService from '../services/financeService';
 import { apiRequest } from '../services/httpClient';
 import { ToastMessage } from '../components/ToastMessage';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const SellersPage = () => {
     const [wallets, setWallets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ message: '', type: 'success' });
     
+    // Frontend Pagination and Search State
+    const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10);
+
     const [modal, setModal] = useState(false);
     const [selectedSeller, setSelectedSeller] = useState(null);
 
@@ -55,6 +61,24 @@ export const SellersPage = () => {
         }
     };
 
+    // Derived Data: Filtering
+    const filteredWallets = useMemo(() => {
+        if (!search.trim()) return wallets;
+        const s = search.toLowerCase();
+        return wallets.filter(w => 
+            (w.sellerName && w.sellerName.toLowerCase().includes(s)) ||
+            (w.sellerId.toString().includes(s))
+        );
+    }, [wallets, search]);
+
+    // Derived Data: Pagination
+    const paginatedWallets = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return filteredWallets.slice(start, start + pageSize);
+    }, [filteredWallets, currentPage, pageSize]);
+
+    const totalPages = Math.ceil(filteredWallets.length / pageSize);
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
@@ -93,8 +117,28 @@ export const SellersPage = () => {
             />
 
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                <div className="card-header bg-white border-bottom py-3">
+                <div className="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <h5 className="mb-0 fw-bold">Sellers Overview & Performance</h5>
+                    <div className="d-flex gap-2">
+                        <div className="input-group input-group-sm" style={{ maxWidth: '300px' }}>
+                            <span className="input-group-text bg-light border-end-0">
+                                <i className="bi bi-search text-muted"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                className="form-control bg-light border-start-0 ps-0" 
+                                placeholder="Search sellers..." 
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setCurrentPage(1); // Reset to first page on search
+                                }}
+                            />
+                        </div>
+                        <Button color="primary" size="sm" onClick={() => loadWallets()} className="rounded-pill px-3">
+                            <i className="bi bi-arrow-clockwise me-1"></i> Refresh
+                        </Button>
+                    </div>
                 </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
@@ -111,10 +155,10 @@ export const SellersPage = () => {
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border spinner-border-sm text-primary me-2"></div>Loading data...</td></tr>
-                            ) : wallets.length === 0 ? (
+                                <tr><td colSpan="7" className="text-center py-5"><LoadingIndicator text="Loading sellers data..." /></td></tr>
+                            ) : paginatedWallets.length === 0 ? (
                                 <tr><td colSpan="7" className="text-center py-5 text-muted">No sellers found</td></tr>
-                            ) : wallets.map(wallet => (
+                            ) : paginatedWallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td className="ps-4">
                                         <div className="fw-bold text-dark">{wallet.sellerName}</div>
@@ -143,6 +187,38 @@ export const SellersPage = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Frontend Pagination Controls */}
+                {!loading && filteredWallets.length > 0 && (
+                    <div className="card-footer bg-white py-3 border-top-0 d-flex justify-content-between align-items-center">
+                        <div className="text-muted small">
+                            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredWallets.length)} of {filteredWallets.length} sellers
+                        </div>
+                        <div className="d-flex gap-2">
+                            <Button 
+                                color="outline-secondary" 
+                                size="sm" 
+                                disabled={currentPage <= 1}
+                                onClick={() => setCurrentPage(p => p - 1)}
+                                className="rounded-pill px-3"
+                            >
+                                <i className="bi bi-chevron-left me-1"></i> Previous
+                            </Button>
+                            <div className="align-self-center px-3 small border-start border-end">
+                                Page <strong>{currentPage}</strong> of {totalPages || 1}
+                            </div>
+                            <Button 
+                                color="outline-secondary" 
+                                size="sm" 
+                                disabled={currentPage >= totalPages}
+                                onClick={() => setCurrentPage(p => p + 1)}
+                                className="rounded-pill px-3"
+                            >
+                                Next <i className="bi bi-chevron-right ms-1"></i>
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Performance Statistics Modal */}
