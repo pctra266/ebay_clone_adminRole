@@ -51,7 +51,7 @@ export const SellerPendingFundsPage = () => {
 
             <nav aria-label="breadcrumb" className="mb-4">
                 <ol className="breadcrumb">
-                    <li className="breadcrumb-item"><Link to="/wallets">Wallets</Link></li>
+                    <li className="breadcrumb-item"><Link to="/sellers">Sellers</Link></li>
                     <li className="breadcrumb-item active" aria-current="page">Pending Funds Detail</li>
                 </ol>
             </nav>

@@ -14,7 +14,7 @@ import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
-import { WalletsPage } from "./pages/WalletsPage";
+import { SellersPage } from "./pages/SellersPage";
 import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
@@ -22,7 +22,6 @@ import { ProductList } from "./pages/Public/Home";
 import EbayProductDetail from "./pages/EbayProductDetail";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
-import { AdminSellerPerformancePage } from "./pages/AdminSellerPerformancePage";
 import { MockPage } from "./pages/MockPage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 import PayoutEnginePage from "./pages/PayoutEnginePage";
@@ -99,8 +98,8 @@ const AppRoutes = [
     element: protect(<DisputeDetailPage />)
   },
   {
-    path: "/wallets",
-    element: protect(<WalletsPage />)
+    path: "/sellers",
+    element: protect(<SellersPage />)
   },
   {
     path: "/settlements",
@@ -136,15 +135,11 @@ const AppRoutes = [
     element: protect(<ReturnRequestDetailPage />)
   },
   {
-    path: "/seller-performance",
-    element: protect(<AdminSellerPerformancePage />)
-  },
-  {
     path: "/mock",
     element: protect(<MockPage />)
   },
   {
-    path: "/wallets/pending/:sellerId",
+    path: "/sellers/pending/:sellerId",
     element: protect(<SellerPendingFundsPage />)
   },
   {

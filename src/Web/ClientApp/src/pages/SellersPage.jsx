@@ -5,11 +5,11 @@ import financeService from '../services/financeService';
 import { apiRequest } from '../services/httpClient';
 import { ToastMessage } from '../components/ToastMessage';
 
-export const WalletsPage = () => {
+export const SellersPage = () => {
     const [wallets, setWallets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ message: '', type: 'success' });
-
+    
     const [modal, setModal] = useState(false);
     const [selectedSeller, setSelectedSeller] = useState(null);
 
@@ -29,9 +29,9 @@ export const WalletsPage = () => {
                 financeService.getSellerWallets(),
                 apiRequest('/api/Users/seller-metrics')
             ]);
-
+            
             const metrics = metricsData.items || metricsData;
-
+            
             // Merge data
             const merged = walletData.map(w => {
                 const metric = metrics.find(m => m.id === w.sellerId);
@@ -49,7 +49,7 @@ export const WalletsPage = () => {
 
             setWallets(merged);
         } catch (error) {
-            setToast({ message: 'Failed to load wallet data', type: 'error' });
+            setToast({ message: 'Failed to load seller data', type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -73,8 +73,8 @@ export const WalletsPage = () => {
         }
 
         return (
-            <span
-                className={`badge ${badgeClass} cursor-pointer`}
+            <span 
+                className={`badge ${badgeClass} cursor-pointer`} 
                 onClick={() => toggleModal(wallet)}
                 style={{ cursor: 'pointer' }}
                 title="Click to view performance statistics"
@@ -86,15 +86,15 @@ export const WalletsPage = () => {
 
     return (
         <div className="container-fluid py-4">
-            <ToastMessage
-                message={toast.message}
-                type={toast.type}
-                onClose={() => setToast({ message: '', type: 'success' })}
+            <ToastMessage 
+                message={toast.message} 
+                type={toast.type} 
+                onClose={() => setToast({ message: '', type: 'success' })} 
             />
 
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
                 <div className="card-header bg-white border-bottom py-3">
-                    <h5 className="mb-0 fw-bold">Seller Wallets & Performance</h5>
+                    <h5 className="mb-0 fw-bold">Sellers Overview & Performance</h5>
                 </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
@@ -113,7 +113,7 @@ export const WalletsPage = () => {
                             {loading ? (
                                 <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border spinner-border-sm text-primary me-2"></div>Loading data...</td></tr>
                             ) : wallets.length === 0 ? (
-                                <tr><td colSpan="7" className="text-center py-5 text-muted">No seller wallets found</td></tr>
+                                <tr><td colSpan="7" className="text-center py-5 text-muted">No sellers found</td></tr>
                             ) : wallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td className="ps-4">
@@ -132,7 +132,7 @@ export const WalletsPage = () => {
                                         </Link>
                                     </td>
                                     <td className="text-end">
-                                        <Link to={`/wallets/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-medium">
+                                        <Link to={`/sellers/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-medium">
                                             {formatCurrency(wallet.pendingBalance)}
                                         </Link>
                                     </td>
