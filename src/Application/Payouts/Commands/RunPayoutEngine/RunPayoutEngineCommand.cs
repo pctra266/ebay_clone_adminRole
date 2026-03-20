@@ -10,7 +10,10 @@ namespace EbayClone.Application.Payouts.Commands.RunPayoutEngine;
 /// Trigger the Payout Engine for all eligible Sellers.
 /// Returns a PayoutEngineResult summarizing the session.
 /// </summary>
-public record RunPayoutEngineCommand : IRequest<PayoutEngineResult>;
+public record RunPayoutEngineCommand : IRequest<PayoutEngineResult>
+{
+    public int? SellerId { get; init; }
+}
 
 public record PayoutEngineResult(
     int TotalScanned,
@@ -49,7 +52,7 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
             .FirstOrDefaultAsync(cancellationToken)
             ?? new PayoutConfig();  // fallback to defaults if no row
 
-        if (!config.IsEnabled)
+        if (!config.IsEnabled && !request.SellerId.HasValue)
         {
             _logger.LogInformation("[INFO] Payout Engine is DISABLED by admin. Aborting.");
             return new PayoutEngineResult(0, 0, 0, 0, 0, 0, sessionId);
@@ -59,10 +62,21 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
             config.Frequency, config.MinimumThreshold);
 
         // ── 1. Load all Seller wallets with their Sellers ────────────────────
-        var wallets = await _context.SellerWallets
+        var query = _context.SellerWallets
             .Include(w => w.Seller)
-            .Where(w => w.AvailableBalance > config.MinimumThreshold)
-            .ToListAsync(cancellationToken);
+            .AsQueryable();
+
+        if (request.SellerId.HasValue)
+        {
+            _logger.LogInformation("[INFO] TARGETED RUN for SellerId: {Id}", request.SellerId.Value);
+            query = query.Where(w => w.SellerId == request.SellerId.Value);
+        }
+        else
+        {
+            query = query.Where(w => w.AvailableBalance > config.MinimumThreshold);
+        }
+
+        var wallets = await query.ToListAsync(cancellationToken);
 
         _logger.LogInformation("[INFO] Total sellers with eligible balance: {Count}", wallets.Count);
 

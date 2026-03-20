@@ -23,7 +23,7 @@ import EbayProductDetail from "./pages/EbayProductDetail";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import { AdminSellerPerformancePage } from "./pages/AdminSellerPerformancePage";
-import { MockPurchasePage } from "./pages/MockPurchasePage";
+import { MockPage } from "./pages/MockPage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 import PayoutEnginePage from "./pages/PayoutEnginePage";
 
@@ -140,8 +140,8 @@ const AppRoutes = [
     element: protect(<AdminSellerPerformancePage />)
   },
   {
-    path: "/mock-purchase",
-    element: protect(<MockPurchasePage />)
+    path: "/mock",
+    element: protect(<MockPage />)
   },
   {
     path: "/wallets/pending/:sellerId",

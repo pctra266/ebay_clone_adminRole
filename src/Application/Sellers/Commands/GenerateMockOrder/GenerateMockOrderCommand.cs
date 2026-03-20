@@ -11,6 +11,8 @@ public record GenerateMockOrderCommand : IRequest<bool>
     public int SellerId { get; init; }
     public string OrderType { get; init; } = "Normal";
     public decimal Amount { get; init; } = 500000;
+    public bool SettleImmediately { get; init; } = false;
+    public bool EnsureBankLinked { get; init; } = true;
 }
 
 public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrderCommand, bool>
@@ -76,6 +78,16 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             "abovestandard" => 3,
             _ => 21
         };
+
+        if (request.SettleImmediately)
+        {
+            holdDays = 0;
+        }
+
+        if (request.EnsureBankLinked && string.IsNullOrEmpty(seller.BankAccountMock))
+        {
+            seller.BankAccountMock = "{\"bankName\": \"Mock Test Bank\", \"accountNumber\": \"123456789\", \"accountName\": \"" + seller.Username + "\"}";
+        }
 
         var order = new OrderTable
         {
