@@ -47,6 +47,8 @@ public interface IApplicationDbContext
     DbSet<AdminUserRole> AdminUserRoles { get; }
     DbSet<FinancialTransaction> FinancialTransactions { get; }
     DbSet<DisputeMessage> DisputeMessages { get; }
+    DbSet<PayoutConfig> PayoutConfigs { get; }
+    DbSet<PayoutTransaction> PayoutTransactions { get; }
 
 
     // 2. Hàm lưu thay đổi (Quan trọng nhất)

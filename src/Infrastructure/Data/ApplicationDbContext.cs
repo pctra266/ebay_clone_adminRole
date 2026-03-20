@@ -48,6 +48,10 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
     public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
 
+    // Payout Engine
+    public virtual DbSet<PayoutConfig> PayoutConfigs { get; set; }
+    public virtual DbSet<PayoutTransaction> PayoutTransactions { get; set; }
+
 
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {

@@ -26,6 +26,7 @@ import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import { AdminSellerPerformancePage } from "./pages/AdminSellerPerformancePage";
 import { MockPurchasePage } from "./pages/MockPurchasePage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
+import PayoutEnginePage from "./pages/PayoutEnginePage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -150,6 +151,10 @@ const AppRoutes = [
   {
     path: "/wallets/pending/:sellerId",
     element: protect(<SellerPendingFundsPage />)
+  },
+  {
+    path: "/payout-engine",
+    element: protect(<PayoutEnginePage />)
   }
 ];
 

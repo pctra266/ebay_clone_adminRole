@@ -82,5 +82,8 @@ public static class DependencyInjection
         builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
 
         builder.Services.AddHostedService<AutoReviewUsersService>();
+
+        // Payout Engine
+        builder.Services.AddScoped<IMockPaymentGateway, MockPaymentGatewayService>();
     }
 }
