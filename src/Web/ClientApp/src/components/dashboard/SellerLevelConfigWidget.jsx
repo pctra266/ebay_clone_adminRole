@@ -61,7 +61,7 @@ export const SellerLevelConfigWidget = () => {
     };
 
     return (
-        <div className="glass-panel rounded-4 p-4 h-100 animate-fade-in-up" style={{ minWidth: '350px' }}>
+        <div className="glass-panel rounded-4 p-4 h-100 animate-fade-in-up">
             <ToastMessage 
                 message={toast.message} 
                 type={toast.type} 
@@ -83,30 +83,30 @@ export const SellerLevelConfigWidget = () => {
                     <div className="row g-3">
                         <div className="col-12"><small className="text-primary fw-bold uppercase">Top Rated Rules</small></div>
                         
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Min Orders</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Min Orders</label>
                             <input type="number" className="pe-form-control pe-form-control-sm" name="topRatedMinTransactions" value={criteria.topRatedMinTransactions} onChange={handleChange} required />
                         </div>
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Min Days</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Min Days</label>
                             <input type="number" className="pe-form-control pe-form-control-sm" name="topRatedMinDays" value={criteria.topRatedMinDays} onChange={handleChange} required />
                         </div>
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Defect Max (%)</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Defect Max (%)</label>
                             <input type="number" step="0.001" className="pe-form-control pe-form-control-sm" name="topRatedMaxDefectRate" value={criteria.topRatedMaxDefectRate} onChange={handleChange} required />
                         </div>
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Late Max (%)</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Late Max (%)</label>
                             <input type="number" step="0.001" className="pe-form-control pe-form-control-sm" name="topRatedMaxLateRate" value={criteria.topRatedMaxLateRate} onChange={handleChange} required />
                         </div>
 
                         <div className="col-12 mt-3"><small className="text-primary fw-bold uppercase">Above Standard Rules</small></div>
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Defect Max (%)</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Defect Max (%)</label>
                             <input type="number" step="0.001" className="pe-form-control pe-form-control-sm" name="aboveStandardMaxDefectRate" value={criteria.aboveStandardMaxDefectRate} onChange={handleChange} required />
                         </div>
-                        <div className="col-md-6">
-                            <label className="pe-input-label small">Max Unres. Cases</label>
+                        <div className="col-6">
+                            <label className="pe-input-label small mb-1">Max Cases</label>
                             <input type="number" className="pe-form-control pe-form-control-sm" name="aboveStandardMaxUnresolvedCases" value={criteria.aboveStandardMaxUnresolvedCases} onChange={handleChange} required />
                         </div>
                     </div>

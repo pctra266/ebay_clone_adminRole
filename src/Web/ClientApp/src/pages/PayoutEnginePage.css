@@ -154,11 +154,18 @@
 }
 
 .pe-form-control {
+    width: 100%;
     border: 1.5px solid var(--ebay-border);
     border-radius: 0.75rem;
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
     transition: all 0.2s;
+}
+
+.pe-form-control-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
 }
 
 .pe-form-control:focus {
