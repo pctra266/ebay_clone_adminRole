@@ -24,7 +24,8 @@ public static class UserMappings
             IsVerified = user.IsVerified,
             ViolationCount = user.ViolationCount,
             LastLoginIp = user.LastLoginIp,
-            LastLoginAt = user.LastLoginAt
+            LastLoginAt = user.LastLoginAt,
+            SellerLevel = user.SellerLevel
         };
     }
 
@@ -40,7 +41,8 @@ public static class UserMappings
             Status = user.Status,
             ApprovalStatus = user.ApprovalStatus,
             IsVerified = user.IsVerified,
-            LastLoginAt = user.LastLoginAt
+            LastLoginAt = user.LastLoginAt,
+            SellerLevel = user.SellerLevel
         };
     }
 }

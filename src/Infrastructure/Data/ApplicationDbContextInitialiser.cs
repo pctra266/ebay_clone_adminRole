@@ -142,7 +142,8 @@ public class ApplicationDbContextInitialiser
             typeof(FinanceDemoSeeder),
             typeof(StatsDemoSeeder),
             typeof(AdditionalDataSeeder),
-            typeof(PayoutEngineDemoSeeder)   // ← Payout Engine demo data
+            typeof(PayoutEngineDemoSeeder),   // ← Payout Engine demo data
+            typeof(SellerLevelCriteriaSeeder)
         };
 
         // Create seeder instances and sort by Order property

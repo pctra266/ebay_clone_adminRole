@@ -108,7 +108,18 @@ export function UserDetailPage() {
                 <div className="col-md-4"><strong>Violation Count:</strong> {user.violationCount}</div>
                 {user.role === "Seller" && (
                   <>
-                    <div className="col-md-4"><strong>Seller Level:</strong> {user.sellerLevel || "BelowStandard"}</div>
+                    <div className="col-md-4">
+                      <strong>Seller Level:</strong> 
+                      <span className={`badge ms-2 ${
+                        user.sellerLevel === 'TopRated' ? 'bg-success' : 
+                        user.sellerLevel === 'AboveStandard' ? 'bg-warning text-dark' : 
+                        'bg-danger'
+                      }`}>
+                        {user.sellerLevel === 'TopRated' ? 'Top Rated' : 
+                         user.sellerLevel === 'AboveStandard' ? 'Above Standard' : 
+                         (user.sellerLevel || "Below Standard")}
+                      </span>
+                    </div>
                     <div className="col-md-4">
                       <button className="btn btn-sm btn-outline-primary" onClick={async () => {
                         try {

@@ -9,6 +9,7 @@ import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 export const SellersPage = () => {
     const [wallets, setWallets] = useState([]);
+    const [criteria, setCriteria] = useState(null);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [rtIndicator, setRtIndicator] = useState(false); // flashes when real-time update arrives
@@ -58,7 +59,15 @@ export const SellersPage = () => {
 
     useEffect(() => {
         loadWallets();
+        loadCriteria();
     }, []);
+
+    const loadCriteria = async () => {
+        try {
+            const data = await apiRequest('/api/Users/seller-level-criteria');
+            setCriteria(data);
+        } catch (e) { console.error("Failed to load criteria", e); }
+    };
 
     const loadWallets = async () => {
         try {
@@ -147,6 +156,42 @@ export const SellersPage = () => {
                 type={toast.type} 
                 onClose={() => setToast({ message: '', type: 'success' })} 
             />
+
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1 className="h3 fw-bold mb-0">
+                    Sellers Overview
+                    {rtIndicator && <span className="badge bg-primary animate-pulse ms-2" style={{ fontSize: '0.7rem' }}>Real-time Update</span>}
+                </h1>
+            </div>
+
+            {/* Leveling Guide Note */}
+            {criteria && (
+                <div className="alert bg-white border-0 shadow-sm rounded-4 mb-4 p-4 d-flex align-items-center gap-4 animate-fade-in">
+                    <div className="bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i className="bi bi-info-circle-fill text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                        <h6 className="fw-bold text-dark mb-1">Seller Leveling Guide</h6>
+                        <div className="row g-2 small text-muted">
+                            <div className="col-md-4">
+                                <span className="badge bg-success-subtle text-success me-1">Top Rated</span>
+                                &ge; {criteria.topRatedMinTransactions} orders, &ge; {criteria.topRatedMinDays} days on platform, &le; {(criteria.topRatedMaxDefectRate * 100).toFixed(1)}% defect.
+                            </div>
+                            <div className="col-md-4">
+                                <span className="badge bg-warning-subtle text-warning me-1">Above Standard</span>
+                                &le; {(criteria.aboveStandardMaxDefectRate * 100).toFixed(1)}% defect, &le; {criteria.aboveStandardMaxUnresolvedCases} unresolved cases.
+                            </div>
+                            <div className="col-md-4">
+                                <span className="badge bg-danger-subtle text-danger me-1">Below Standard</span>
+                                Fails to meet Above Standard or Top Rated requirements.
+                            </div>
+                        </div>
+                    </div>
+                    <Link to="/dashboard" className="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        <i className="bi bi-gear-fill me-1"></i> Configure
+                    </Link>
+                </div>
+            )}
 
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
                 <div className="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">

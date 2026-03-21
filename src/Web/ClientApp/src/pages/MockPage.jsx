@@ -25,6 +25,8 @@ export function MockPage() {
     const [payoutLoading, setPayoutLoading] = useState(false);
     const [payoutResult, setPayoutResult] = useState(null);
     const [toast, setToast] = useState({ message: '', type: 'success' });
+    const [defectData, setDefectData] = useState({ sellerId: '' });
+    const [defectLoading, setDefectLoading] = useState(false);
 
     const handlePurchaseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -80,6 +82,23 @@ export function MockPage() {
         }
     };
 
+    const handleDefectSubmit = async (e) => {
+        e.preventDefault();
+        setDefectLoading(true);
+        try {
+            await apiRequest('/api/Mocking/generate-mock-defect', {
+                method: 'POST',
+                body: { sellerId: parseInt(defectData.sellerId, 10) },
+            });
+            setToast({ message: "Mock defect generated! The seller now has an unresolved dispute & refunded return.", type: 'warning' });
+            setDefectData({ sellerId: '' });
+        } catch (err) {
+            setToast({ message: err.message || "Failed to generate defect.", type: 'error' });
+        } finally {
+            setDefectLoading(false);
+        }
+    };
+
     return (
         <section className="py-2 px-3">
             <ToastMessage 
@@ -100,7 +119,7 @@ export function MockPage() {
 
             <div className="row g-4">
                 {/* Purchase Column */}
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                     <GlassCard stagger="stagger-1" className="h-100">
                         <div className="mb-4">
                             <h5 className="fw-bold mb-2">1. Generate Mock Purchase</h5>
@@ -149,7 +168,7 @@ export function MockPage() {
                 </div>
 
                 {/* Payout Column */}
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                     <GlassCard stagger="stagger-2" className="h-100 border-primary" style={{ borderTop: '4px solid var(--ebay-blue)' }}>
                         <div className="mb-4">
                             <h5 className="fw-bold mb-2">2. Push Manual Payout</h5>
@@ -203,6 +222,29 @@ export function MockPage() {
                                 </div>
                             </div>
                         )}
+                    </GlassCard>
+                </div>
+
+                {/* Defect Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-3" className="h-100 border-danger" style={{ borderTop: '4px solid var(--bs-danger)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-danger">3. Generate Account Defect</h5>
+                            <p className="text-muted small">
+                                Simulate an <strong>unresolved dispute</strong> and a <strong>refunded return</strong> to instantly spike the seller's defect rate and force a Below Standard downgrade.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleDefectSubmit} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" name="sellerId" value={defectData.sellerId} onChange={(e) => setDefectData({ sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-danger rounded-pill mt-4" disabled={defectLoading}>
+                                {defectLoading ? "Generating Defect..." : "Inject Account Defects"}
+                            </button>
+                        </form>
                     </GlassCard>
                 </div>
             </div>
