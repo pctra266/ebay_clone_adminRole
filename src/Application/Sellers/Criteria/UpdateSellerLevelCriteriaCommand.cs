@@ -16,6 +16,7 @@ public record UpdateSellerLevelCriteriaCommand : IRequest<bool>
     public double AboveStandardMaxDefectRate { get; init; }
     public int AboveStandardMaxUnresolvedCases { get; init; }
     public double AboveStandardMaxUnresolvedRate { get; init; }
+    public DateTime? NextEvaluationDate { get; init; }
 }
 
 public class UpdateSellerLevelCriteriaCommandHandler : IRequestHandler<UpdateSellerLevelCriteriaCommand, bool>
@@ -46,6 +47,12 @@ public class UpdateSellerLevelCriteriaCommandHandler : IRequestHandler<UpdateSel
         criteria.AboveStandardMaxDefectRate = request.AboveStandardMaxDefectRate;
         criteria.AboveStandardMaxUnresolvedCases = request.AboveStandardMaxUnresolvedCases;
         criteria.AboveStandardMaxUnresolvedRate = request.AboveStandardMaxUnresolvedRate;
+        
+        if (request.NextEvaluationDate.HasValue)
+        {
+            criteria.NextEvaluationDate = request.NextEvaluationDate.Value;
+        }
+
         criteria.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);

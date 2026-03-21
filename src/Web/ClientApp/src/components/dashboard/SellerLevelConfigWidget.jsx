@@ -36,6 +36,10 @@ export const SellerLevelConfigWidget = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'nextEvaluationDate') {
+            setCriteria(prev => ({ ...prev, [name]: value }));
+            return;
+        }
         const val = name.includes('Rate') ? parseFloat(value) : (name.includes('Sales') ? parseFloat(value) : parseInt(value));
         setCriteria(prev => ({ ...prev, [name]: isNaN(val) ? 0 : val }));
     };
@@ -114,8 +118,8 @@ export const SellerLevelConfigWidget = () => {
                     >
                         {saving ? 'Saving...' : 'Update Criteria'}
                     </button>
-                    <div style={{ fontSize: '0.65rem', textAlign: 'center', color: '#6c757d' }}>
-                        Changing these values will affect the next evaluation cycle or manual triggers.
+                    <div style={{ fontSize: '0.65rem', textAlign: 'center', color: '#6c757d' }} className="mt-1">
+                        Changing criteria affects the next evaluation cycle. Demo overrides are moved to the Mock page.
                     </div>
                 </form>
             )}

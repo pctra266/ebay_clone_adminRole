@@ -16,6 +16,7 @@ public record SellerLevelCriteriaDto
     public double AboveStandardMaxDefectRate { get; init; }
     public int AboveStandardMaxUnresolvedCases { get; init; }
     public double AboveStandardMaxUnresolvedRate { get; init; }
+    public DateTime NextEvaluationDate { get; init; }
     public DateTime UpdatedAt { get; init; }
 }
 
@@ -48,6 +49,7 @@ public class GetSellerLevelCriteriaQueryHandler : IRequestHandler<GetSellerLevel
                 AboveStandardMaxDefectRate = 0.02,
                 AboveStandardMaxUnresolvedCases = 2,
                 AboveStandardMaxUnresolvedRate = 0.003,
+                NextEvaluationDate = DateTime.UtcNow.AddMonths(1),
                 UpdatedAt = DateTime.UtcNow
             };
         }
@@ -63,6 +65,7 @@ public class GetSellerLevelCriteriaQueryHandler : IRequestHandler<GetSellerLevel
             AboveStandardMaxDefectRate = criteria.AboveStandardMaxDefectRate,
             AboveStandardMaxUnresolvedCases = criteria.AboveStandardMaxUnresolvedCases,
             AboveStandardMaxUnresolvedRate = criteria.AboveStandardMaxUnresolvedRate,
+            NextEvaluationDate = criteria.NextEvaluationDate,
             UpdatedAt = criteria.UpdatedAt
         };
     }

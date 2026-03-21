@@ -20,8 +20,12 @@ public class SellerLevelCriteria
 
     // --- Above Standard Criteria ---
     public double AboveStandardMaxDefectRate { get; set; } = 0.02; // 2%
+    public double AboveStandardMaxLateRate { get; set; } = 0.08;
     public int AboveStandardMaxUnresolvedCases { get; set; } = 2;
     public double AboveStandardMaxUnresolvedRate { get; set; } = 0.003; // 0.3%
+
+    // Automated Evaluation Schedule
+    public DateTime NextEvaluationDate { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public int? UpdatedBy { get; set; }

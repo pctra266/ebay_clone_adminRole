@@ -27,6 +27,7 @@ export function MockPage() {
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [defectData, setDefectData] = useState({ sellerId: '' });
     const [defectLoading, setDefectLoading] = useState(false);
+    const [evalLoading, setEvalLoading] = useState(false);
 
     const handlePurchaseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -96,6 +97,23 @@ export function MockPage() {
             setToast({ message: err.message || "Failed to generate defect.", type: 'error' });
         } finally {
             setDefectLoading(false);
+        }
+    };
+
+    const handleSetDemoTime = async (minutesFromNow) => {
+        try {
+            setEvalLoading(true);
+            const criteria = await apiRequest('/api/Users/seller-level-criteria');
+            const target = new Date(Date.now() + minutesFromNow * 60000);
+            await apiRequest('/api/Users/seller-level-criteria', {
+                method: 'PUT',
+                body: { ...criteria, nextEvaluationDate: target.toISOString() }
+            });
+            setToast({ message: `Evaluation scheduled in ${minutesFromNow} min! Check the Sellers Overview.`, type: 'success' });
+        } catch (error) {
+            setToast({ message: 'Failed to schedule evaluation time', type: 'error' });
+        } finally {
+            setEvalLoading(false);
         }
     };
 
@@ -245,6 +263,26 @@ export function MockPage() {
                                 {defectLoading ? "Generating Defect..." : "Inject Account Defects"}
                             </button>
                         </form>
+                    </GlassCard>
+                </div>
+
+                {/* Schedule Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-4" className="h-100 border-info" style={{ borderTop: '4px solid var(--bs-info)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-info">4. Schedule Auto-Evaluation</h5>
+                            <p className="text-muted small">
+                                Override the Background Service's target schedule (normally runs the 20th of the month) to demo mass dynamic evaluation.
+                            </p>
+                        </div>
+                        <div className="d-flex flex-column gap-3 mt-4">
+                            <button type="button" className="btn btn-outline-info rounded-pill" onClick={() => handleSetDemoTime(1)} disabled={evalLoading}>
+                                {evalLoading ? "Scheduling..." : "Evaluate in 1 Minute"}
+                            </button>
+                            <button type="button" className="btn btn-outline-secondary rounded-pill" onClick={() => handleSetDemoTime(1440)} disabled={evalLoading}>
+                                Evaluate Tomorrow
+                            </button>
+                        </div>
                     </GlassCard>
                 </div>
             </div>

@@ -13,6 +13,7 @@ export const SellersPage = () => {
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [rtIndicator, setRtIndicator] = useState(false); // flashes when real-time update arrives
+    const [timeLeft, setTimeLeft] = useState('');
     
     // Frontend Pagination and Search State
     const [search, setSearch] = useState("");
@@ -26,6 +27,36 @@ export const SellersPage = () => {
         setSelectedSeller(seller);
         setModal(!modal);
     };
+
+    // ── Countdown Timer ──────────────────────────────────────────────────────
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            if (!criteria || !criteria.nextEvaluationDate) return "Calculating...";
+            
+            // Append Z to enforce UTC if the backend didn't
+            const dateStr = criteria.nextEvaluationDate.endsWith('Z') ? criteria.nextEvaluationDate : criteria.nextEvaluationDate + 'Z';
+            const target = new Date(dateStr);
+            const now = new Date();
+            const diff = target - now;
+
+            if (diff <= 0) return "Evaluating now... (Refresh to check)";
+
+            const MathFloor = Math.floor;
+            const days = MathFloor(diff / (1000 * 60 * 60 * 24));
+            const hours = MathFloor((diff / (1000 * 60 * 60)) % 24);
+            const mins = MathFloor((diff / 1000 / 60) % 60);
+            const secs = MathFloor((diff / 1000) % 60);
+
+            return `${days}d ${hours.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+        };
+
+        setTimeLeft(calculateTimeLeft());
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [criteria]);
 
     // ── Real-time: connect to SellerHub ──────────────────────────────────────
     useEffect(() => {
@@ -162,6 +193,12 @@ export const SellersPage = () => {
                     Sellers Overview
                     {rtIndicator && <span className="badge bg-primary animate-pulse ms-2" style={{ fontSize: '0.7rem' }}>Real-time Update</span>}
                 </h1>
+                
+                <div className="bg-white border rounded-pill px-3 py-2 shadow-sm d-flex align-items-center animate-fade-in">
+                    <i className="bi bi-clock-history text-primary me-2"></i>
+                    <span className="text-secondary small me-2">Next Auto-Evaluation:</span>
+                    <strong className="text-dark font-monospace">{timeLeft}</strong>
+                </div>
             </div>
 
             {/* Leveling Guide Note */}
