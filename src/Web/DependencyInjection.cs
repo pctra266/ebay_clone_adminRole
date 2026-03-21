@@ -28,6 +28,7 @@ public static class DependencyInjection
 
         builder.Services.AddHostedService<SellerEvaluationBackgroundService>();
         builder.Services.AddHostedService<SettlementBackgroundService>();
+        builder.Services.AddHostedService<PayoutEngineBackgroundService>();
 
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
@@ -142,6 +143,7 @@ public static class DependencyInjection
             });
         }
 
+        builder.Services.AddScoped<ISellerHubService, SellerHubService>();
         builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
     }
 

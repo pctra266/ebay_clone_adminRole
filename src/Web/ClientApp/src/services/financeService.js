@@ -6,25 +6,6 @@ const financeService = {
         return await apiRequest(endpoints.wallets);
     },
 
-    getWithdrawalRequests: async (status) => {
-        const url = status ? `${endpoints.financials}/withdrawals?status=${status}` : `${endpoints.financials}/withdrawals`;
-        return await apiRequest(url);
-    },
-
-    approveWithdrawal: async (id, transactionId) => {
-        return await apiRequest(`${endpoints.financials}/withdrawals/${id}/approve`, {
-            method: 'POST',
-            body: { transactionId }
-        });
-    },
-
-    rejectWithdrawal: async (id, reason) => {
-        return await apiRequest(`${endpoints.financials}/withdrawals/${id}/reject`, {
-            method: 'POST',
-            body: { reason }
-        });
-    },
-
     settleFunds: async () => {
         return await apiRequest(`${endpoints.financials}/trigger-settlement`, {
             method: 'POST'
@@ -43,6 +24,36 @@ const financeService = {
 
     getSellerPendingFunds: async (sellerId) => {
         return await apiRequest(`${endpoints.financials}/pending/${sellerId}`);
+    },
+
+    // ── Automated Payout Engine ─────────────────────────────────────────────
+    runPayoutEngine: async () => {
+        return await apiRequest(`${endpoints.financials}/payouts/run`, { method: 'POST' });
+    },
+
+    releaseHold: async (payoutTransactionId) => {
+        return await apiRequest(`${endpoints.financials}/payouts/${payoutTransactionId}/release-hold`, {
+            method: 'POST'
+        });
+    },
+
+    getPayoutHistory: async (groupBy = 'day') => {
+        return await apiRequest(`${endpoints.financials}/payouts/history?groupBy=${groupBy}`);
+    },
+
+    getPayoutExceptions: async () => {
+        return await apiRequest(`${endpoints.financials}/payouts/exceptions`);
+    },
+
+    getPayoutConfig: async () => {
+        return await apiRequest(`${endpoints.financials}/payouts/config`);
+    },
+
+    updatePayoutConfig: async (config) => {
+        return await apiRequest(`${endpoints.financials}/payouts/config`, {
+            method: 'PUT',
+            body: config
+        });
     }
 };
 

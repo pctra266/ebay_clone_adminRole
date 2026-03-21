@@ -39,7 +39,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     // New DbSets for eBay Admin features
     public virtual DbSet<ProductReport> ProductReports { get; set; }
     public virtual DbSet<SellerWallet> SellerWallets { get; set; }
-    public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
     public virtual DbSet<PlatformFee> PlatformFees { get; set; }
     public virtual DbSet<AdminAction> AdminActions { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -47,6 +46,10 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<AdminUserRole> AdminUserRoles { get; set; }
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
     public virtual DbSet<DisputeMessage> DisputeMessages { get; set; }
+
+    // Payout Engine
+    public virtual DbSet<PayoutConfig> PayoutConfigs { get; set; }
+    public virtual DbSet<PayoutTransaction> PayoutTransactions { get; set; }
 
 
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
@@ -483,11 +486,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
             entity.HasOne(e => e.Order)
                 .WithMany()
                 .HasForeignKey(e => e.OrderId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(e => e.Withdrawal)
-                .WithMany()
-                .HasForeignKey(e => e.WithdrawalId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 

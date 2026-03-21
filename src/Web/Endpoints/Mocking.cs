@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using EbayClone.Application.Sellers.Commands.GenerateMockOrder;
+using EbayClone.Application.Sellers.Commands.PushPayout;
+using EbayClone.Application.Payouts.Commands.RunPayoutEngine;
 
 namespace EbayClone.Web.Endpoints;
 
@@ -14,6 +16,7 @@ public class Mocking : EndpointGroupBase
     {
         group.RequireAuthorization(Policies.ManageUsers);
         group.MapPost("generate-seller-order", GenerateSellerOrder);
+        group.MapPost("push-payout", PushPayout);
     }
 
     public async Task<IResult> GenerateSellerOrder(ISender sender, [FromBody] GenerateMockOrderCommand command)
@@ -22,6 +25,19 @@ public class Mocking : EndpointGroupBase
         {
             var result = await sender.Send(command);
             return TypedResults.Ok(new { success = result, message = "Mock order generated." });
+        }
+        catch (ArgumentException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
+    }
+
+    public async Task<IResult> PushPayout(ISender sender, [FromBody] PushPayoutCommand command)
+    {
+        try
+        {
+            var result = await sender.Send(command);
+            return TypedResults.Ok(result);
         }
         catch (ArgumentException ex)
         {

@@ -9,6 +9,7 @@ import { RevenueChart } from "../components/dashboard/RevenueChart";
 import { OrderDistribution } from "../components/dashboard/OrderDistribution";
 import { ActionCenter } from "../components/dashboard/ActionCenter";
 import { DashboardActions } from "../components/dashboard/DashboardActions";
+import { PlatformFeeWidget } from "../components/dashboard/PlatformFeeWidget";
 
 // Chart.js registration (Required once in the app, usually better in a central place but keeping it here for dashboard context)
 import {
@@ -140,6 +141,7 @@ export function DashboardPage() {
               <div className="d-flex flex-column gap-4 h-100">
                 <ActionCenter metrics={metrics} />
                 <OrderDistribution orderStats={stats.orders} />
+                <PlatformFeeWidget />
 
                 {/* [EXTENSION POINT] - Add more side widgets here (e.g. Top Sellers, Recent Activity) */}
               </div>

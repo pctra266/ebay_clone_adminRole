@@ -11,17 +11,21 @@ public record GenerateMockOrderCommand : IRequest<bool>
     public int SellerId { get; init; }
     public string OrderType { get; init; } = "Normal";
     public decimal Amount { get; init; } = 500000;
+    public bool SettleImmediately { get; init; } = false;
+    public bool EnsureBankLinked { get; init; } = true;
 }
 
 public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrderCommand, bool>
 {
     private readonly IApplicationDbContext _context;
     private readonly ISender _sender;
+    private readonly ISellerHubService _sellerHubService;
 
-    public GenerateMockOrderCommandHandler(IApplicationDbContext context, ISender sender)
+    public GenerateMockOrderCommandHandler(IApplicationDbContext context, ISender sender, ISellerHubService sellerHubService)
     {
         _context = context;
         _sender = sender;
+        _sellerHubService = sellerHubService;
     }
 
     public async Task<bool> Handle(GenerateMockOrderCommand request, CancellationToken cancellationToken)
@@ -66,7 +70,14 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             completedAt = orderDate.AddDays(10);
         }
 
-        var platformFee = request.Amount * 0.05m;
+        // Fetch dynamic platform fee from DB
+        var platformFeeConfig = await _context.PlatformFees
+            .Where(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive && f.CategoryId == null)
+            .OrderByDescending(f => f.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+            
+        var feePercentage = platformFeeConfig?.Percentage ?? 5m;
+        var platformFee = request.Amount * (feePercentage / 100m);
         var sellerEarnings = request.Amount - platformFee;
 
         // hold days rule
@@ -76,6 +87,16 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             "abovestandard" => 3,
             _ => 21
         };
+
+        if (request.SettleImmediately)
+        {
+            holdDays = 0;
+        }
+
+        if (request.EnsureBankLinked && string.IsNullOrEmpty(seller.BankAccountMock))
+        {
+            seller.BankAccountMock = "{\"bankName\": \"Mock Test Bank\", \"accountNumber\": \"123456789\", \"accountName\": \"" + seller.Username + "\"}";
+        }
 
         var order = new OrderTable
         {
@@ -110,8 +131,11 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             _context.SellerWallets.Add(wallet);
         }
         
-        wallet.PendingBalance += sellerEarnings;
+        wallet.CreditPending(sellerEarnings);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Broadcast: PendingBalance just increased
+        await _sellerHubService.BroadcastWalletUpdate(seller.Id, wallet.AvailableBalance, wallet.PendingBalance, wallet.TotalWithdrawn);
 
         // Handle specific metrics failures AFTER completed
         if (request.OrderType == "DisputeUnresolved")
@@ -151,6 +175,15 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
         catch (Exception)
         {
             // Fail silently for mock orders if settlement trigger fails
+        }
+
+        // Broadcast final state after settlement attempt (AvailableBalance may have moved)
+        var finalWallet = await _context.SellerWallets.AsNoTracking()
+            .FirstOrDefaultAsync(w => w.SellerId == seller.Id, cancellationToken);
+        if (finalWallet != null)
+        {
+            await _sellerHubService.BroadcastWalletUpdate(
+                seller.Id, finalWallet.AvailableBalance, finalWallet.PendingBalance, finalWallet.TotalWithdrawn);
         }
 
         return true;

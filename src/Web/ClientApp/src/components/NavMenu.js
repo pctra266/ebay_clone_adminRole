@@ -57,12 +57,12 @@ export const NavMenu = () => {
           {(user?.role === 'SuperAdmin' || user?.roles?.includes('SuperAdmin')) && (
             <>
               <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
-              <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
-              <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
+              <SidebarLink to="/sellers" icon="bi bi-person-badge">Sellers Overview</SidebarLink>
+              <SidebarLink to="/payout-engine" icon="bi bi-lightning-charge">Payout Engine</SidebarLink>
               <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
-              <SidebarLink to="/seller-performance" icon="bi bi-speedometer">Seller Performance</SidebarLink>
+              {/* <SidebarLink to="/mock" icon="bi bi-magic">Mock Simulation</SidebarLink> */}
             </>
           )}
         </ul>
