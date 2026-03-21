@@ -6,6 +6,7 @@ import { apiRequest } from '../services/httpClient';
 import { ToastMessage } from '../components/ToastMessage';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import './PayoutEnginePage.css'; // Inherit modern table/badge styles
 
 export const SellersPage = () => {
     const [wallets, setWallets] = useState([]);
@@ -15,10 +16,13 @@ export const SellersPage = () => {
     const [rtIndicator, setRtIndicator] = useState(false); // flashes when real-time update arrives
     const [timeLeft, setTimeLeft] = useState('');
     
-    // Frontend Pagination and Search State
+    // Frontend Pagination, Search, Filter & Sort State
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(10);
+    const [filterLevel, setFilterLevel] = useState("All");
+    const [filterStatus, setFilterStatus] = useState("All");
+    const [sortConfig, setSortConfig] = useState({ key: 'availableBalance', direction: 'desc' });
 
     const [modal, setModal] = useState(false);
     const [selectedSeller, setSelectedSeller] = useState(null);
@@ -133,15 +137,69 @@ export const SellersPage = () => {
         }
     };
 
-    // Derived Data: Filtering
+    // Derived Data: Filtering & Sorting
     const filteredWallets = useMemo(() => {
-        if (!search.trim()) return wallets;
-        const s = search.toLowerCase();
-        return wallets.filter(w => 
-            (w.sellerName && w.sellerName.toLowerCase().includes(s)) ||
-            (w.sellerId.toString().includes(s))
-        );
-    }, [wallets, search]);
+        let result = [...wallets];
+
+        // 1. Search filter
+        if (search.trim()) {
+            const s = search.toLowerCase();
+            result = result.filter(w => 
+                (w.sellerName && w.sellerName.toLowerCase().includes(s)) ||
+                (w.sellerId.toString().includes(s))
+            );
+        }
+
+        // 2. Level filter
+        if (filterLevel !== "All") {
+            result = result.filter(w => w.sellerLevel === filterLevel);
+        }
+
+        // 3. Status filter
+        if (filterStatus !== "All") {
+            result = result.filter(w => w.status === filterStatus);
+        }
+
+        // 4. Sorting
+        if (sortConfig !== null) {
+            result.sort((a, b) => {
+                let aValue = a[sortConfig.key];
+                let bValue = b[sortConfig.key];
+
+                if (sortConfig.key === 'sellerLevel') {
+                    const levelRank = { 'TopRated': 3, 'AboveStandard': 2, 'BelowStandard': 1 };
+                    aValue = levelRank[aValue] || 0;
+                    bValue = levelRank[bValue] || 0;
+                } else {
+                    // Handle string comparisons safely
+                    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+                    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+                }
+
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        return result;
+    }, [wallets, search, filterLevel, filterStatus, sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+        setCurrentPage(1); // Reset to first page to see the new top results
+    };
+
+    const getSortIcon = (key) => {
+        if (!sortConfig || sortConfig.key !== key) return <i className="bi bi-arrow-down-up opacity-25 ms-1" style={{ fontSize: '0.7em' }}></i>;
+        return sortConfig.direction === 'asc' 
+            ? <i className="bi bi-arrow-up text-primary ms-1" style={{ fontSize: '0.8em' }}></i> 
+            : <i className="bi bi-arrow-down text-primary ms-1" style={{ fontSize: '0.8em' }}></i>;
+    };
 
     // Derived Data: Pagination
     const paginatedWallets = useMemo(() => {
@@ -230,41 +288,85 @@ export const SellersPage = () => {
                 </div>
             )}
 
-            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                <div className="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <h5 className="mb-0 fw-bold">Sellers Overview & Performance</h5>
-                    <div className="d-flex gap-2">
-                        <div className="input-group input-group-sm" style={{ maxWidth: '300px' }}>
-                            <span className="input-group-text bg-light border-end-0">
+            <div className="glass-panel border-0 mb-4 overflow-hidden animate-fade-in-up" stagger="stagger-1">
+                <div className="p-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3 bg-white bg-opacity-50">
+                    <h5 className="mb-0 fw-bold d-flex align-items-center">
+                        <i className="bi bi-people-fill text-primary me-2 fs-4"></i>
+                        Seller Database
+                        <span className="badge bg-primary bg-opacity-10 text-primary ms-3 rounded-pill">
+                            {filteredWallets.length} Total
+                        </span>
+                    </h5>
+                    
+                    <div className="d-flex flex-wrap gap-2 align-items-center">
+                        {/* Status Filter */}
+                        <select 
+                            className="form-select form-select-sm pe-form-control pe-form-control-sm border-0 shadow-sm"
+                            style={{ width: '130px', backgroundColor: 'rgba(255,255,255,0.7)' }}
+                            value={filterStatus}
+                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+
+                        {/* Level Filter */}
+                        <select 
+                            className="form-select form-select-sm pe-form-control pe-form-control-sm border-0 shadow-sm"
+                            style={{ width: '150px', backgroundColor: 'rgba(255,255,255,0.7)' }}
+                            value={filterLevel}
+                            onChange={(e) => { setFilterLevel(e.target.value); setCurrentPage(1); }}
+                        >
+                            <option value="All">All Levels</option>
+                            <option value="TopRated">Top Rated</option>
+                            <option value="AboveStandard">Above Standard</option>
+                            <option value="BelowStandard">Below Standard</option>
+                        </select>
+
+                        {/* Search Input */}
+                        <div className="input-group input-group-sm shadow-sm rounded-pill overflow-hidden" style={{ maxWidth: '250px' }}>
+                            <span className="input-group-text bg-white border-0 ps-3">
                                 <i className="bi bi-search text-muted"></i>
                             </span>
                             <input 
                                 type="text" 
-                                className="form-control bg-light border-start-0 ps-0" 
-                                placeholder="Search sellers..." 
+                                className="form-control border-0 bg-white" 
+                                placeholder="Search Name or UID..." 
                                 value={search}
-                                onChange={(e) => {
-                                    setSearch(e.target.value);
-                                    setCurrentPage(1); // Reset to first page on search
-                                }}
+                                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                             />
                         </div>
-                        <Button color="primary" size="sm" onClick={() => loadWallets()} className="rounded-pill px-3">
+
+                        <Button color="primary" size="sm" onClick={() => loadWallets()} className="rounded-pill px-3 shadow-sm ms-2">
                             <i className="bi bi-arrow-clockwise me-1"></i> Refresh
                         </Button>
                     </div>
                 </div>
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0">
+                <div className="table-responsive bg-white">
+                    <table className="table table-hover align-middle pe-table mb-0">
                         <thead className="table-light">
                             <tr>
-                                <th className="ps-4">Seller</th>
-                                <th>Level</th>
-                                <th>Status</th>
+                                <th className="ps-4 cursor-pointer" onClick={() => requestSort('sellerName')} style={{ cursor: 'pointer' }}>
+                                    Seller {getSortIcon('sellerName')}
+                                </th>
+                                <th className="cursor-pointer" onClick={() => requestSort('sellerLevel')} style={{ cursor: 'pointer' }}>
+                                    Level {getSortIcon('sellerLevel')}
+                                </th>
+                                <th className="cursor-pointer" onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
+                                    Status {getSortIcon('status')}
+                                </th>
                                 <th>Detail</th>
-                                <th className="text-end">Pending</th>
-                                <th className="text-end">Available</th>
-                                <th className="text-end pe-4">Total Withdrawn</th>
+                                <th className="text-end cursor-pointer" onClick={() => requestSort('pendingBalance')} style={{ cursor: 'pointer' }}>
+                                    Pending {getSortIcon('pendingBalance')}
+                                </th>
+                                <th className="text-end cursor-pointer" onClick={() => requestSort('availableBalance')} style={{ cursor: 'pointer' }}>
+                                    Available {getSortIcon('availableBalance')}
+                                </th>
+                                <th className="text-end pe-4 cursor-pointer" onClick={() => requestSort('totalWithdrawn')} style={{ cursor: 'pointer' }}>
+                                    Total Withdrawn {getSortIcon('totalWithdrawn')}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -275,27 +377,27 @@ export const SellersPage = () => {
                             ) : paginatedWallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td className="ps-4">
-                                        <div className="fw-bold text-dark">{wallet.sellerName}</div>
-                                        <small className="text-muted">UID: {wallet.sellerId}</small>
+                                        <div className="fw-bold text-dark fs-6">{wallet.sellerName}</div>
+                                        <small className="text-muted text-monospace">UID: {wallet.sellerId}</small>
                                     </td>
                                     <td>{renderLevelBadge(wallet)}</td>
                                     <td>
-                                        <span className={`badge rounded-pill ${wallet.status === 'Active' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}`}>
+                                        <span className={`pe-badge ${wallet.status === 'Active' ? 'badge-success' : wallet.status === 'Suspended' ? 'badge-failed' : 'bg-secondary-subtle text-secondary'}`}>
                                             {wallet.status}
                                         </span>
                                     </td>
                                     <td>
-                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-link btn-sm p-0 text-decoration-none">
-                                            View History
+                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-sm btn-light rounded-pill px-3 text-primary fw-bold" style={{ fontSize: '0.8rem' }}>
+                                            <i className="bi bi-eye-fill me-1"></i> View
                                         </Link>
                                     </td>
                                     <td className="text-end">
-                                        <Link to={`/sellers/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-medium">
+                                        <Link to={`/sellers/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-bold" style={{ fontSize: '1rem' }}>
                                             {formatCurrency(wallet.pendingBalance)}
                                         </Link>
                                     </td>
-                                    <td className="text-end text-success fw-bold">{formatCurrency(wallet.availableBalance)}</td>
-                                    <td className="text-end text-muted pe-4">{formatCurrency(wallet.totalWithdrawn)}</td>
+                                    <td className="text-end text-success fw-bold" style={{ fontSize: '1.05rem', letterSpacing: '-0.5px' }}>{formatCurrency(wallet.availableBalance)}</td>
+                                    <td className="text-end text-muted pe-4 fw-medium">{formatCurrency(wallet.totalWithdrawn)}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -304,9 +406,21 @@ export const SellersPage = () => {
 
                 {/* Frontend Pagination Controls */}
                 {!loading && filteredWallets.length > 0 && (
-                    <div className="card-footer bg-white py-3 border-top-0 d-flex justify-content-between align-items-center">
-                        <div className="text-muted small">
-                            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredWallets.length)} of {filteredWallets.length} sellers
+                    <div className="p-3 bg-white border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div className="d-flex align-items-center gap-2">
+                            <select 
+                                className="form-select border-0 bg-light rounded-pill py-1 px-3 text-muted small" 
+                                style={{ width: 'auto', fontSize: '0.8rem' }}
+                                value={pageSize}
+                                onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                            >
+                                <option value={10}>10 records / page</option>
+                                <option value={20}>20 records / page</option>
+                                <option value={50}>50 records / page</option>
+                            </select>
+                            <span className="text-muted small">
+                                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredWallets.length)} of {filteredWallets.length}
+                            </span>
                         </div>
                         <div className="d-flex gap-2">
                             <Button 
