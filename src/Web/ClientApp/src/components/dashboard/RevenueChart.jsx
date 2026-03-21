@@ -58,7 +58,7 @@ export const RevenueChart = ({ revenueData }) => {
           <small className="text-secondary">Total for current range</small>
         </div>
       </div>
-      <div className="py-2" style={{ height: 260 }}>
+      <div className="py-2" style={{ height: 320 }}>
         <Line data={chartData} options={options} />
       </div>
     </GlassCard>

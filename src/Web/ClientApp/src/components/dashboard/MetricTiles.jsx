@@ -5,46 +5,41 @@ const fmt = (n) => (n != null ? Number(n).toLocaleString("en-US") : 0);
 const fmtCurrency = (n) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n ?? 0);
 
-const MetricTile = ({ label, value, icon, gradient, stagger, currency = false }) => (
-  <GlassCard className="h-100" stagger={stagger}>
-    <div className="metric-card-modern">
-      <div className={`icon-box ${gradient} shadow-sm mb-3`}>
-        <i className={icon}></i>
-      </div>
-      <div className="metric-label mb-1">{label}</div>
-      <div className="metric-value">{currency ? fmtCurrency(value) : fmt(value)}</div>
+const MetricItem = ({ label, value, icon, gradient, currency = false }) => (
+  <div className="d-flex align-items-center px-4 py-2">
+    <div className={`icon-box ${gradient} shadow-sm me-3 mb-0`} style={{ width: 32, height: 32, fontSize: '1rem' }}>
+      <i className={icon}></i>
     </div>
-  </GlassCard>
+    <div>
+      <div className="metric-label" style={{ fontSize: '0.65rem' }}>{label}</div>
+      <div className="metric-value" style={{ fontSize: '1.1rem' }}>{currency ? fmtCurrency(value) : fmt(value)}</div>
+    </div>
+  </div>
 );
 
 export const MetricTiles = ({ metrics }) => (
-  <div className="row g-4 mb-5">
-    <div className="col-md-3">
-      <MetricTile
+  <GlassCard className="mb-4 overflow-hidden" stagger="stagger-1">
+    <div className="d-flex align-items-center flex-wrap divide-x">
+      <MetricItem
         label="Active Users"
         value={metrics?.totalUsers}
         icon="bi bi-people"
         gradient="bg-gradient-green"
-        stagger="stagger-2"
       />
-    </div>
-    <div className="col-md-3">
-      <MetricTile
+      <div className="vr d-none d-md-block" style={{ height: '30px', opacity: 0.1 }}></div>
+      <MetricItem
         label="Total Products"
         value={metrics?.totalProducts}
         icon="bi bi-bag-check"
         gradient="bg-gradient-yellow"
-        stagger="stagger-3"
       />
-    </div>
-    <div className="col-md-3">
-      <MetricTile
-        label="Orders"
+      <div className="vr d-none d-md-block" style={{ height: '30px', opacity: 0.1 }}></div>
+      <MetricItem
+        label="Orders Today"
         value={metrics?.totalOrdersToday}
         icon="bi bi-cart-check"
         gradient="bg-gradient-red"
-        stagger="stagger-4"
       />
     </div>
-  </div>
+  </GlassCard>
 );
