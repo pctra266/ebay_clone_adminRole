@@ -28,9 +28,10 @@ export function MockPage() {
     const [defectData, setDefectData] = useState({ sellerId: '' });
     const [defectLoading, setDefectLoading] = useState(false);
     const [evalLoading, setEvalLoading] = useState(false);
+    const [evalSeconds, setEvalSeconds] = useState(60);
     
     // States for Accelerate Settlements
-    const [settleData, setSettleData] = useState({ sellerId: '', minutes: 1 });
+    const [settleData, setSettleData] = useState({ sellerId: '', seconds: 60 });
     const [settleLoading, setSettleLoading] = useState(false);
 
     const handlePurchaseChange = (e) => {
@@ -104,16 +105,16 @@ export function MockPage() {
         }
     };
 
-    const handleSetDemoTime = async (minutesFromNow) => {
+    const handleSetDemoTime = async (secondsFromNow) => {
         try {
             setEvalLoading(true);
             const criteria = await apiRequest('/api/Users/seller-level-criteria');
-            const target = new Date(Date.now() + minutesFromNow * 60000);
+            const target = new Date(Date.now() + secondsFromNow * 1000);
             await apiRequest('/api/Users/seller-level-criteria', {
                 method: 'PUT',
                 body: { ...criteria, nextEvaluationDate: target.toISOString() }
             });
-            setToast({ message: `Evaluation scheduled in ${minutesFromNow} min! Check the Sellers Overview.`, type: 'success' });
+            setToast({ message: `Evaluation scheduled in ${secondsFromNow} seconds! Check the Sellers Overview.`, type: 'success' });
         } catch (error) {
             setToast({ message: 'Failed to schedule evaluation time', type: 'error' });
         } finally {
@@ -129,11 +130,11 @@ export function MockPage() {
                 method: 'POST',
                 body: { 
                     sellerId: parseInt(settleData.sellerId, 10), 
-                    minutesFromNow: parseInt(settleData.minutes, 10) 
+                    secondsFromNow: parseInt(settleData.seconds, 10) 
                 }
             });
-            setToast({ message: `Success! ${res.updatedCount} pending order(s) accelerated to clear in ${settleData.minutes} minute.`, type: 'success' });
-            setSettleData({ sellerId: '', minutes: 1 });
+            setToast({ message: `Success! ${res.updatedCount} pending order(s) accelerated to clear in ${settleData.seconds} seconds.`, type: 'success' });
+            setSettleData({ sellerId: '', seconds: 60 });
         } catch (error) {
             setToast({ message: error.message || 'Failed to accelerate settlements', type: 'error' });
         } finally {
@@ -300,11 +301,31 @@ export function MockPage() {
                             </p>
                         </div>
                         <div className="d-flex flex-column gap-3 mt-4">
-                            <button type="button" className="btn btn-outline-info rounded-pill" onClick={() => handleSetDemoTime(1)} disabled={evalLoading}>
-                                {evalLoading ? "Scheduling..." : "Evaluate in 1 Minute"}
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Time to Evaluate (Seconds)</label>
+                                <input 
+                                    type="number" 
+                                    className="pe-form-control" 
+                                    value={evalSeconds} 
+                                    onChange={(e) => setEvalSeconds(e.target.value)} 
+                                    min="1" 
+                                />
+                            </div>
+                            <button 
+                                type="button" 
+                                className="btn btn-outline-info rounded-pill" 
+                                onClick={() => handleSetDemoTime(parseInt(evalSeconds, 10))} 
+                                disabled={evalLoading}
+                            >
+                                {evalLoading ? "Scheduling..." : "Schedule Custom Evaluation"}
                             </button>
-                            <button type="button" className="btn btn-outline-secondary rounded-pill" onClick={() => handleSetDemoTime(1440)} disabled={evalLoading}>
-                                Evaluate Tomorrow
+                            <button 
+                                type="button" 
+                                className="btn btn-link btn-sm text-secondary text-decoration-none" 
+                                onClick={() => handleSetDemoTime(86400)} 
+                                disabled={evalLoading}
+                            >
+                                Reset to Tomorrow (24h)
                             </button>
                         </div>
                     </GlassCard>
@@ -327,12 +348,15 @@ export function MockPage() {
                             </div>
                             
                             <div className="pe-input-group">
-                                <label className="pe-input-label">Time to clear (Minutes)</label>
-                                <select className="pe-form-control pe-select" value={settleData.minutes} onChange={(e) => setSettleData({ ...settleData, minutes: e.target.value })}>
-                                    <option value="1">1 Minute</option>
-                                    <option value="5">5 Minutes</option>
-                                    <option value="60">1 Hour</option>
-                                </select>
+                                <label className="pe-input-label">Time to clear (Seconds)</label>
+                                <input 
+                                    type="number" 
+                                    className="pe-form-control" 
+                                    value={settleData.seconds} 
+                                    onChange={(e) => setSettleData({ ...settleData, seconds: e.target.value })} 
+                                    min="1" 
+                                    required
+                                />
                             </div>
 
                             <button type="submit" className="btn btn-outline-success rounded-pill mt-2" disabled={settleLoading}>

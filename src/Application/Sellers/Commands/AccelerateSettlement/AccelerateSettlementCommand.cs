@@ -7,7 +7,7 @@ namespace EbayClone.Application.Sellers.Commands.AccelerateSettlement;
 public record AccelerateSettlementCommand : IRequest<int>
 {
     public int SellerId { get; init; }
-    public int MinutesFromNow { get; init; } = 1;
+    public int SecondsFromNow { get; init; } = 60;
 }
 
 public class AccelerateSettlementCommandHandler : IRequestHandler<AccelerateSettlementCommand, int>
@@ -21,7 +21,7 @@ public class AccelerateSettlementCommandHandler : IRequestHandler<AccelerateSett
 
     public async Task<int> Handle(AccelerateSettlementCommand request, CancellationToken cancellationToken)
     {
-        var targetTime = DateTime.UtcNow.AddMinutes(request.MinutesFromNow);
+        var targetTime = DateTime.UtcNow.AddSeconds(request.SecondsFromNow);
         
         var pendingOrders = await _context.OrderTables
             .Include(o => o.OrderItems)
