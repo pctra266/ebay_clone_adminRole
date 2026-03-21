@@ -28,6 +28,10 @@ export function MockPage() {
     const [defectData, setDefectData] = useState({ sellerId: '' });
     const [defectLoading, setDefectLoading] = useState(false);
     const [evalLoading, setEvalLoading] = useState(false);
+    
+    // States for Accelerate Settlements
+    const [settleData, setSettleData] = useState({ sellerId: '', minutes: 1 });
+    const [settleLoading, setSettleLoading] = useState(false);
 
     const handlePurchaseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -114,6 +118,26 @@ export function MockPage() {
             setToast({ message: 'Failed to schedule evaluation time', type: 'error' });
         } finally {
             setEvalLoading(false);
+        }
+    };
+
+    const handleAccelerateSettlements = async (e) => {
+        e.preventDefault();
+        setSettleLoading(true);
+        try {
+            const res = await apiRequest('/api/Mocking/accelerate-settlement', {
+                method: 'POST',
+                body: { 
+                    sellerId: parseInt(settleData.sellerId, 10), 
+                    minutesFromNow: parseInt(settleData.minutes, 10) 
+                }
+            });
+            setToast({ message: `Success! ${res.updatedCount} pending order(s) accelerated to clear in ${settleData.minutes} minute.`, type: 'success' });
+            setSettleData({ sellerId: '', minutes: 1 });
+        } catch (error) {
+            setToast({ message: error.message || 'Failed to accelerate settlements', type: 'error' });
+        } finally {
+            setSettleLoading(false);
         }
     };
 
@@ -283,6 +307,38 @@ export function MockPage() {
                                 Evaluate Tomorrow
                             </button>
                         </div>
+                    </GlassCard>
+                </div>
+
+                {/* Accelerate Settlements Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-5" className="h-100 border-success" style={{ borderTop: '4px solid var(--bs-success)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-success">5. Accelerate Settlements</h5>
+                            <p className="text-muted small">
+                                Instantly fast-forward the Estimated Settlement Date of <strong>all pending orders</strong> for a given seller to clear in N minutes.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleAccelerateSettlements} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" value={settleData.sellerId} onChange={(e) => setSettleData({ ...settleData, sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+                            
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Time to clear (Minutes)</label>
+                                <select className="pe-form-control pe-select" value={settleData.minutes} onChange={(e) => setSettleData({ ...settleData, minutes: e.target.value })}>
+                                    <option value="1">1 Minute</option>
+                                    <option value="5">5 Minutes</option>
+                                    <option value="60">1 Hour</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-success rounded-pill mt-2" disabled={settleLoading}>
+                                {settleLoading ? "Accelerating..." : "Accelerate to Available Balance"}
+                            </button>
+                        </form>
                     </GlassCard>
                 </div>
             </div>

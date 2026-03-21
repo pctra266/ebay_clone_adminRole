@@ -1,4 +1,4 @@
-﻿using EbayClone.Application.Financials.Commands.SettlePendingFunds;
+using EbayClone.Application.Financials.Commands.SettlePendingFunds;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,9 +35,8 @@ public class SettlementBackgroundService : BackgroundService
                     _logger.LogInformation("Auto-settled funds for {Count} orders.", settledCount);
                 }
                 
-                // Di chuyển Task.Delay vào trong khối try-catch
-                // Run settlement checks every 1 hour
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                // Run settlement checks every 15 seconds (reduced for demo UI accuracy)
+                await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
             }
             catch (TaskCanceledException)
             {
