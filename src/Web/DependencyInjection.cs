@@ -143,6 +143,7 @@ public static class DependencyInjection
             });
         }
 
+        builder.Services.AddScoped<ISellerHubService, SellerHubService>();
         builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
     }
 

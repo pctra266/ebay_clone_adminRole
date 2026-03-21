@@ -5,11 +5,13 @@ import financeService from '../services/financeService';
 import { apiRequest } from '../services/httpClient';
 import { ToastMessage } from '../components/ToastMessage';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 export const SellersPage = () => {
     const [wallets, setWallets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState({ message: '', type: 'success' });
+    const [rtIndicator, setRtIndicator] = useState(false); // flashes when real-time update arrives
     
     // Frontend Pagination and Search State
     const [search, setSearch] = useState("");
@@ -23,6 +25,36 @@ export const SellersPage = () => {
         setSelectedSeller(seller);
         setModal(!modal);
     };
+
+    // ── Real-time: connect to SellerHub ──────────────────────────────────────
+    useEffect(() => {
+        const connection = new HubConnectionBuilder()
+            .withUrl('/hubs/sellers')
+            .withAutomaticReconnect()
+            .configureLogging(LogLevel.Warning)
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log('[SellerHub] Connected ✓');
+
+                connection.on('UpdateSellerWallet', (data) => {
+                    console.log('[SellerHub] Wallet update:', data);
+                    setWallets(prev => prev.map(w =>
+                        w.sellerId === data.sellerId
+                            ? { ...w, availableBalance: data.availableBalance, pendingBalance: data.pendingBalance, totalWithdrawn: data.totalWithdrawn }
+                            : w
+                    ));
+                    // Flash the indicator briefly
+                    setRtIndicator(true);
+                    setTimeout(() => setRtIndicator(false), 1500);
+                });
+            })
+            .catch(err => console.error('[SellerHub] Connection failed:', err));
+
+        return () => { connection.stop(); };
+    }, []);
+    // ─────────────────────────────────────────────────────────────────────────
 
     useEffect(() => {
         loadWallets();

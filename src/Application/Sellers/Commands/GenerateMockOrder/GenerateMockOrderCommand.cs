@@ -19,11 +19,13 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
 {
     private readonly IApplicationDbContext _context;
     private readonly ISender _sender;
+    private readonly ISellerHubService _sellerHubService;
 
-    public GenerateMockOrderCommandHandler(IApplicationDbContext context, ISender sender)
+    public GenerateMockOrderCommandHandler(IApplicationDbContext context, ISender sender, ISellerHubService sellerHubService)
     {
         _context = context;
         _sender = sender;
+        _sellerHubService = sellerHubService;
     }
 
     public async Task<bool> Handle(GenerateMockOrderCommand request, CancellationToken cancellationToken)
@@ -125,6 +127,9 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
         wallet.CreditPending(sellerEarnings);
         await _context.SaveChangesAsync(cancellationToken);
 
+        // Broadcast: PendingBalance just increased
+        await _sellerHubService.BroadcastWalletUpdate(seller.Id, wallet.AvailableBalance, wallet.PendingBalance, wallet.TotalWithdrawn);
+
         // Handle specific metrics failures AFTER completed
         if (request.OrderType == "DisputeUnresolved")
         {
@@ -163,6 +168,15 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
         catch (Exception)
         {
             // Fail silently for mock orders if settlement trigger fails
+        }
+
+        // Broadcast final state after settlement attempt (AvailableBalance may have moved)
+        var finalWallet = await _context.SellerWallets.AsNoTracking()
+            .FirstOrDefaultAsync(w => w.SellerId == seller.Id, cancellationToken);
+        if (finalWallet != null)
+        {
+            await _sellerHubService.BroadcastWalletUpdate(
+                seller.Id, finalWallet.AvailableBalance, finalWallet.PendingBalance, finalWallet.TotalWithdrawn);
         }
 
         return true;

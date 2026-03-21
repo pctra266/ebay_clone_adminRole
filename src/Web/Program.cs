@@ -14,6 +14,7 @@ builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
 
+
 var app = builder.Build();
 
 // Run DB migration + seeder on startup (idempotent — safe to run every time)
@@ -52,7 +53,7 @@ app.UseSwaggerUi(settings =>
 });
 
 // ── SignalR Hubs ─────────────────────────────────────────────────
-// ① MapHub phải đến TRƯỜC MapFallbackToFile
+// ① MapHub phải đến TRƯỚC MapFallbackToFile
 //   vì fallback bắt mọi route chưa match — kể cả /hubs/dispute/negotiate
 // Redis backplane đảm bảo message được route đúng khi chạy 2+ pods.
 app.MapHub<DisputeHub>("/hubs/dispute");

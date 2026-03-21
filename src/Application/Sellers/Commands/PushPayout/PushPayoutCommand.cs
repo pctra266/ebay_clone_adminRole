@@ -47,22 +47,7 @@ public class PushPayoutCommandHandler : IRequestHandler<PushPayoutCommand, Payou
 
         if (wallet.AvailableBalance < request.Amount)
         {
-            var injectionAmount = request.Amount - wallet.AvailableBalance;
-            wallet.AvailableBalance += injectionAmount;
-
-            // Audit injection
-            _context.FinancialTransactions.Add(new FinancialTransaction
-            {
-                SellerId = seller.Id,
-                UserId = seller.Id,
-                Type = "Adjustment",
-                Amount = injectionAmount,
-                BalanceAfter = wallet.AvailableBalance,
-                Description = $"[MockPush] Injected ${injectionAmount:F2} to cover manual payout test (Requested: ${request.Amount:F2}).",
-                Date = DateTime.UtcNow
-            });
-
-            await _context.SaveChangesAsync(cancellationToken);
+            throw new ArgumentException($"Insufficient Available Balance. Requested: {request.Amount:N0} VND, Available: {wallet.AvailableBalance:N0} VND.");
         }
 
         // 3. Trigger targeted Payout Engine run with specific amount
