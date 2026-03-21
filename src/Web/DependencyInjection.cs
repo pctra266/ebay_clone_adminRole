@@ -26,6 +26,10 @@ public static class DependencyInjection
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<ApplicationDbContext>();
 
+        builder.Services.AddHostedService<SellerEvaluationBackgroundService>();
+        builder.Services.AddHostedService<SettlementBackgroundService>();
+        builder.Services.AddHostedService<PayoutEngineBackgroundService>();
+
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
         builder.Services.AddRazorPages();
@@ -139,6 +143,7 @@ public static class DependencyInjection
             });
         }
 
+        builder.Services.AddScoped<ISellerHubService, SellerHubService>();
         builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
     }
 

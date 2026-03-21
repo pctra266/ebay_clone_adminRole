@@ -23,7 +23,7 @@ public class UpdatePlatformFeesCommandHandler : IRequestHandler<UpdatePlatformFe
     {
         // 1. Update Listing Fee
         var listingFee = await _context.PlatformFees
-            .FirstOrDefaultAsync(f => f.FeeType == PlatformFee.TypeListingFee && f.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(f => f.FeeType == PlatformFee.TypeListingFee && f.IsActive && f.CategoryId == null, cancellationToken);
 
         if (listingFee == null)
         {
@@ -39,7 +39,7 @@ public class UpdatePlatformFeesCommandHandler : IRequestHandler<UpdatePlatformFe
 
         // 2. Update Final Value Fee (Percentage)
         var finalValueFee = await _context.PlatformFees
-            .FirstOrDefaultAsync(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive && f.CategoryId == null, cancellationToken);
 
         if (finalValueFee == null)
         {

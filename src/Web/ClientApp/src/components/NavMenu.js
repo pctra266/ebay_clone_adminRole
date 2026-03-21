@@ -49,7 +49,6 @@ export const NavMenu = () => {
             <>
               <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
               <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
-              <SidebarLink to="/settlements" icon="bi bi-cart-check">Orders</SidebarLink>
               <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
               <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
             </>
@@ -58,43 +57,48 @@ export const NavMenu = () => {
           {(user?.role === 'SuperAdmin' || user?.roles?.includes('SuperAdmin')) && (
             <>
               <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
-              <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
-              <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
+              <SidebarLink to="/sellers" icon="bi bi-person-badge">Sellers Overview</SidebarLink>
+              <SidebarLink to="/payout-engine" icon="bi bi-lightning-charge">Payout Engine</SidebarLink>
               <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
-              <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
+              {/* <SidebarLink to="/mock" icon="bi bi-magic">Mock Simulation</SidebarLink> */}
             </>
           )}
         </ul>
       </div>
-      <div className="sidebar-footer p-3 border-top bg-white d-flex flex-column gap-2">
-         {user && (
-           <div className="d-flex align-items-center p-2 rounded mb-1" style={{ backgroundColor: '#f8f9fa' }}>
-             <div 
-               className="rounded-circle text-white d-flex justify-content-center align-items-center bg-primary"
-               style={{ width: '40px', height: '40px', fontSize: '1.2rem', flexShrink: 0 }}
-             >
-               {user.email ? user.email.charAt(0).toUpperCase() : <i className="bi bi-person"></i>}
-             </div>
-             <div className="ms-2 overflow-hidden w-100">
-               <div className="fw-bold text-truncate text-dark" title={user.fullName || user.userName || user.email || 'Admin'} style={{ fontSize: '0.9rem' }}>
-                 {user.fullName || user.userName || 'Admin'}
-               </div>
-               <div className="text-muted text-truncate" title={user.email} style={{ fontSize: '0.8rem' }}>
-                 {user.email}
-               </div>
-             </div>
-           </div>
-         )}
-         <button 
-           className="sidebar-link border-0 w-100 text-start bg-transparent text-danger" 
-           onClick={handleLogout}
-           style={{ cursor: 'pointer' }}
-         >
-           <i className="bi bi-box-arrow-right"></i>
-           <span>Logout</span>
-         </button>
+      <div className="sidebar-footer mt-auto border-top pt-2">
+        <ul className="navbar-nav w-100">
+          {user && (
+            <li className="nav-item px-3 py-2 d-flex align-items-center mb-1">
+              <div 
+                className="rounded-circle text-white d-flex justify-content-center align-items-center shadow-sm"
+                style={{ width: '36px', height: '36px', fontSize: '1rem', backgroundColor: '#0064d2', flexShrink: 0 }}
+              >
+                {user.email ? user.email.charAt(0).toUpperCase() : <i className="bi bi-person"></i>}
+              </div>
+              <div className="ms-3 overflow-hidden w-100">
+                <div className="fw-semibold text-truncate text-dark" title={user.fullName || user.userName || user.email || 'Admin'} style={{ fontSize: '0.9rem' }}>
+                  {user.fullName || user.userName || 'Admin'}
+                </div>
+                <div className="text-secondary text-truncate" title={user.email} style={{ fontSize: '0.8rem' }}>
+                  {user.email}
+                </div>
+              </div>
+            </li>
+          )}
+          
+          <NavItem>
+            <button 
+              className="sidebar-link border-0 w-100 text-start bg-transparent text-danger fw-medium" 
+              onClick={handleLogout}
+              style={{ cursor: 'pointer' }}
+            >
+              <i className="bi bi-box-arrow-left"></i>
+              <span>Logout</span>
+            </button>
+          </NavItem>
+        </ul>
       </div>
     </nav>
   );

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using EbayClone.Domain.Common;
 
 namespace EbayClone.Domain.Entities;
 
-public partial class OrderTable
+public partial class OrderTable : BaseAuditableEntity
 {
-    public int Id { get; set; }
+    public new int Id { get; set; }
 
     public int? BuyerId { get; set; }
 
@@ -21,6 +20,8 @@ public partial class OrderTable
     public DateTime? CompletedAt { get; set; } // When buyer received order
     
     public DateTime? CanDisputeUntil { get; set; } // Dispute deadline
+    
+    public DateTime? EstimatedSettlementDate { get; set; } // When funds can be released according to SellerLevel
     
     public decimal? PlatformFee { get; set; } // Platform commission
     

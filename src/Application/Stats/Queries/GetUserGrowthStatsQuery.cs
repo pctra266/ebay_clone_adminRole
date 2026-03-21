@@ -26,18 +26,27 @@ public class GetUserGrowthStatsQueryHandler : IRequestHandler<GetUserGrowthStats
 
     public async Task<UserGrowthStatsDto> Handle(GetUserGrowthStatsQuery request, CancellationToken cancellationToken)
     {
-        var start = request.StartDate?.ToUniversalTime() ?? DateTime.UtcNow.Date;
-        var end   = request.EndDate?.ToUniversalTime()   ?? DateTime.UtcNow.Date.AddDays(1).AddTicks(-1);
+        var query = _context.Users.AsNoTracking();
 
-        // Use ApprovedAt as registration/join date proxy (same pattern as existing queries)
-        var usersInRange = await _context.Users
-            .AsNoTracking()
-            .Where(u => u.ApprovedAt != null && u.ApprovedAt >= start && u.ApprovedAt <= end)
-            .Select(u => new { u.ApprovedAt, u.Role })
+        if (request.StartDate.HasValue)
+        {
+            var start = request.StartDate.Value.ToUniversalTime();
+            query = query.Where(u => u.CreatedAt >= start);
+        }
+
+        if (request.EndDate.HasValue)
+        {
+            var end = request.EndDate.Value.ToUniversalTime();
+            query = query.Where(u => u.CreatedAt <= end);
+        }
+
+        // Use CreatedAt for temporal filtering
+        var usersInRange = await query
+            .Select(u => new { u.CreatedAt, u.Role })
             .ToListAsync(cancellationToken);
 
         var grouped = usersInRange
-            .GroupBy(u => u.ApprovedAt!.Value.Date)
+            .GroupBy(u => u.CreatedAt.Date)
             .Select(g => new DailyUserGrowthDto(
                 g.Key,
                 g.Count(u => u.Role == "Buyer"  || u.Role == "buyer"),

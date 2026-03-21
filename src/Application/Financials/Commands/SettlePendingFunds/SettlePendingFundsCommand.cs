@@ -1,4 +1,5 @@
 using EbayClone.Application.Common.Interfaces;
+using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,23 +10,27 @@ public record SettlePendingFundsCommand : IRequest<int>;
 public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFundsCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISellerHubService _sellerHubService;
 
-    public SettlePendingFundsCommandHandler(IApplicationDbContext context)
+    public SettlePendingFundsCommandHandler(IApplicationDbContext context, ISellerHubService sellerHubService)
     {
         _context = context;
+        _sellerHubService = sellerHubService;
     }
 
     public async Task<int> Handle(SettlePendingFundsCommand request, CancellationToken cancellationToken)
     {
         // 1. Find orders that are delivered and past the dispute window
-        // For simplicity, we use DateTime.UtcNow. In production, this might be a scheduled job.
         var eligibleOrders = await _context.OrderTables
-            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && o.CanDisputeUntil < DateTime.UtcNow)
+            .Where(o => o.Status == "Delivered" && o.CompletedAt != null && 
+                        ((o.EstimatedSettlementDate != null && o.EstimatedSettlementDate <= DateTime.UtcNow) ||
+                         (o.EstimatedSettlementDate == null && o.CanDisputeUntil < DateTime.UtcNow)))
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
             .ToListAsync(cancellationToken);
 
         int settledCount = 0;
+        var updatedWallets = new Dictionary<int, SellerWallet>();
 
         foreach (var order in eligibleOrders)
         {
@@ -43,17 +48,28 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
 
                 if (wallet != null)
                 {
-                    // In a real system, we'd calculate exactly how much of THIS order goes to THIS seller.
-                    // Here we assume SellerEarnings from OrderTable is pre-calculated.
                     var amountToSettle = order.SellerEarnings ?? 0;
                     
                     if (amountToSettle > 0)
                     {
                         wallet.MovePendingToAvailable(amountToSettle);
                         
-                        // Update order status to indicate funds are cleared
+                        var transaction = new FinancialTransaction
+                        {
+                            SellerId = sellerId,
+                            UserId = sellerId,
+                            Type = "Settlement",
+                            Amount = amountToSettle,
+                            BalanceAfter = wallet.AvailableBalance,
+                            OrderId = order.Id,
+                            Description = $"Settled pending funds for order #{order.Id}",
+                            Date = DateTime.UtcNow
+                        };
+                        _context.FinancialTransactions.Add(transaction);
+
                         order.Status = "FundsCleared"; 
                         settledCount++;
+                        updatedWallets[sellerId] = wallet;
                     }
                 }
             }
@@ -62,6 +78,13 @@ public class SettlePendingFundsCommandHandler : IRequestHandler<SettlePendingFun
         if (settledCount > 0)
         {
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Broadcast real-time update for all settled sellers
+            foreach (var (sellerId, wallet) in updatedWallets)
+            {
+                await _sellerHubService.BroadcastWalletUpdate(
+                    sellerId, wallet.AvailableBalance, wallet.PendingBalance, wallet.TotalWithdrawn);
+            }
         }
 
         return settledCount;

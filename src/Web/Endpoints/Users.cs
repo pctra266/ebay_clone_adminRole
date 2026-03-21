@@ -7,6 +7,7 @@ using EbayClone.Application.Users.Commands.UnbanUser;
 using EbayClone.Application.Users.Commands.UpdateUserStatus;
 using EbayClone.Application.Users.Queries.GetUserById;
 using EbayClone.Application.Users.Queries.GetUsers;
+using EbayClone.Application.Sellers.Queries.GetSellerPerformanceMetrics;
 using EbayClone.Domain.Constants;
 using EbayClone.Web.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -27,6 +28,27 @@ public class Users : EndpointGroupBase
         group.MapPost("{id:int}/unban", UnbanUser);
         group.MapPost("{id:int}/approve", ApproveUser);
         group.MapPost("{id:int}/reject", RejectUser);
+        group.MapPost("evaluate-sellers", EvaluateSellers);
+        group.MapGet("seller-metrics", GetSellerMetrics);
+    }
+
+    public async Task<Results<Ok<int>, BadRequest<string>>> EvaluateSellers(ISender sender)
+    {
+        try
+        {
+            var result = await sender.Send(new EbayClone.Application.Sellers.Commands.EvaluateSellerLevels.EvaluateSellerLevelsCommand());
+            return TypedResults.Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
+    }
+
+    public async Task<Ok<List<SellerPerformanceMetricsDto>>> GetSellerMetrics(ISender sender)
+    {
+        var result = await sender.Send(new GetSellerPerformanceMetricsQuery());
+        return TypedResults.Ok(result);
     }
 
     public async Task<Ok<PaginatedList<UserBriefDto>>> GetUsers(

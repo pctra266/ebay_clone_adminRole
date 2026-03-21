@@ -738,15 +738,32 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EstimatedSettlementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime")
                         .HasColumnName("orderDate");
 
                     b.Property<decimal?>("PlatformFee")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("platformFee");
 
                     b.Property<decimal?>("SellerEarnings")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("sellerEarnings");
 
                     b.Property<string>("Status")
                         .HasMaxLength(20)
@@ -754,7 +771,7 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnName("status");
 
                     b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("totalPrice");
 
                     b.HasKey("Id")
@@ -810,6 +827,78 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Payment", (string)null);
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.PayoutConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Frequency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MinimumThreshold")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ScheduledHourUtc")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PayoutConfigs");
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.PayoutTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BankSnapshot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorLog")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SessionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("PayoutTransactions");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.PlatformFee", b =>
@@ -1318,6 +1407,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("avatarURL");
 
+                    b.Property<string>("BankAccountMock")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("BannedAt")
                         .HasColumnType("datetime2");
 
@@ -1328,6 +1420,12 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CCCD")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -1348,6 +1446,12 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LastLoginIp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Latitude")
@@ -1377,6 +1481,10 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("role");
+
+                    b.Property<string>("SellerLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1907,6 +2015,17 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.PayoutTransaction", b =>
+                {
+                    b.HasOne("EbayClone.Domain.Entities.User", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Seller");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.PlatformFee", b =>
