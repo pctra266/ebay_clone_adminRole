@@ -30,6 +30,8 @@ public class Users : EndpointGroupBase
         group.MapPost("{id:int}/reject", RejectUser);
         group.MapPost("evaluate-sellers", EvaluateSellers);
         group.MapGet("seller-metrics", GetSellerMetrics);
+        group.MapGet("seller-level-criteria", GetSellerLevelCriteria);
+        group.MapPut("seller-level-criteria", UpdateSellerLevelCriteria);
     }
 
     public async Task<Results<Ok<int>, BadRequest<string>>> EvaluateSellers(ISender sender)
@@ -49,6 +51,25 @@ public class Users : EndpointGroupBase
     {
         var result = await sender.Send(new GetSellerPerformanceMetricsQuery());
         return TypedResults.Ok(result);
+    }
+
+    public async Task<Ok<EbayClone.Application.Sellers.Criteria.SellerLevelCriteriaDto>> GetSellerLevelCriteria(ISender sender)
+    {
+        var result = await sender.Send(new EbayClone.Application.Sellers.Criteria.GetSellerLevelCriteriaQuery());
+        return TypedResults.Ok(result);
+    }
+
+    public async Task<Results<Ok, BadRequest<string>>> UpdateSellerLevelCriteria(ISender sender, [FromBody] EbayClone.Application.Sellers.Criteria.UpdateSellerLevelCriteriaCommand command)
+    {
+        try
+        {
+            await sender.Send(command);
+            return TypedResults.Ok();
+        }
+        catch (Exception ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 
     public async Task<Ok<PaginatedList<UserBriefDto>>> GetUsers(

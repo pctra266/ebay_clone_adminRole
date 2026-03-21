@@ -50,6 +50,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     // Payout Engine
     public virtual DbSet<PayoutConfig> PayoutConfigs { get; set; }
     public virtual DbSet<PayoutTransaction> PayoutTransactions { get; set; }
+    public virtual DbSet<SellerLevelCriteria> SellerLevelCriteria { get; set; }
 
 
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)

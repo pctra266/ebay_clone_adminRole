@@ -16,7 +16,28 @@ public class Mocking : EndpointGroupBase
     {
         group.RequireAuthorization(Policies.ManageUsers);
         group.MapPost("generate-seller-order", GenerateSellerOrder);
+        group.MapPost("generate-mock-defect", GenerateMockDefect);
+        group.MapPost("accelerate-settlement", AccelerateSettlement);
         group.MapPost("push-payout", PushPayout);
+    }
+
+    public async Task<IResult> AccelerateSettlement(ISender sender, [FromBody] EbayClone.Application.Sellers.Commands.AccelerateSettlement.AccelerateSettlementCommand command)
+    {
+        var count = await sender.Send(command);
+        return TypedResults.Ok(new { success = true, updatedCount = count, message = $"Successfully accelerated settlement for {count} pending orders." });
+    }
+
+    public async Task<IResult> GenerateMockDefect(ISender sender, [FromBody] EbayClone.Application.Sellers.Commands.GenerateMockDefect.GenerateMockDefectCommand command)
+    {
+        try
+        {
+            var result = await sender.Send(command);
+            return TypedResults.Ok(new { success = result, message = "Mock defect generated successfully." });
+        }
+        catch (ArgumentException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 
     public async Task<IResult> GenerateSellerOrder(ISender sender, [FromBody] GenerateMockOrderCommand command)

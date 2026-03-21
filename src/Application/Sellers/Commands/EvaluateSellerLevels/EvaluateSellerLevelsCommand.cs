@@ -25,6 +25,12 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
         int updatedCount = 0;
         var now = DateTime.UtcNow;
 
+        var criteria = await _context.SellerLevelCriteria.FirstOrDefaultAsync(c => c.Id == 1, cancellationToken);
+        if (criteria == null)
+        {
+            criteria = new SellerLevelCriteria(); // Use defaults if not found
+        }
+
         foreach (var seller in sellers)
         {
             // Calculate total transactions in last 3 months
@@ -55,8 +61,6 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
             var totalSales = threeMonthOrders.Sum(o => o.TotalPrice ?? 0);
 
             // Metrics
-            // 1. Cases Closed Without Seller Resolution (Disputes unresolved by seller)
-            // Assuming Status "Escalated" or "RefundedByPlatform" implies closed without resolution
             var unresolvedCases = await _context.Disputes
                 .Where(d => d.Order != null && d.Order.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == seller.Id) && d.CreatedAt >= evaluationPeriod && 
                             (d.Status == "ClosedWithoutResolution" || d.Status == "Escalated"))
@@ -64,7 +68,6 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
 
             double unresolvedRate = transactionCount > 0 ? (double)unresolvedCases / transactionCount : 0;
 
-            // 2. Transaction Defect Rate (Return Requests with issues + unresolved disputes + cancellations)
             var returnDefects = await _context.ReturnRequests
                 .Include(r => r.Order)
                 .ThenInclude(o => o!.OrderItems)
@@ -73,29 +76,28 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
                             r.CreatedAt >= evaluationPeriod && r.Status == "Refunded")
                 .CountAsync(cancellationToken);
             
-            var totalDefects = unresolvedCases + returnDefects; // simplified defect counting
+            var totalDefects = unresolvedCases + returnDefects; 
             double defectRate = transactionCount > 0 ? (double)totalDefects / transactionCount : 0;
 
-            // 3. Late Shipment (Using mock simple condition: completedAt > OrderDate + 7 days for now, or just dummy)
             var lateShipments = threeMonthOrders.Count(o => o.CompletedAt.HasValue && o.OrderDate.HasValue && 
                                                             (o.CompletedAt.Value - o.OrderDate.Value).TotalDays > 7);
             double lateRate = transactionCount > 0 ? (double)lateShipments / transactionCount : 0;
 
-            // Evaluate Level
+            // Evaluate Level using dynamic criteria
             string newLevel = "BelowStandard";
 
             // Is Top Rated?
-            bool isTopRated = transactionCount >= 100 && 
-                              totalSales >= 1000 && 
-                              (now - (seller.ApprovedAt ?? now.AddDays(-100))).TotalDays >= 90 &&
-                              unresolvedCases <= 2 &&
-                              defectRate <= 0.005 &&
-                              lateRate <= 0.03;
+            bool isTopRated = transactionCount >= criteria.TopRatedMinTransactions && 
+                              totalSales >= criteria.TopRatedMinSales && 
+                              (now - (seller.ApprovedAt ?? now.AddDays(-1000))).TotalDays >= criteria.TopRatedMinDays &&
+                              unresolvedCases <= criteria.TopRatedMaxUnresolvedCases &&
+                              defectRate <= criteria.TopRatedMaxDefectRate &&
+                              lateRate <= criteria.TopRatedMaxLateRate;
 
             // Is Above Standard?
             bool isAboveStandard = !isTopRated && 
-                                   defectRate <= 0.02 && 
-                                   (unresolvedCases <= 2 || unresolvedRate <= 0.003);
+                                   defectRate <= criteria.AboveStandardMaxDefectRate && 
+                                   (unresolvedCases <= criteria.AboveStandardMaxUnresolvedCases || unresolvedRate <= criteria.AboveStandardMaxUnresolvedRate);
 
             if (isTopRated) newLevel = "TopRated";
             else if (isAboveStandard) newLevel = "AboveStandard";

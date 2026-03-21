@@ -4,6 +4,62 @@ import financeService from '../services/financeService';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ToastMessage } from '../components/ToastMessage';
 
+const OrderCountdown = ({ estSettlementDate }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+    const [progress, setProgress] = useState(100);
+
+    useEffect(() => {
+        if (!estSettlementDate) {
+            setTimeLeft('Pending');
+            return;
+        }
+        
+        let target = new Date(estSettlementDate);
+        if(typeof estSettlementDate === 'string' && !estSettlementDate.endsWith('Z')) {
+             target = new Date(estSettlementDate + 'Z');
+        }
+
+        const calc = () => {
+            const now = new Date();
+            const diff = target - now;
+            if (diff <= 0) {
+                setTimeLeft('Ready to Settle');
+                setProgress(100);
+                return;
+            }
+            const MathFloor = Math.floor;
+            const days = MathFloor(diff / (1000 * 60 * 60 * 24));
+            const hours = MathFloor((diff / (1000 * 60 * 60)) % 24);
+            const mins = MathFloor((diff / 1000 / 60) % 60);
+            const secs = MathFloor((diff / 1000) % 60);
+
+            let str = '';
+            if (days > 0) str += `${days}d `;
+            str += `${hours.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+            setTimeLeft(str);
+
+            const maxMs = 21 * 24 * 60 * 60 * 1000;
+            const percent = Math.min(100, Math.max(5, 100 - (diff / maxMs * 100)));
+            setProgress(percent);
+        };
+        calc();
+        const t = setInterval(calc, 1000);
+        return () => clearInterval(t);
+    }, [estSettlementDate]);
+
+    if (timeLeft === 'Ready to Settle') return <span className="badge bg-success">Ready to Settle</span>;
+    if (timeLeft === 'Pending') return <span className="text-muted">Pending</span>;
+
+    return (
+        <div className="d-flex flex-column align-items-center" style={{ minWidth: '130px' }}>
+            <span className="fw-bold text-warning font-monospace small">{timeLeft}</span>
+            <div className="progress w-100 mt-1" style={{height: '4px'}}>
+                <div className="progress-bar bg-warning" role="progressbar" style={{width: `${progress}%`}}></div>
+            </div>
+        </div>
+    );
+};
+
 export const SellerPendingFundsPage = () => {
     const { sellerId } = useParams();
     const [orders, setOrders] = useState([]);
@@ -94,16 +150,7 @@ export const SellerPendingFundsPage = () => {
                                     </td>
                                     <td>{formatDate(order.estimatedSettlementDate)}</td>
                                     <td className="text-center">
-                                        {order.daysRemaining <= 0 ? (
-                                            <span className="badge bg-success">Ready to Settle</span>
-                                        ) : (
-                                            <div className="d-flex flex-column align-items-center">
-                                                <span className="fw-bold text-warning">{order.daysRemaining} days</span>
-                                                <div className="progress w-75 mt-1" style={{height: '4px'}}>
-                                                    <div className="progress-bar bg-warning" role="progressbar" style={{width: `${Math.max(5, 100 - (order.daysRemaining * 5))}%`}}></div>
-                                                </div>
-                                            </div>
-                                        )}
+                                        <OrderCountdown estSettlementDate={order.estimatedSettlementDate} />
                                     </td>
                                 </tr>
                             ))}
