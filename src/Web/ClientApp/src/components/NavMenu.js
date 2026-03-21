@@ -62,7 +62,7 @@ export const NavMenu = () => {
               <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
-              <SidebarLink to="/mock" icon="bi bi-magic">Mock Simulation</SidebarLink>
+              {/* <SidebarLink to="/mock" icon="bi bi-magic">Mock Simulation</SidebarLink> */}
             </>
           )}
         </ul>
