@@ -24,12 +24,12 @@ public class GetPlatformFeesQueryHandler : IRequestHandler<GetPlatformFeesQuery,
     public async Task<PlatformFeesDto> Handle(GetPlatformFeesQuery request, CancellationToken cancellationToken)
     {
         var listingFee = await _context.PlatformFees
-            .Where(f => f.FeeType == PlatformFee.TypeListingFee && f.IsActive)
+            .Where(f => f.FeeType == PlatformFee.TypeListingFee && f.IsActive && f.CategoryId == null)
             .Select(f => f.FixedAmount)
             .FirstOrDefaultAsync(cancellationToken) ?? 0;
 
         var finalValueFee = await _context.PlatformFees
-            .Where(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive)
+            .Where(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive && f.CategoryId == null)
             .Select(f => f.Percentage)
             .FirstOrDefaultAsync(cancellationToken) ?? 0;
 

@@ -70,7 +70,14 @@ public class GenerateMockOrderCommandHandler : IRequestHandler<GenerateMockOrder
             completedAt = orderDate.AddDays(10);
         }
 
-        var platformFee = request.Amount * 0.05m;
+        // Fetch dynamic platform fee from DB
+        var platformFeeConfig = await _context.PlatformFees
+            .Where(f => f.FeeType == PlatformFee.TypeFinalValueFee && f.IsActive && f.CategoryId == null)
+            .OrderByDescending(f => f.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+            
+        var feePercentage = platformFeeConfig?.Percentage ?? 5m;
+        var platformFee = request.Amount * (feePercentage / 100m);
         var sellerEarnings = request.Amount - platformFee;
 
         // hold days rule
