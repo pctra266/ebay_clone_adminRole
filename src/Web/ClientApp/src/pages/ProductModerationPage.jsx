@@ -86,7 +86,12 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                 <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
                     {/* Product Info */}
                     <div style={{ display: 'flex', gap: 12, marginBottom: 20, padding: 14, background: '#F8FAFC', borderRadius: 10, border: '1px solid #E2E8F0' }}>
-                        <img src={product.image || 'https://via.placeholder.com/52'} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }} />
+                        <img 
+                            src={product.image || '/images/default-product.png'} 
+                            alt="" 
+                            style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }} 
+                            onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                        />
                         <div>
                             <p style={{ margin: 0, fontWeight: 600, color: '#1E293B', fontSize: 14 }}>{product.title}</p>
                             <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748B' }}>Shop: <b>{product.shopName || 'Unknown'}</b></p>
@@ -448,7 +453,13 @@ export const ProductModerationPage = () => {
                                                 </td>
                                                 <td>
                                                     <div className="d-flex align-items-center gap-3">
-                                                        <img src={product.image} alt="" className="rounded-3 border shadow-sm" style={{ width: '42px', height: '42px', objectFit: 'cover' }} />
+                                                        <img 
+                                                            src={product.image || '/images/default-product.png'} 
+                                                            alt="" 
+                                                            className="rounded-3 border shadow-sm" 
+                                                            style={{ width: '42px', height: '42px', objectFit: 'cover' }} 
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                                                        />
                                                         <div className="fw-bold text-primary cursor-pointer text-decoration-hover">{product.title}</div>
                                                     </div>
                                                 </td>
