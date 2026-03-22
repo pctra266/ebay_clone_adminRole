@@ -53,7 +53,9 @@ public class Verify2FATests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.ShouldBe("TestToken");
+        result.Success.ShouldBeTrue();
+        result.Token.ShouldBe("TestToken");
+        result.ErrorMessage.ShouldBeNull();
     }
 
     [Test]
