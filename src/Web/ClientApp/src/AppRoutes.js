@@ -14,16 +14,20 @@ import ProtectedRoute     from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
-import { WalletsPage } from "./pages/WalletsPage";
-import { WithdrawalsPage } from "./pages/WithdrawalsPage";
+import { SellersPage } from "./pages/SellersPage";
 import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
 import EbayProductDetail from "./pages/EbayProductDetail";
+import { WalletsPage } from "./pages/WalletsPage";
+import { WithdrawalsPage } from "./pages/WithdrawalsPage";
+import StatisticsPage from "./pages/StatisticsPage";
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
-import StatisticsPage from "./pages/StatisticsPage";
+import { MockPage } from "./pages/MockPage";
+import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
+import PayoutEnginePage from "./pages/PayoutEnginePage";
 
 // Helper cho gọn
 const protect = (element, allowedRoles = []) => (
@@ -39,7 +43,6 @@ const AppRoutes = [
     element: <LoginPage />,
     noLayout: true
   },
-
   // ── Cần login nhưng chưa cần 2FA ─────────────────────────────────
   {
     path: "/enable2FA",
@@ -110,6 +113,10 @@ const AppRoutes = [
     element: protect(<WithdrawalsPage />, ["SuperAdmin"])
   },
   {
+    path: "/sellers",
+    element: protect(<SellersPage />, ["SuperAdmin"])
+  },
+  {
     path: "/settlements",
     element: protect(<PendingSettlementsPage />, ["SuperAdmin", "Support"])
   },
@@ -145,6 +152,18 @@ const AppRoutes = [
   {
     path: "/return-requests/:id",
     element: protect(<ReturnRequestDetailPage />, ["SuperAdmin", "Support"])
+  },
+  {
+    path: "/mock",
+    element: protect(<MockPage />, ["SuperAdmin"])
+  },
+  {
+    path: "/sellers/pending/:sellerId",
+    element: protect(<SellerPendingFundsPage />, ["SuperAdmin"])
+  },
+  {
+    path: "/payout-engine",
+    element: protect(<PayoutEnginePage />, ["SuperAdmin"])
   }
 ];
 

@@ -16,9 +16,16 @@ public class Dashboard : EndpointGroupBase
             .Produces<DashboardMetricsDto>(StatusCodes.Status200OK);
     }
 
-    public async Task<Ok<DashboardMetricsDto>> GetDashboardMetrics(ISender sender)
+    public async Task<Ok<DashboardMetricsDto>> GetDashboardMetrics(
+        ISender sender, 
+        DateTime? startDate = null, 
+        DateTime? endDate = null)
     {
-        var result = await sender.Send(new GetDashboardMetricsQuery());
+        var result = await sender.Send(new GetDashboardMetricsQuery 
+        { 
+            StartDate = startDate, 
+            EndDate = endDate 
+        });
         return TypedResults.Ok(result);
     }
 }

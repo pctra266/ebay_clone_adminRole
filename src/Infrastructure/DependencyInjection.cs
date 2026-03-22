@@ -21,6 +21,7 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         builder.Services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
+        builder.Services.AddScoped<ISaveChangesInterceptor, SellerWalletChangedInterceptor>();
 
         builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
@@ -82,5 +83,8 @@ public static class DependencyInjection
         builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
 
         builder.Services.AddHostedService<AutoReviewUsersService>();
+
+        // Payout Engine
+        builder.Services.AddScoped<IMockPaymentGateway, MockPaymentGatewayService>();
     }
 }

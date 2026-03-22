@@ -10,7 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.Dashboard.Queries.GetDashboardMetrics;
 
-public record GetDashboardMetricsQuery : IRequest<DashboardMetricsDto>;
+public record GetDashboardMetricsQuery : IRequest<DashboardMetricsDto>
+{
+    public DateTime? StartDate { get; init; }
+    public DateTime? EndDate { get; init; }
+}
 
 public class GetDashboardMetricsQueryHandler : IRequestHandler<GetDashboardMetricsQuery, DashboardMetricsDto>
 {
@@ -27,11 +31,23 @@ public class GetDashboardMetricsQueryHandler : IRequestHandler<GetDashboardMetri
         var today = now.Date;
         var sevenDaysAgo = today.AddDays(-6);
 
-        var totalUsers = await _context.Users.CountAsync(cancellationToken);
-        var totalProducts = await _context.Products.CountAsync(cancellationToken);
+        var startDate = request.StartDate;
+        var endDate = request.EndDate;
+
+        var totalUsers = await _context.Users
+            .CountAsync(u => (!request.StartDate.HasValue || u.CreatedAt >= request.StartDate.Value) &&
+                             (!request.EndDate.HasValue || u.CreatedAt <= request.EndDate.Value), 
+                        cancellationToken);
+
+        var totalProducts = await _context.Products
+            .CountAsync(p => (!request.StartDate.HasValue || p.CreatedAt >= request.StartDate.Value) &&
+                             (!request.EndDate.HasValue || p.CreatedAt <= request.EndDate.Value), 
+                        cancellationToken);
         
-        var totalOrdersToday = await _context.OrderTables
-            .CountAsync(o => o.OrderDate >= today, cancellationToken);
+        var totalOrders = await _context.OrderTables
+            .CountAsync(o => (!request.StartDate.HasValue || o.OrderDate >= request.StartDate.Value) &&
+                             (!request.EndDate.HasValue || o.OrderDate <= request.EndDate.Value), 
+                        cancellationToken);
 
         var pendingAccountsCount = await _context.Users
             .CountAsync(u => u.ApprovalStatus == "PendingApproval" || u.Status == "Pending", cancellationToken);
@@ -72,7 +88,7 @@ public class GetDashboardMetricsQueryHandler : IRequestHandler<GetDashboardMetri
         {
             TotalUsers = totalUsers,
             TotalProducts = totalProducts,
-            TotalOrdersToday = totalOrdersToday,
+            TotalOrdersToday = totalOrders, // Renamed logic-wise to fit the range
             PendingAccountsCount = pendingAccountsCount,
             OpenDisputesCount = openDisputesCount,
             NewReturnRequestsCount = newReturnRequestsCount,

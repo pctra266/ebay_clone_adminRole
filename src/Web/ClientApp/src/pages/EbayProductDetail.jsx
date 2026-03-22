@@ -63,11 +63,11 @@ const EbayProductDetail = () => {
     };
 
     const parseImages = (imgStr) => {
-        if (!imgStr) return [];
+        if (!imgStr || imgStr === "[]") return ['/images/default-product.png'];
         try {
             const parsed = JSON.parse(imgStr);
-            if (Array.isArray(parsed)) return parsed;
-            return [imgStr];
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            return ['/images/default-product.png'];
         } catch (e) {
             return [imgStr];
         }
@@ -143,8 +143,8 @@ const EbayProductDetail = () => {
         );
     }
 
-    const images = parseImages(product.images);
-    const primaryImage = activeImage || images[0] || 'https://via.placeholder.com/500';
+    const images = parseImages(product.images || product.image);
+    const primaryImage = activeImage || images[0] || '/images/default-product.png';
 
     return (
         <div className="ebay-container ebay-product-page">
@@ -170,12 +170,20 @@ const EbayProductDetail = () => {
                                     className={`thumbnail-btn ${activeImage === img ? 'active' : ''}`}
                                     onClick={() => setActiveImage(img)}
                                 >
-                                    <img src={img} alt={`Thumbnail ${idx + 1}`} />
+                                    <img 
+                                        src={img} 
+                                        alt={`Thumbnail ${idx + 1}`} 
+                                        onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                                    />
                                 </button>
                             ))}
                         </div>
                         <div className="ebay-product-main-image">
-                            <img src={primaryImage} alt={product.title} />
+                            <img 
+                                src={primaryImage} 
+                                alt={product.title} 
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                            />
                         </div>
                     </div>
 

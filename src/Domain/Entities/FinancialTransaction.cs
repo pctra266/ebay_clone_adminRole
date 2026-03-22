@@ -17,7 +17,6 @@ public partial class FinancialTransaction
     public decimal BalanceAfter { get; set; }
 
     public int? OrderId { get; set; }
-
     public int? WithdrawalId { get; set; }
 
     public string? Description { get; set; }

@@ -6,6 +6,7 @@ import { apiRequest } from "./httpClient";
 // Ensure cookies (auth_token) are sent with every axios request
 axios.defaults.withCredentials = true;
 
+
 // axios-based service (used by HEAD branch pages)
 export const userService = {
     getUsers: async (params) => {

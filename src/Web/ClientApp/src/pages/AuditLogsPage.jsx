@@ -60,156 +60,221 @@ export function AuditLogsPage() {
     loadLogs();
   }, [loadLogs]);
 
+  const criticalCount = (logsData.items || []).filter(l => l.action?.toLowerCase().includes('delete') || l.action?.toLowerCase().includes('ban')).length;
+
   return (
-    <section className="py-3">
-      <h1 className="h3 mb-3">Audit Logs</h1>
+    <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
+      <div className="container-fluid" style={{ maxWidth: 1400 }}>
+        {/* ── Page Header (Standardized) ── */}
+        <div className="text-center mb-5">
+          <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Audit Logs</h1>
+          <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
+            Accountability and transparency through comprehensive system activity tracking.
+          </p>
+        </div>
 
-      <ToastMessage
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ message: "", type: "success" })}
-      />
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ message: "", type: "success" })}
+        />
 
-      <div className="card mb-3">
-        <div className="card-body">
-          <h2 className="h5">Filters</h2>
-          <div className="row g-2 align-items-end">
-            <div className="col-md-3">
-              <label htmlFor="f-admin-user" className="form-label">User</label>
-              <input
-                id="f-admin-user"
-                className="form-control"
-                value={filters.adminUsername}
-                onChange={(event) => setFilters((prev) => ({ ...prev, adminUsername: event.target.value }))}
-              />
+        {/* ── Quick Stats Grid ── */}
+        <div className="row g-3 mb-5 justify-content-center">
+          {[
+            { label: 'Total Activity', value: logsData.totalCount, icon: 'bi-journal-text', color: 'primary' },
+            { label: 'Critical Actions', value: criticalCount > 0 ? criticalCount : 'Monitored', icon: 'bi-shield-lock-fill', color: 'danger' },
+            { label: 'Governance Health', value: 'Excellent', icon: 'bi-check-circle-fill', color: 'success' },
+            { label: 'Log Retention', value: '30 Days', icon: 'bi-archive-fill', color: 'info' },
+          ].map((stat, idx) => (
+            <div key={idx} className="col-12 col-sm-6 col-lg-3">
+              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
+                <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-circle`}>
+                  <i className={`bi ${stat.icon} h4 mb-0`}></i>
+                </div>
+                <div>
+                  <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
+                  <h5 className="mb-0 fw-bold text-dark">{stat.value}</h5>
+                </div>
+              </div>
             </div>
-            <div className="col-md-2">
-              <label htmlFor="f-target-type" className="form-label">Entity</label>
-              <input
-                id="f-target-type"
-                className="form-control"
-                value={filters.targetType}
-                onChange={(event) => setFilters((prev) => ({ ...prev, targetType: event.target.value }))}
-              />
+          ))}
+        </div>
+
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div className="card-body p-0">
+            {/* ── Enhanced Filter Toolbar ── */}
+            <div className="px-4 py-4 bg-light border-bottom">
+              <div className="row g-3">
+                <div className="col-md-3">
+                  <div className="position-relative">
+                    <i className="bi bi-person position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                    <input
+                      className="form-control border-0 bg-white rounded-pill ps-5 py-2 shadow-sm"
+                      placeholder="Admin Username..."
+                      value={filters.adminUsername}
+                      onChange={(e) => setFilters(p => ({ ...p, adminUsername: e.target.value }))}
+                      style={{ height: '42px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="position-relative">
+                    <i className="bi bi-box position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                    <input
+                      className="form-control border-0 bg-white rounded-pill ps-5 py-2 shadow-sm"
+                      placeholder="Entity (Product, User...)"
+                      value={filters.targetType}
+                      onChange={(e) => setFilters(p => ({ ...p, targetType: e.target.value }))}
+                      style={{ height: '42px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="position-relative">
+                    <i className="bi bi-activity position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                    <input
+                      className="form-control border-0 bg-white rounded-pill ps-5 py-2 shadow-sm"
+                      placeholder="Action (Ban, Update...)"
+                      value={filters.action}
+                      onChange={(e) => setFilters(p => ({ ...p, action: e.target.value }))}
+                      style={{ height: '42px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="d-flex gap-2">
+                    <input
+                      className="form-control border-0 bg-white rounded-pill px-3 py-2 shadow-sm flex-grow-1"
+                      type="date"
+                      value={filters.fromDate}
+                      onChange={(e) => setFilters(p => ({ ...p, fromDate: e.target.value }))}
+                      style={{ height: '42px', fontSize: '0.85rem' }}
+                    />
+                    <i className="bi bi-arrow-right align-self-center text-muted"></i>
+                    <input
+                      className="form-control border-0 bg-white rounded-pill px-3 py-2 shadow-sm flex-grow-1"
+                      type="date"
+                      value={filters.toDate}
+                      onChange={(e) => setFilters(p => ({ ...p, toDate: e.target.value }))}
+                      style={{ height: '42px', fontSize: '0.85rem' }}
+                    />
+                    <button className="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onClick={() => { setPageNumber(1); loadLogs(); }}>
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="col-md-3">
-              <label htmlFor="f-action" className="form-label">Action</label>
-              <input
-                id="f-action"
-                className="form-control"
-                value={filters.action}
-                onChange={(event) => setFilters((prev) => ({ ...prev, action: event.target.value }))}
-              />
-            </div>
-            <div className="col-md-2">
-              <label htmlFor="f-from-date" className="form-label">From</label>
-              <input
-                id="f-from-date"
-                className="form-control"
-                type="date"
-                value={filters.fromDate}
-                onChange={(event) => setFilters((prev) => ({ ...prev, fromDate: event.target.value }))}
-              />
-            </div>
-            <div className="col-md-2">
-              <label htmlFor="f-to-date" className="form-label">To</label>
-              <input
-                id="f-to-date"
-                className="form-control"
-                type="date"
-                value={filters.toDate}
-                onChange={(event) => setFilters((prev) => ({ ...prev, toDate: event.target.value }))}
-              />
-            </div>
-            <div className="col-12">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  setPageNumber(1);
-                  loadLogs();
-                }}
-              >
-                Apply Filters
-              </button>
+
+            {loading ? (
+              <div className="py-5 text-center">
+                <div className="spinner-border text-primary" role="status"></div>
+                <p className="mt-2 text-secondary small">Traversing historical records...</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table pe-table mb-0 align-middle">
+                  <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
+                    <tr>
+                      <th className="ps-4 py-3 border-0">Actor</th>
+                      <th className="py-3 border-0">Operation</th>
+                      <th className="py-3 border-0">Target Entity</th>
+                      <th className="py-3 border-0">Timestamp</th>
+                      <th className="py-3 border-0">Previous State</th>
+                      <th className="pe-4 py-3 border-0">Resulting State</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(logsData.items || []).length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center py-5 text-muted">No audit records match your criteria.</td>
+                      </tr>
+                    ) : (
+                      (logsData.items || []).map((log) => (
+                        <tr key={log.id} className="transition-all border-bottom">
+                          <td className="ps-4 py-3">
+                            <div className="d-flex align-items-center gap-2">
+                              <div className="bg-light p-2 rounded-circle">
+                                <i className="bi bi-person-badge text-primary"></i>
+                              </div>
+                              <span className="fw-bold text-dark">{log.user || log.adminUsername || `Admin #${log.adminId}`}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`badge rounded-pill px-3 py-1 ${
+                              log.action?.includes('Delete') || log.action?.includes('Ban') ? 'bg-danger-subtle text-danger' :
+                              log.action?.includes('Create') ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'
+                            }`} style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+                              {log.action}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="fw-medium text-dark">{log.targetType}</div>
+                            {log.targetId && <div className="text-muted x-small">Ref: #{log.targetId}</div>}
+                          </td>
+                          <td>
+                            <div className="text-dark small fw-medium">{formatDate(log.createdAt).split(',')[0]}</div>
+                            <div className="text-muted x-small">{formatDate(log.createdAt).split(',')[1]}</div>
+                          </td>
+                          <td style={{ minWidth: 200 }}>
+                            <details className="audit-detail">
+                              <summary className="small text-primary cursor-pointer">Changes (Before)</summary>
+                              <pre className="bg-dark text-light p-3 rounded-3 mt-2 mb-0 shadow-sm" style={{ fontSize: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+                                {formatJsonText(log.beforeData)}
+                              </pre>
+                            </details>
+                          </td>
+                          <td className="pe-4" style={{ minWidth: 200 }}>
+                            <details className="audit-detail">
+                              <summary className="small text-primary cursor-pointer">Changes (After)</summary>
+                              <pre className="bg-dark text-light p-3 rounded-3 mt-2 mb-0 shadow-sm" style={{ fontSize: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+                                {formatJsonText(log.afterData)}
+                              </pre>
+                            </details>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── Standard Pagination ── */}
+            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+              <span className="text-muted small">
+                Showing <strong className="text-dark">{(pageNumber - 1) * 20 + 1}</strong> - <strong className="text-dark">{Math.min(pageNumber * 20, logsData.totalCount)}</strong> of {logsData.totalCount}
+              </span>
+              <nav>
+                <ul className="pagination pagination-sm mb-0 gap-1">
+                  <li className={`page-item ${pageNumber <= 1 ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-pill border-0 fw-bold px-3 py-2" onClick={() => setPageNumber(p => p - 1)}>
+                      <i className="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
+                  <li className="page-item disabled px-2">
+                    <span className="page-link bg-transparent border-0 text-dark fw-bold py-2">
+                      {pageNumber} / {logsData.totalPages || 1}
+                    </span>
+                  </li>
+                  <li className={`page-item ${pageNumber >= (logsData.totalPages || 1) ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-pill border-0 fw-bold px-3 py-2" onClick={() => setPageNumber(p => p + 1)}>
+                      <i className="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
       </div>
-
-      {loading ? (
-        <LoadingIndicator text="Loading audit logs..." />
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-striped align-middle">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Action</th>
-                <th>Entity</th>
-                <th>Timestamp</th>
-                <th>Before</th>
-                <th>After</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(logsData.items || []).map((log) => (
-                <tr key={log.id}>
-                  <td>{log.user || log.adminUsername || log.adminId}</td>
-                  <td>{log.action}</td>
-                  <td>{log.targetType} {log.targetId ? `#${log.targetId}` : ""}</td>
-                  <td>{formatDate(log.createdAt)}</td>
-                  <td style={{ minWidth: 220 }}>
-                    <details>
-                      <summary className="small">View JSON</summary>
-                      <pre className="bg-light p-2 small mb-0">{formatJsonText(log.beforeData)}</pre>
-                    </details>
-                  </td>
-                  <td style={{ minWidth: 220 }}>
-                    <details>
-                      <summary className="small">View JSON</summary>
-                      <pre className="bg-light p-2 small mb-0">{formatJsonText(log.afterData)}</pre>
-                    </details>
-                  </td>
-                </tr>
-              ))}
-              {(logsData.items || []).length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center text-muted py-4">
-                    No audit logs found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div className="d-flex justify-content-between align-items-center mt-2">
-        <small className="text-muted">Total: {logsData.totalCount || 0}</small>
-        <div className="d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm"
-            disabled={pageNumber <= 1}
-            onClick={() => setPageNumber((prev) => prev - 1)}
-          >
-            Previous
-          </button>
-          <span className="align-self-center small">
-            Page {pageNumber} / {logsData.totalPages || 1}
-          </span>
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm"
-            disabled={pageNumber >= (logsData.totalPages || 1)}
-            onClick={() => setPageNumber((prev) => prev + 1)}
-          >
-            Next
-          </button>
-        </div>
-      </div>
-    </section>
+      <style>{`
+        .audit-detail summary::-webkit-details-marker { display: none; }
+        .audit-detail summary { list-style: none; font-weight: 600; text-decoration: underline; }
+        .x-small { font-size: 0.7rem; }
+      `}</style>
+    </div>
   );
 }
 

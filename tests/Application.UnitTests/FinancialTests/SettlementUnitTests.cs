@@ -5,12 +5,15 @@ using EbayClone.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using NUnit.Framework;
+using Moq;
+using EbayClone.Application.Common.Interfaces;
 
 namespace EbayClone.Application.UnitTests.FinancialTests;
 
 public class SettlementUnitTests
 {
     private ApplicationDbContext _context = null!;
+    private Mock<ISellerHubService> _sellerHubServiceMock = null!;
 
     [SetUp]
     public void Setup()
@@ -20,6 +23,7 @@ public class SettlementUnitTests
             .Options;
 
         _context = new ApplicationDbContext(options);
+        _sellerHubServiceMock = new Mock<ISellerHubService>();
     }
 
     [TearDown]
@@ -64,7 +68,7 @@ public class SettlementUnitTests
 
         await _context.SaveChangesAsync();
 
-        var handler = new SettlePendingFundsCommandHandler(_context);
+        var handler = new SettlePendingFundsCommandHandler(_context, _sellerHubServiceMock.Object);
 
         // Act
         var result = await handler.Handle(new SettlePendingFundsCommand(), CancellationToken.None);
