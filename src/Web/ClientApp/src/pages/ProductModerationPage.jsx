@@ -4,25 +4,7 @@ import { categoryService } from '../services/categoryService';
 
 
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
-const StatusBadge = ({ status }) => {
-    const styles = {
-        'Pending Review': { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
-        'Resolved': { bg: '#D1FAE5', color: '#065F46', dot: '#10B981' },
-        'Rejected': { bg: '#FEE2E2', color: '#991B1B', dot: '#EF4444' },
-    };
-    const s = styles[status] || styles['Pending Review'];
-    return (
-        <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-            background: s.bg, color: s.color,
-        }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: s.dot, flexShrink: 0 }} />
-            {status}
-        </span>
-    );
-};
+// Substituted by .status-indicator from PayoutEnginePage.css
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 const ReviewModal = ({ product, onClose, onResolve }) => {
@@ -71,12 +53,11 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
         }
     };
 
-    // Cấu hình các nút bấm dựa theo Enum của C#
     const ACTION_BUTTONS = [
-        { id: 1, label: '🗑 Delete & Warn', color: '#991B1B', border: '#EF4444', bg: '#FEF2F2', activeBg: '#FCA5A5' },
-        { id: 2, label: '👁️ Hide Product', color: '#92400E', border: '#F59E0B', bg: '#FFFBEB', activeBg: '#FDE68A' },
-        { id: 3, label: '✅ Ignore (False Report)', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' },
-        { id: 4, label: '🔄 Restore', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' }
+        { id: 1, label: 'Delete & Warn', color: '#991B1B', border: '#EF4444', bg: '#FEF2F2', activeBg: '#FCA5A5' },
+        { id: 2, label: 'Hide Product', color: '#92400E', border: '#F59E0B', bg: '#FFFBEB', activeBg: '#FDE68A' },
+        { id: 3, label: 'Ignore Report', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' },
+        { id: 4, label: 'Restore Product', color: '#065F46', border: '#10B981', bg: '#ECFDF5', activeBg: '#A7F3D0' }
     ];
 
     return (
@@ -87,21 +68,22 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
         }}>
             <div style={{
                 background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520,
+                maxHeight: '90vh', display: 'flex', flexDirection: 'column',
                 boxShadow: '0 25px 60px rgba(0,0,0,0.25)', overflow: 'hidden',
                 animation: 'slideUp 0.25s ease',
             }}>
                 {/* Header */}
-                <div style={{ background: 'linear-gradient(135deg,#1e3a5f,#2563eb)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="p-3 bg-primary text-white d-flex justify-content-between align-items-center flex-shrink-0">
                     <div>
-                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, margin: 0 }}>Under Review</p>
-                        <h3 style={{ color: '#fff', margin: '4px 0 0', fontSize: 16, fontFamily: "'Sora', sans-serif" }}>
+                        <p className="text-white text-opacity-75 small mb-0 fw-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.5px' }}>MODERATION CASE</p>
+                        <h6 className="mb-0 fw-bold">
                             #{product.id} · {product.title}
-                        </h3>
+                        </h6>
                     </div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                    <button onClick={onClose} className="btn-close btn-close-white shadow-none" style={{ fontSize: '0.8rem' }}></button>
                 </div>
 
-                <div style={{ padding: 24 }}>
+                <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
                     {/* Product Info */}
                     <div style={{ display: 'flex', gap: 12, marginBottom: 20, padding: 14, background: '#F8FAFC', borderRadius: 10, border: '1px solid #E2E8F0' }}>
                         <img src={product.image || 'https://via.placeholder.com/52'} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }} />
@@ -117,40 +99,36 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                             <p style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>
                                 Reports List ({details?.reports?.length || 0})
                             </p>
-                            <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: 12, maxHeight: 180, overflowY: 'auto' }}>
+                            <div className="bg-light border rounded-3 p-3 overflow-auto" style={{ maxHeight: '200px' }}>
                                 {details?.reports && details.reports.length > 0 ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                    <div className="d-flex flex-column gap-2">
                                         {details.reports.map((r, i) => (
-                                            <div key={r.reportId || i} style={{ background: '#fff', border: '1px solid #FDE68A', borderRadius: 6, padding: '8px 12px' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-                                                    <strong style={{ fontSize: 13, color: '#92400E' }}>
-                                                        [{r.reporterType}] {r.reason}
-                                                    </strong>
-                                                    <span style={{ fontSize: 11, background: '#FEF3C7', color: '#B45309', padding: '2px 6px', borderRadius: 12, fontWeight: 600, whiteSpace: 'nowrap', marginLeft: 8 }}>
-                                                        {r.status}
-                                                    </span>
+                                            <div key={r.reportId || i} className="bg-white border rounded-3 p-3 shadow-sm">
+                                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                                    <span className="badge bg-primary bg-opacity-10 text-primary small">{r.reporterType}</span>
+                                                    <span className="text-muted small">#{r.reportId}</span>
                                                 </div>
-                                                <div style={{ fontSize: 12, color: '#78350F', marginBottom: r.proofDocumentUrl ? 6 : 0 }}>
-                                                    ⏱ {new Date(r.createdAt).toLocaleString('en-US')}
+                                                <div className="fw-bold text-dark mb-1">{r.reason}</div>
+                                                <div className="text-secondary small mb-2">
+                                                    <i className="bi bi-clock me-1"></i> {new Date(r.createdAt).toLocaleString()}
                                                 </div>
                                                 {r.proofDocumentUrl && (
-                                                    <div style={{ fontSize: 12 }}>
-                                                        <a href={r.proofDocumentUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 500 }}>
-                                                            📎 View Proof
-                                                        </a>
-                                                    </div>
+                                                    <a href={r.proofDocumentUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill">
+                                                        <i className="bi bi-paperclip me-1"></i>View Proof
+                                                    </a>
                                                 )}
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p style={{ margin: 0, fontSize: 13, color: '#92400E' }}>No detailed report data found.</p>
+                                    <p className="text-muted text-center py-3 mb-0">No detailed report data found.</p>
                                 )}
                             </div>
                         </div>
                     ) : (
                         <div style={{ marginBottom: 20, textAlign: 'center', color: '#64748B', fontSize: 13, padding: '20px 0' }}>
-                            ⏳ Loading violation details...
+                            <div className="spinner-border spinner-border-sm text-primary me-2"></div>
+                            Loading violation details...
                         </div>
                     )}
 
@@ -190,7 +168,7 @@ const ReviewModal = ({ product, onClose, onResolve }) => {
                             background: decision ? 'linear-gradient(135deg,#2563eb,#1d4ed8)' : '#CBD5E1',
                             color: '#fff', fontWeight: 700, fontSize: 14, transition: 'all 0.2s',
                         }}>
-                            {loading ? '⏳ Processing...' : '✅ Confirm Decision'}
+                            {loading ? 'Processing...' : 'Confirm Decision'}
                         </button>
                     </div>
                 </div>
@@ -211,7 +189,7 @@ export const ProductModerationPage = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [page, setPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0); // Added state to manage total item count for pagination
-    const PER_PAGE = 5;
+    const PER_PAGE = 10;
     const totalPages = Math.ceil(totalItems / PER_PAGE) || 1;
     const fetchProducts = useCallback(async () => {
         setLoading(true);
@@ -297,133 +275,207 @@ export const ProductModerationPage = () => {
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
       `}</style>
 
-            <div style={{ minHeight: '100vh', background: '#F1F5F9', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
-                <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }} className="animate-fade-in">
+                <div className="container-fluid" style={{ maxWidth: 1200 }}>
 
-                    {/* Page Header */}
-                    <div style={{ marginBottom: 24, animation: 'fadeIn 0.4s ease' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg,#1e3a5f,#2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🛡️</div>
+                    {/* ── Page Header (Standardized) ── */}
+                    <div className="mb-5 animate-fade-in-up">
+                        <div className="d-flex flex-column align-items-center text-center">
+                            <div className="d-flex align-items-center gap-3">
+                                <h1 className="h2 fw-bold mb-0 text-dark" style={{ letterSpacing: '-1px' }}>Product Moderation</h1>
+                                <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                                    <i className="bi bi-shield-check fs-5"></i>
+                                </div>
+                            </div>
+                            <p className="text-secondary mb-0 mt-2" style={{ maxWidth: '600px', fontSize: '0.95rem', lineHeight: '1.4' }}>
+                                Monitor, review, and resolve reported products to maintain platform integrity and safety.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* ── Quick Stats Grid (Unified Blue) ── */}
+                    <div className="d-flex flex-wrap justify-content-center gap-3 w-100 mx-auto mb-4" style={{ maxWidth: '1100px' }}>
+                        <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1 stats-card-primary" style={{ minWidth: '180px' }}>
+                            <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                                <i className="bi bi-box-seam fs-5"></i>
+                            </div>
                             <div>
-                                <h1 style={{ margin: 0, fontSize: 22, fontFamily: "'Sora', sans-serif", fontWeight: 700, color: '#0F172A' }}>Reported Product Moderation</h1>
-                                <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>Manage and resolve reported products</p>
+                                <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Total Scanned</div>
+                                <div className="h5 mb-0 fw-bold text-dark">{totalItems}</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1 stats-card-primary" style={{ minWidth: '180px' }}>
+                            <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                                <i className="bi bi-flag-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Reported</div>
+                                <div className="h5 mb-0 fw-bold text-dark">{pendingCount}</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1 stats-card-primary" style={{ minWidth: '220px' }}>
+                            <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                                <i className="bi bi-check-circle-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Resolved</div>
+                                <div className="h5 mb-0 fw-bold text-dark">{products.filter(p => p.status === 'Resolved').length}</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1 stats-card-primary" style={{ minWidth: '220px' }}>
+                            <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                                <i className="bi bi-x-octagon-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Rejected</div>
+                                <div className="h5 mb-0 fw-bold text-dark">{products.filter(p => p.status === 'Rejected').length}</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Card */}
-                    <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden', animation: 'slideUp 0.35s ease' }}>
+                    {/* ── Main Content Card ── */}
+                    <div className="bg-white rounded-4 shadow-sm border-0 overflow-hidden animate-slide-up">
+                        
+                        {/* ── Toolbar: Search & Filters ── */}
+                        <div className="p-4 bg-white border-bottom">
+                            <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                
+                                {/* Tabs as Button Group */}
+                                <div className="btn-group p-1 bg-light rounded-pill">
+                                    {['All Products', 'Reported Products'].map((tab, i) => {
+                                        const key = i === 0 ? 'All' : 'Reported';
+                                        const active = activeTab === key;
+                                        return (
+                                            <button 
+                                                key={tab} 
+                                                onClick={() => { setActiveTab(key); setPage(1); }}
+                                                className={`btn btn-sm rounded-pill px-4 py-2 border-0 fw-bold transition-all ${active ? 'bg-white text-primary shadow-sm' : 'text-secondary'}`}
+                                            >
+                                                {tab}
+                                                {i === 1 && pendingCount > 0 && <span className="badge bg-danger ms-2">{pendingCount}</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
 
-                        {/* Tabs */}
-                        <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', padding: '0 24px' }}>
-                            {['All Products', 'Reported Products'].map((tab, i) => {
-                                const key = i === 0 ? 'All' : 'Reported';
-                                const active = activeTab === key;
-                                return (
-                                    <button key={tab} onClick={() => { setActiveTab(key); setPage(1); }} style={{
-                                        padding: '16px 4px', marginRight: 24, border: 'none', background: 'none',
-                                        fontSize: 14, fontWeight: active ? 600 : 400,
-                                        color: active ? '#2563EB' : '#64748B',
-                                        borderBottom: active ? '2px solid #2563EB' : '2px solid transparent',
-                                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.2s',
-                                    }}>
-                                        {tab}
-                                        {i === 1 && pendingCount > 0 && (
-                                            <span style={{ background: '#EF4444', color: '#fff', borderRadius: 20, fontSize: 11, fontWeight: 700, padding: '1px 7px', minWidth: 20, textAlign: 'center' }}>{pendingCount}</span>
-                                        )}
+                                <div className="d-flex flex-wrap align-items-center gap-3 flex-grow-1 justify-content-md-end">
+                                    {/* Search */}
+                                    <div className="position-relative" style={{ minWidth: '280px' }}>
+                                        <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                        <input 
+                                            className="form-control ps-5 rounded-pill border-0 bg-light shadow-none"
+                                            value={search} 
+                                            onChange={e => setSearch(e.target.value)} 
+                                            placeholder="Search product ID or name..."
+                                            style={{ height: '42px' }}
+                                        />
+                                    </div>
+
+                                    {/* Category Filter */}
+                                    <select
+                                        className="form-select rounded-pill border-0 bg-light shadow-none ps-3 pe-5"
+                                        style={{ width: 'auto', minWidth: '200px', height: '42px', cursor: 'pointer' }}
+                                        value={categoryFilter}
+                                        onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+                                    >
+                                        <option value="">All Categories</option>
+                                        {categories.map((c) => (
+                                            <option key={c.tagId || c.id} value={c.tagName || c.name}>{c.tagName || c.name}</option>
+                                        ))}
+                                    </select>
+
+                                    <button 
+                                        className="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                        onClick={() => { setSearch(""); setCategoryFilter(""); fetchProducts(); }}
+                                        style={{ width: '42px', height: '42px' }}
+                                        title="Reset filters"
+                                    >
+                                        <i className="bi bi-arrow-clockwise text-primary"></i>
                                     </button>
-                                );
-                            })}
-                        </div>
-
-                        {/* Filters */}
-                        <div style={{ padding: '16px 24px', display: 'flex', gap: 12, flexWrap: 'wrap', borderBottom: '1px solid #F1F5F9', background: '#FAFBFC' }}>
-                            <select
-                                value={categoryFilter}
-                                onChange={(e) => {
-                                    const selectedId = e.target.value;
-                                    setCategoryFilter(selectedId); // Save ID to state
-                                    console.log('Selected ID:', selectedId);
-                                }}
-                                style={{
-                                    padding: '8px 32px 8px 12px',
-                                    borderRadius: 8,
-                                    border: '1.5px solid #E2E8F0',
-                                    fontSize: 13,
-                                    color: '#374151',
-                                    background: '#fff',
-                                    cursor: 'pointer',
-                                    appearance: 'none',
-                                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'right 10px center'
-                                }}
-                            >
-                                {/* Default option for all categories */}
-                                <option value="">Filter by Category (All)</option>
-
-                                {/* Map categories list */}
-                                {categories.map((c) => (
-                                    <option key={c.tagId || c.id} value={c.tagName || c.name}>
-                                        {c.tagName || c.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#94A3B8' }}>🔍</span>
-                                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search product name or ID..." style={{ width: '100%', padding: '8px 12px 8px 34px', borderRadius: 8, border: '1.5px solid #E2E8F0', fontSize: 13, color: '#1E293B', background: '#fff', boxSizing: 'border-box' }} />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Table */}
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        {/* ── Products Table ── */}
+                        <div className="table-responsive">
+                            <table className="table table-hover align-middle pe-table mb-0">
                                 <thead>
-                                    <tr style={{ background: '#F8FAFC' }}>
-                                        {['Product ID', 'Image & Product Name', 'Shop Name', 'Reason for Report', 'Status', 'Action'].map(h => (
-                                            <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px solid #E2E8F0', whiteSpace: 'nowrap' }}>{h}</th>
-                                        ))}
+                                    <tr>
+                                        <th className="ps-4">
+                                            <i className="bi bi-hash header-icon"></i>ID
+                                        </th>
+                                        <th>
+                                            <i className="bi bi-box-seam header-icon"></i>Product info
+                                        </th>
+                                        <th>
+                                            <i className="bi bi-shop header-icon"></i>Shop
+                                        </th>
+                                        <th>
+                                            <i className="bi bi-flag header-icon"></i>Reason
+                                        </th>
+                                        <th>
+                                            <i className="bi bi-circle-fill header-icon" style={{ fontSize: '0.6em' }}></i>Status
+                                        </th>
+                                        <th className="text-center">Review</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {loading ? (
-                                        Array(4).fill(0).map((_, i) => (
+                                        Array(PER_PAGE).fill(0).map((_, i) => (
                                             <tr key={i}>
-                                                {[70, 200, 110, 140, 120, 80].map((w, j) => (
-                                                    <td key={j} style={{ padding: '14px 16px', borderBottom: '1px solid #F1F5F9' }}>
-                                                        <div className="skeleton" style={{ height: 16, width: w }} />
-                                                    </td>
-                                                ))}
+                                                <td colSpan="6" className="py-4 text-center">
+                                                    <div className="spinner-border spinner-border-sm text-primary me-2"></div>
+                                                    <span className="text-muted small">Loading...</span>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : displayProducts.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} style={{ textAlign: 'center', padding: 48, color: '#94A3B8', fontSize: 14 }}>
-                                                <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
-                                                No products found.
+                                            <td colSpan="6" className="text-center py-5">
+                                                <div className="text-muted fs-1 mb-3">📭</div>
+                                                <h5 className="text-secondary">No products found</h5>
+                                                <p className="text-muted small">Try adjusting your filters or search terms</p>
                                             </td>
                                         </tr>
                                     ) : (
-                                        displayProducts.map((product, idx) => (
-                                            <tr key={product.id} className="row-hover" style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.15s', animationDelay: `${idx * 0.05}s`, animation: 'fadeIn 0.3s ease both' }}>
-                                                <td style={{ padding: '14px 16px', fontSize: 13, color: '#64748B', fontWeight: 500 }}>#{product.id}</td>
-                                                <td style={{ padding: '14px 16px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                        <img src={product.image} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', border: '1.5px solid #E2E8F0', flexShrink: 0 }} />
-                                                        <span style={{ fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer', textDecoration: 'none' }} onMouseEnter={e => e.target.style.textDecoration = 'underline'} onMouseLeave={e => e.target.style.textDecoration = 'none'}>{product.title}</span>
+                                        displayProducts.map((product) => (
+                                            <tr key={product.id}>
+                                                <td className="ps-4">
+                                                    <span className="text-muted text-monospace" style={{ fontSize: '0.8rem' }}>#{product.id}</span>
+                                                </td>
+                                                <td>
+                                                    <div className="d-flex align-items-center gap-3">
+                                                        <img src={product.image} alt="" className="rounded-3 border shadow-sm" style={{ width: '42px', height: '42px', objectFit: 'cover' }} />
+                                                        <div className="fw-bold text-primary cursor-pointer text-decoration-hover">{product.title}</div>
                                                     </div>
                                                 </td>
-                                                <td style={{ padding: '14px 16px', fontSize: 13, color: '#374151' }}>{product.shopName}</td>
-                                                <td style={{ padding: '14px 16px', fontSize: 13, color: '#374151' }}>{product.reason}</td>
-                                                <td style={{ padding: '14px 16px' }}><StatusBadge status={product.status} /></td>
-                                                <td style={{ padding: '14px 16px' }}>
+                                                <td>
+                                                    <div className="small fw-medium text-dark">{product.shopName}</div>
+                                                </td>
+                                                <td style={{ maxWidth: '200px' }}>
+                                                    <div className="small text-truncate" title={product.reason}>{product.reason}</div>
+                                                </td>
+                                                <td>
+                                                    <div className="status-indicator">
+                                                        <span className={`status-dot status-dot--${product.status.toLowerCase().replace(' ', '-')}`}></span>
+                                                        <span className="small fw-bold text-dark">{product.status}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="text-center">
                                                     {product.reportReasons.length > 0 ? (
-                                                        <button className="btn-review" onClick={() => setSelectedProduct(product)} style={{
-                                                            background: '#2563EB', color: '#fff', border: 'none', borderRadius: 7,
-                                                            padding: '7px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                                                        }}>Review</button>
+                                                        <button 
+                                                            className="btn btn-primary btn-sm px-3 rounded-pill shadow-sm fw-bold"
+                                                            onClick={() => setSelectedProduct(product)}
+                                                        >
+                                                            Review
+                                                        </button>
                                                     ) : (
-                                                        <span style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>✔ Done</span>
+                                                        <span className="text-success small fw-bold">
+                                                            <i className="bi bi-check-circle-fill me-1"></i>Report Handled
+                                                        </span>
                                                     )}
                                                 </td>
                                             </tr>
@@ -433,36 +485,23 @@ export const ProductModerationPage = () => {
                             </table>
                         </div>
 
-                        {/* Footer */}
-                        <div style={{ padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F1F5F9', background: '#FAFBFC' }}>
-                            <span style={{ fontSize: 13, color: '#64748B' }}>
-                                Showing {displayTotalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, displayTotalItems)} of {displayTotalItems} items
+                        {/* ── Table Footer (Pagination) ── */}
+                        <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+                            <span className="text-muted small">
+                                Showing <strong>{displayTotalItems === 0 ? 0 : (page - 1) * PER_PAGE + 1}</strong> to <strong>{Math.min(page * PER_PAGE, displayTotalItems)}</strong> of {displayTotalItems}
                             </span>
-
-                            {/* Added condition filteredTotalPages > 1 here */}
                             {filteredTotalPages > 1 && (
-                                <div style={{ display: 'flex', gap: 6 }}>
-                                    {Array.from({ length: filteredTotalPages }, (_, index) => index + 1).map(p => (
-                                        <button
-                                            key={p}
-                                            onClick={() => setPage(p)}
-                                            style={{
-                                                padding: '6px 12px',
-                                                borderRadius: 6,
-                                                cursor: 'pointer',
-                                                fontSize: 13,
-                                                fontWeight: 600,
-                                                transition: 'all 0.2s',
-                                                border: '1px solid',
-                                                borderColor: page === p ? '#2563EB' : '#E2E8F0',
-                                                background: page === p ? '#EFF6FF' : '#fff',
-                                                color: page === p ? '#2563EB' : '#64748B',
-                                            }}
-                                        >
-                                            {p}
-                                        </button>
-                                    ))}
-                                </div>
+                                <nav>
+                                    <ul className="pagination pagination-sm mb-0 gap-1">
+                                        {Array.from({ length: filteredTotalPages }, (_, index) => index + 1).map(p => (
+                                            <li key={p} className={`page-item ${page === p ? 'active' : ''}`}>
+                                                <button className="page-link rounded-circle border-0 fw-bold px-3 py-2" onClick={() => setPage(p)}>
+                                                    {p}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </nav>
                             )}
                         </div>
                     </div>
