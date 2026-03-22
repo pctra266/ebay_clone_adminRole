@@ -159,43 +159,46 @@ export function AdminRolesPage() {
           <div className="col-lg-6">
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4">
-                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-plus-circle me-2 text-primary"></i>Define New Role</h5>
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-plus-circle me-2 text-primary"></i>Define New Role
+                </h6>
               </div>
               <div className="card-body p-4">
                 <form className="row g-3" onSubmit={submitCreateRole}>
                   <div className="col-12">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Role Designation</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Role Designation</label>
                     <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       placeholder="e.g. Sales Manager"
                       value={roleForm.roleName}
                       onChange={(e) => setRoleForm(p => ({ ...p, roleName: e.target.value }))}
                       required
-                      style={{ height: '45px' }}
+                      style={{ height: '44px', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-12">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Responsibility Description</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Responsibility Description</label>
                     <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       placeholder="Specify the scope of this role..."
                       value={roleForm.description}
                       onChange={(e) => setRoleForm(p => ({ ...p, description: e.target.value }))}
-                      style={{ height: '45px' }}
+                      style={{ height: '44px', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-12">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Permissions (Comma Seperated)</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Permissions (Comma Separated)</label>
                     <textarea
-                      className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 py-3"
                       rows="3"
                       placeholder="e.g. orders.read, products.write, users.ban"
                       value={roleForm.permissions}
                       onChange={(e) => setRoleForm(p => ({ ...p, permissions: e.target.value }))}
+                      style={{ fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-12 pt-2">
-                    <button className="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" type="submit">
+                    <button className="btn btn-primary w-100 rounded-3 fw-bold py-2 shadow-sm border-0" type="submit" style={{ height: '44px', fontSize: '0.9rem' }}>
                       <i className="bi bi-shield-plus me-2"></i>Provision Role
                     </button>
                   </div>
@@ -207,57 +210,59 @@ export function AdminRolesPage() {
           <div className="col-lg-6">
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4">
-                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-person-plus-fill me-2 text-primary"></i>Register Admin Account</h5>
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-person-plus-fill me-2 text-primary"></i>Register Admin Account
+                </h6>
               </div>
               <div className="card-body p-4">
                 <form className="row g-3" onSubmit={submitCreateAdmin}>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Admin Username</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Admin Username</label>
                     <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       value={adminForm.username}
                       onChange={(e) => setAdminForm(p => ({ ...p, username: e.target.value }))}
                       required
-                      style={{ height: '45px' }}
+                      style={{ height: '44px', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Corporate Email</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Corporate Email</label>
                     <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       type="email"
                       value={adminForm.email}
                       onChange={(e) => setAdminForm(p => ({ ...p, email: e.target.value }))}
                       required
-                      style={{ height: '45px' }}
+                      style={{ height: '44px', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Secure Password</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Secure Password</label>
                     <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       type="password"
                       value={adminForm.password}
                       onChange={(e) => setAdminForm(p => ({ ...p, password: e.target.value }))}
                       required
-                      style={{ height: '45px' }}
+                      style={{ height: '44px', fontSize: '0.9rem' }}
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold small text-muted text-uppercase">Initial Role Assignment</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Initial Role</label>
                     <select
-                      className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
+                      className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       value={adminForm.roleId}
                       onChange={(e) => setAdminForm(p => ({ ...p, roleId: e.target.value }))}
                       required
-                      style={{ height: '45px', fontWeight: 500 }}
+                      style={{ height: '44px', fontSize: '0.85rem' }}
                     >
                       <option value="">Select authority...</option>
                       {roles.map(r => <option key={r.id} value={r.id}>{r.roleName}</option>)}
                     </select>
                   </div>
                   <div className="col-12 pt-2">
-                    <button className="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" type="submit">
+                    <button className="btn btn-primary w-100 rounded-3 fw-bold py-2 shadow-sm border-0" type="submit" style={{ height: '44px', fontSize: '0.9rem' }}>
                       <i className="bi bi-person-check-fill me-2"></i>Create Administrator
                     </button>
                   </div>
@@ -270,7 +275,9 @@ export function AdminRolesPage() {
         {/* ── Role List Management ── */}
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
           <div className="card-header bg-white border-bottom py-3 px-4">
-            <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-list-check me-2 text-primary"></i>Defined Security Roles</h5>
+            <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+              <i className="bi bi-list-check me-2 text-primary"></i>Defined Security Roles
+            </h6>
           </div>
           <div className="card-body p-0">
             {loadingRoles ? (
@@ -278,7 +285,7 @@ export function AdminRolesPage() {
             ) : (
               <div className="table-responsive">
                 <table className="table pe-table mb-0 align-middle">
-                  <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
+                  <thead className="bg-light text-secondary fw-semibold small">
                     <tr>
                       <th className="ps-4 py-3 border-0">Identity</th>
                       <th className="py-3 border-0">Responsibility</th>
@@ -326,25 +333,25 @@ export function AdminRolesPage() {
         {/* ── Admin Users Management ── */}
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
-            <h5 className="mb-0 fw-bold text-dark">Administrative Accounts</h5>
+            <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>Administrative Accounts</h6>
             <div className="d-flex gap-2 flex-wrap flex-grow-1 justify-content-end" style={{ maxWidth: '600px' }}>
               <input
-                className="form-control border-0 bg-light rounded-pill px-4 shadow-sm flex-grow-1"
+                className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 flex-grow-1"
                 placeholder="Search administrators..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                style={{ height: '40px', fontSize: '0.85rem' }}
+                style={{ height: '38px', fontSize: '0.85rem' }}
               />
               <select
-                className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
-                style={{ width: '160px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
+                className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                style={{ width: '150px', height: '38px', fontSize: '0.85rem' }}
                 value={roleFilter}
                 onChange={(e) => { setRoleFilter(e.target.value); setPageNumber(1); }}
               >
                 <option value="">All Roles</option>
                 {roles.map(r => <option key={r.id} value={r.id}>{r.roleName}</option>)}
               </select>
-              <button className="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onClick={() => { setPageNumber(1); loadAdminUsers(); }}>
+              <button className="btn btn-primary rounded-3 px-3 shadow-none fw-bold border-0" style={{ height: '38px', fontSize: '0.85rem' }} onClick={() => { setPageNumber(1); loadAdminUsers(); }}>
                 Search
               </button>
             </div>
@@ -355,11 +362,11 @@ export function AdminRolesPage() {
             ) : (
               <div className="table-responsive">
                 <table className="table pe-table mb-0 align-middle">
-                  <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
+                  <thead className="bg-light text-secondary fw-semibold small">
                     <tr>
                       <th className="ps-4 py-3 border-0">Executive</th>
                       <th className="py-3 border-0">Security Role</th>
-                      <th className="py-3 border-0">Governance logs</th>
+                      <th className="py-3 border-0">Governance Logs</th>
                       <th className="pe-4 py-3 border-0 text-end">Modify Access</th>
                     </tr>
                   </thead>
@@ -389,14 +396,14 @@ export function AdminRolesPage() {
                         <td className="pe-4">
                           <div className="d-flex gap-2 justify-content-end">
                             <select
-                              className="form-select border-0 bg-light rounded-pill px-3 shadow-sm"
-                              style={{ height: '32px', fontSize: '0.75rem', maxWidth: '140px' }}
+                              className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-2"
+                              style={{ height: '32px', fontSize: '0.75rem', maxWidth: '130px' }}
                               value={selectedRoleByUser[item.userId] || item.roleId}
                               onChange={(e) => setSelectedRoleByUser(p => ({ ...p, [item.userId]: e.target.value }))}
                             >
                               {roles.map(r => <option key={r.id} value={r.id}>{r.roleName}</option>)}
                             </select>
-                            <button className="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onClick={() => submitAssignRole(item.userId)}>
+                            <button className="btn btn-sm btn-primary rounded-3 px-3 fw-bold border-0 shadow-none" onClick={() => submitAssignRole(item.userId)} style={{ fontSize: '0.75rem' }}>
                               Assign
                             </button>
                           </div>
