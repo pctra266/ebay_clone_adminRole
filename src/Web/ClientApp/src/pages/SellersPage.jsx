@@ -206,11 +206,11 @@ export const SellersPage = () => {
 
     const getSortIcon = (key) => {
         if (!sortConfig || sortConfig.key !== key) return <i className="bi bi-arrow-down-up opacity-25 ms-1" style={{ fontSize: '0.7em' }}></i>;
-        
+
         return (
             <span className="d-inline-flex align-items-center text-primary">
-                {sortConfig.direction === 'asc' 
-                    ? <i className="bi bi-arrow-up ms-1" style={{ fontSize: '0.8em' }}></i> 
+                {sortConfig.direction === 'asc'
+                    ? <i className="bi bi-arrow-up ms-1" style={{ fontSize: '0.8em' }}></i>
                     : <i className="bi bi-arrow-down ms-1" style={{ fontSize: '0.8em' }}></i>}
             </span>
         );
@@ -224,32 +224,45 @@ export const SellersPage = () => {
 
     const totalPages = Math.ceil(filteredWallets.length / pageSize);
 
+    const stats = useMemo(() => {
+        return {
+            total: wallets.length,
+            active: wallets.filter(w => w.status === 'Active').length,
+            totalAvailable: wallets.reduce((sum, w) => sum + (w.availableBalance || 0), 0),
+            totalPending: wallets.reduce((sum, w) => sum + (w.pendingBalance || 0), 0)
+        };
+    }, [wallets]);
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
     const renderLevelBadge = (wallet) => {
         const level = wallet.sellerLevel;
-        let badgeClass = "bg-danger";
-        let label = "Below Standard";
+        let icon = "bi-exclamation-triangle";
+        let colorClass = "text-danger";
+        let label = "Below Std";
 
         if (level === 'TopRated') {
-            badgeClass = "bg-success";
+            icon = "bi-trophy-fill";
+            colorClass = "text-success";
             label = "Top Rated";
         } else if (level === 'AboveStandard') {
-            badgeClass = "bg-warning text-dark";
-            label = "Above Standard";
+            icon = "bi-shield-check";
+            colorClass = "text-warning";
+            label = "Above Std";
         }
 
         return (
-            <span
-                className={`badge ${badgeClass} cursor-pointer`}
+            <div
+                className={`d-flex align-items-center ${colorClass} fw-bold pe-badge-interactive`}
                 onClick={() => toggleModal(wallet)}
-                style={{ cursor: 'pointer' }}
-                title="Click to view performance statistics"
+                title={level}
+                style={{ fontSize: '0.85rem' }}
             >
-                {label}
-            </span>
+                <i className={`bi ${icon} me-2`} style={{ fontSize: '1rem' }}></i>
+                <span className="hide-text-mobile">{label}</span>
+            </div>
         );
     };
 
@@ -261,24 +274,76 @@ export const SellersPage = () => {
                 onClose={() => setToast({ message: '', type: 'success' })}
             />
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div className="d-flex align-items-center gap-3">
-                    <h1 className="h3 fw-bold mb-0">Sellers Overview</h1>
-                    <button
-                        className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center ${showGuide ? 'btn-primary' : 'btn-outline-secondary'}`}
-                        style={{ width: '32px', height: '32px' }}
-                        onClick={() => setShowGuide(!showGuide)}
-                        title="Toggle Seller Leveling Guide"
-                    >
-                        <i className={`bi ${showGuide ? 'bi-info-circle-fill' : 'bi-info-circle'}`}></i>
-                    </button>
-                    {rtIndicator && <span className="badge bg-primary animate-pulse ms-2" style={{ fontSize: '0.7rem' }}>Real-time Update</span>}
+            <div className="mb-5 animate-fade-in-up">
+                {/* ── Top Row: Title ── */}
+                <div className="d-flex flex-column align-items-center mb-4 w-100 text-center">
+                    <div className="d-flex align-items-center gap-3">
+                        <h1 className="h2 fw-bold mb-0 text-dark" style={{ letterSpacing: '-1px' }}>Sellers Overview</h1>
+                        <button
+                            className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center transition-all ${showGuide ? 'btn-primary' : 'btn-outline-secondary'}`}
+                            style={{ width: '36px', height: '36px', transition: 'all 0.3s ease' }}
+                            onClick={() => setShowGuide(!showGuide)}
+                            title="Toggle Seller Leveling Guide"
+                        >
+                            <i className={`bi ${showGuide ? 'bi-info-circle-fill' : 'bi-info-circle'}`} style={{ fontSize: '1.2rem' }}></i>
+                        </button>
+                    </div>
+                    <p className="text-secondary mb-0 mt-2" style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>
+                        Monitor seller performance, manage account statuses, and track wallet balances in real-time.
+                    </p>
+                    {rtIndicator && <span className="badge bg-primary bg-opacity-10 text-primary mt-2" style={{ fontSize: '0.65rem', border: '1px solid rgba(13,110,253,0.2)' }}>Real-time Sync Active</span>}
                 </div>
 
-                <div className="bg-white border rounded-pill px-3 py-2 shadow-sm d-flex align-items-center animate-fade-in">
-                    <i className="bi bi-clock-history text-primary me-2"></i>
-                    <span className="text-secondary small me-2">Next Auto-Evaluation:</span>
-                    <strong className="text-dark font-monospace">{timeLeft}</strong>
+                {/* ── Middle Row: Quick Stats Grid ── */}
+                <div className="d-flex flex-wrap justify-content-center gap-3 w-100 mx-auto mb-4" style={{ maxWidth: '1100px' }}>
+                    <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: '180px' }}>
+                        <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                            <i className="bi bi-people-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Total Sellers</div>
+                            <div className="h5 mb-0 fw-bold">{stats.total}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: '180px' }}>
+                        <div className="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                            <i className="bi bi-patch-check-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Active Now</div>
+                            <div className="h5 mb-0 fw-bold">{stats.active}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: '220px' }}>
+                        <div className="p-2 bg-info bg-opacity-10 text-info rounded-3">
+                            <i className="bi bi-wallet-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Total Available</div>
+                            <div className="h5 mb-0 fw-bold text-success">{formatCurrency(stats.totalAvailable)}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-0 shadow-sm rounded-4 px-4 py-3 d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: '220px' }}>
+                        <div className="p-2 bg-warning bg-opacity-10 text-warning rounded-3">
+                            <i className="bi bi-hourglass-split fs-5"></i>
+                        </div>
+                        <div>
+                            <div className="text-secondary small fw-medium text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Total Pending</div>
+                            <div className="h5 mb-0 fw-bold text-warning">{formatCurrency(stats.totalPending)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Bottom Row: Evaluation Countdown (Right-aligned) ── */}
+                <div className="d-flex justify-content-end w-100 mx-auto" style={{ maxWidth: '1100px' }}>
+                    <div className="bg-light border-0 rounded-pill px-4 py-2 d-flex align-items-center shadow-inner" style={{ fontSize: '0.85rem' }}>
+                        <i className="bi bi-clock-history text-primary me-2"></i>
+                        <span className="text-dark fw-bold me-2">Auto-Evaluation:</span>
+                        <strong className="text-primary font-monospace">{timeLeft}</strong>
+                    </div>
                 </div>
             </div>
 
@@ -433,27 +498,27 @@ export const SellersPage = () => {
                         <thead className="table-light">
                             <tr>
                                 <th className="ps-4 cursor-pointer" onClick={() => requestSort('sellerId')} style={{ cursor: 'pointer' }}>
-                                    ID {getSortIcon('sellerId')}
+                                    <i className="bi bi-hash header-icon"></i>ID {getSortIcon('sellerId')}
                                 </th>
                                 <th className="cursor-pointer" onClick={() => requestSort('sellerName')} style={{ cursor: 'pointer' }}>
-                                    Seller {getSortIcon('sellerName')}
+                                    <i className="bi bi-person header-icon"></i>Seller {getSortIcon('sellerName')}
                                 </th>
                                 <th className="cursor-pointer" onClick={() => requestSort('sellerLevel')} style={{ cursor: 'pointer' }}>
-                                    Level {getSortIcon('sellerLevel')}
+                                    <i className="bi bi-award header-icon"></i>Level {getSortIcon('sellerLevel')}
                                 </th>
                                 <th className="cursor-pointer" onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
-                                    Status {getSortIcon('status')}
+                                    <i className="bi bi-activity header-icon"></i>Status {getSortIcon('status')}
                                 </th>
                                 <th className="text-end cursor-pointer" onClick={() => requestSort('availableBalance')} style={{ cursor: 'pointer' }}>
-                                    Available {getSortIcon('availableBalance')}
+                                    <i className="bi bi-wallet2 header-icon"></i>Available {getSortIcon('availableBalance')}
                                 </th>
                                 <th className="text-end cursor-pointer" onClick={() => requestSort('pendingBalance')} style={{ cursor: 'pointer' }}>
-                                    Pending {getSortIcon('pendingBalance')}
+                                    <i className="bi bi-hourglass-split header-icon"></i>Pending {getSortIcon('pendingBalance')}
                                 </th>
                                 <th className="text-end cursor-pointer" onClick={() => requestSort('totalWithdrawn')} style={{ cursor: 'pointer' }}>
-                                    Total Withdrawn {getSortIcon('totalWithdrawn')}
+                                    <i className="bi bi-box-arrow-up header-icon"></i>Withdrawn {getSortIcon('totalWithdrawn')}
                                 </th>
-                                <th className="text-center">Action</th>
+                                <th className="text-center">Detail</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -464,27 +529,33 @@ export const SellersPage = () => {
                             ) : paginatedWallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td className="ps-4">
-                                        <code className="text-muted small">#{wallet.sellerId}</code>
+                                        <span className="text-muted text-monospace" style={{ fontSize: '0.8rem' }}>{wallet.sellerId}</span>
                                     </td>
                                     <td>
                                         <div className="fw-bold text-dark">{wallet.sellerName}</div>
                                     </td>
                                     <td>{renderLevelBadge(wallet)}</td>
                                     <td>
-                                        <span className={`pe-badge ${wallet.status === 'Active' ? 'badge-success' : wallet.status === 'Suspended' ? 'badge-hold' : wallet.status === 'Banned' ? 'badge-failed' : 'bg-secondary-subtle text-secondary'}`}>
-                                            {wallet.status}
-                                        </span>
+                                        <div className="status-indicator">
+                                            <span className={`status-dot status-dot--${wallet.status.toLowerCase()}`}></span>
+                                            <span className="small fw-bold text-secondary">{wallet.status}</span>
+                                        </div>
                                     </td>
-                                    <td className="text-end text-success fw-bold" style={{ fontSize: '1.05rem', letterSpacing: '-0.5px' }}>{formatCurrency(wallet.availableBalance)}</td>
                                     <td className="text-end">
-                                        <Link to={`/sellers/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-bold" style={{ fontSize: '1rem' }}>
+                                        <div className="balance-compact">
+                                            <span className="text-success fw-bold" style={{ fontSize: '1rem' }}>{formatCurrency(wallet.availableBalance)}</span>
+                                        </div>
+                                    </td>
+                                    <td className="text-end">
+                                        <Link to={`/sellers/pending/${wallet.sellerId}`} className="pe-pending-amount text-warning fw-bold" title="View details">
                                             {formatCurrency(wallet.pendingBalance)}
+                                            <i className="bi bi-chevron-right"></i>
                                         </Link>
                                     </td>
-                                    <td className="text-end text-muted fw-medium">{formatCurrency(wallet.totalWithdrawn)}</td>
+                                    <td className="text-end text-muted small fw-medium">{formatCurrency(wallet.totalWithdrawn)}</td>
                                     <td className="text-center">
-                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-sm btn-light rounded-pill px-3 text-primary fw-bold" style={{ fontSize: '0.8rem' }}>
-                                            <i className="bi bi-eye-fill me-1"></i> View
+                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-sm btn-light rounded-circle shadow-sm" style={{ width: '32px', height: '32px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="View Details">
+                                            <i className="bi bi-eye text-primary"></i>
                                         </Link>
                                     </td>
                                 </tr>
