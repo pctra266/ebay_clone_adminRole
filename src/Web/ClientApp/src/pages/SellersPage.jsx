@@ -137,7 +137,14 @@ export const SellersPage = () => {
             setLoading(false);
         }
     };
-
+    const resetFilters = () => {
+        setSearch("");
+        setFilterLevel("All");
+        setFilterStatus("All");
+        setSortConfig({ key: 'availableBalance', direction: 'desc' });
+        setCurrentPage(1);
+    };
+    // Derived Data: Filtering & Sorting
     // Derived Data: Filtering & Sorting
     const filteredWallets = useMemo(() => {
         let result = [...wallets];
@@ -147,7 +154,7 @@ export const SellersPage = () => {
             const s = search.toLowerCase();
             result = result.filter(w =>
                 (w.sellerName && w.sellerName.toLowerCase().includes(s)) ||
-                (w.sellerId.toString().includes(s))
+                (w.sellerId && w.sellerId.toString().includes(s))
             );
         }
 
@@ -167,12 +174,15 @@ export const SellersPage = () => {
                 let aValue = a[sortConfig.key];
                 let bValue = b[sortConfig.key];
 
+                // Fallback for null/undefined values to prevent sorting from breaking
+                if (aValue === null || aValue === undefined) aValue = "";
+                if (bValue === null || bValue === undefined) bValue = "";
+
                 if (sortConfig.key === 'sellerLevel') {
                     const levelRank = { 'TopRated': 3, 'AboveStandard': 2, 'BelowStandard': 1 };
                     aValue = levelRank[aValue] || 0;
                     bValue = levelRank[bValue] || 0;
                 } else {
-                    // Handle string comparisons safely
                     if (typeof aValue === 'string') aValue = aValue.toLowerCase();
                     if (typeof bValue === 'string') bValue = bValue.toLowerCase();
                 }
@@ -404,7 +414,7 @@ export const SellersPage = () => {
 
                             <button
                                 className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                                onClick={() => loadWallets()}
+                                onClick={resetFilters}
                                 title="Refresh data"
                                 style={{ width: '38px', height: '38px' }}
                             >
