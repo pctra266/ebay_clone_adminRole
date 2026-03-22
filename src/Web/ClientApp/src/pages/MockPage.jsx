@@ -25,6 +25,14 @@ export function MockPage() {
     const [payoutLoading, setPayoutLoading] = useState(false);
     const [payoutResult, setPayoutResult] = useState(null);
     const [toast, setToast] = useState({ message: '', type: 'success' });
+    const [defectData, setDefectData] = useState({ sellerId: '' });
+    const [defectLoading, setDefectLoading] = useState(false);
+    const [evalLoading, setEvalLoading] = useState(false);
+    const [evalSeconds, setEvalSeconds] = useState(60);
+    
+    // States for Accelerate Settlements
+    const [settleData, setSettleData] = useState({ sellerId: '', seconds: 60 });
+    const [settleLoading, setSettleLoading] = useState(false);
 
     const handlePurchaseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -80,6 +88,60 @@ export function MockPage() {
         }
     };
 
+    const handleDefectSubmit = async (e) => {
+        e.preventDefault();
+        setDefectLoading(true);
+        try {
+            await apiRequest('/api/Mocking/generate-mock-defect', {
+                method: 'POST',
+                body: { sellerId: parseInt(defectData.sellerId, 10) },
+            });
+            setToast({ message: "Mock defect generated! The seller now has an unresolved dispute & refunded return.", type: 'warning' });
+            setDefectData({ sellerId: '' });
+        } catch (err) {
+            setToast({ message: err.message || "Failed to generate defect.", type: 'error' });
+        } finally {
+            setDefectLoading(false);
+        }
+    };
+
+    const handleSetDemoTime = async (secondsFromNow) => {
+        try {
+            setEvalLoading(true);
+            const criteria = await apiRequest('/api/Users/seller-level-criteria');
+            const target = new Date(Date.now() + secondsFromNow * 1000);
+            await apiRequest('/api/Users/seller-level-criteria', {
+                method: 'PUT',
+                body: { ...criteria, nextEvaluationDate: target.toISOString() }
+            });
+            setToast({ message: `Evaluation scheduled in ${secondsFromNow} seconds! Check the Sellers Overview.`, type: 'success' });
+        } catch (error) {
+            setToast({ message: 'Failed to schedule evaluation time', type: 'error' });
+        } finally {
+            setEvalLoading(false);
+        }
+    };
+
+    const handleAccelerateSettlements = async (e) => {
+        e.preventDefault();
+        setSettleLoading(true);
+        try {
+            const res = await apiRequest('/api/Mocking/accelerate-settlement', {
+                method: 'POST',
+                body: { 
+                    sellerId: parseInt(settleData.sellerId, 10), 
+                    secondsFromNow: parseInt(settleData.seconds, 10) 
+                }
+            });
+            setToast({ message: `Success! ${res.updatedCount} pending order(s) accelerated to clear in ${settleData.seconds} seconds.`, type: 'success' });
+            setSettleData({ sellerId: '', seconds: 60 });
+        } catch (error) {
+            setToast({ message: error.message || 'Failed to accelerate settlements', type: 'error' });
+        } finally {
+            setSettleLoading(false);
+        }
+    };
+
     return (
         <section className="py-2 px-3">
             <ToastMessage 
@@ -100,7 +162,7 @@ export function MockPage() {
 
             <div className="row g-4">
                 {/* Purchase Column */}
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                     <GlassCard stagger="stagger-1" className="h-100">
                         <div className="mb-4">
                             <h5 className="fw-bold mb-2">1. Generate Mock Purchase</h5>
@@ -149,7 +211,7 @@ export function MockPage() {
                 </div>
 
                 {/* Payout Column */}
-                <div className="col-lg-6">
+                <div className="col-lg-4">
                     <GlassCard stagger="stagger-2" className="h-100 border-primary" style={{ borderTop: '4px solid var(--ebay-blue)' }}>
                         <div className="mb-4">
                             <h5 className="fw-bold mb-2">2. Push Manual Payout</h5>
@@ -203,6 +265,104 @@ export function MockPage() {
                                 </div>
                             </div>
                         )}
+                    </GlassCard>
+                </div>
+
+                {/* Defect Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-3" className="h-100 border-danger" style={{ borderTop: '4px solid var(--bs-danger)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-danger">3. Generate Account Defect</h5>
+                            <p className="text-muted small">
+                                Simulate an <strong>unresolved dispute</strong> and a <strong>refunded return</strong> to instantly spike the seller's defect rate and force a Below Standard downgrade.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleDefectSubmit} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" name="sellerId" value={defectData.sellerId} onChange={(e) => setDefectData({ sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-danger rounded-pill mt-4" disabled={defectLoading}>
+                                {defectLoading ? "Generating Defect..." : "Inject Account Defects"}
+                            </button>
+                        </form>
+                    </GlassCard>
+                </div>
+
+                {/* Schedule Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-4" className="h-100 border-info" style={{ borderTop: '4px solid var(--bs-info)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-info">4. Schedule Auto-Evaluation</h5>
+                            <p className="text-muted small">
+                                Override the Background Service's target schedule (normally runs the 20th of the month) to demo mass dynamic evaluation.
+                            </p>
+                        </div>
+                        <div className="d-flex flex-column gap-3 mt-4">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Time to Evaluate (Seconds)</label>
+                                <input 
+                                    type="number" 
+                                    className="pe-form-control" 
+                                    value={evalSeconds} 
+                                    onChange={(e) => setEvalSeconds(e.target.value)} 
+                                    min="1" 
+                                />
+                            </div>
+                            <button 
+                                type="button" 
+                                className="btn btn-outline-info rounded-pill" 
+                                onClick={() => handleSetDemoTime(parseInt(evalSeconds, 10))} 
+                                disabled={evalLoading}
+                            >
+                                {evalLoading ? "Scheduling..." : "Schedule Custom Evaluation"}
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn btn-link btn-sm text-secondary text-decoration-none" 
+                                onClick={() => handleSetDemoTime(86400)} 
+                                disabled={evalLoading}
+                            >
+                                Reset to Tomorrow (24h)
+                            </button>
+                        </div>
+                    </GlassCard>
+                </div>
+
+                {/* Accelerate Settlements Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-5" className="h-100 border-success" style={{ borderTop: '4px solid var(--bs-success)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-success">5. Accelerate Settlements</h5>
+                            <p className="text-muted small">
+                                Instantly fast-forward the Estimated Settlement Date of <strong>all pending orders</strong> for a given seller to clear in N minutes.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleAccelerateSettlements} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" value={settleData.sellerId} onChange={(e) => setSettleData({ ...settleData, sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+                            
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Time to clear (Seconds)</label>
+                                <input 
+                                    type="number" 
+                                    className="pe-form-control" 
+                                    value={settleData.seconds} 
+                                    onChange={(e) => setSettleData({ ...settleData, seconds: e.target.value })} 
+                                    min="1" 
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-success rounded-pill mt-2" disabled={settleLoading}>
+                                {settleLoading ? "Accelerating..." : "Accelerate to Available Balance"}
+                            </button>
+                        </form>
                     </GlassCard>
                 </div>
             </div>

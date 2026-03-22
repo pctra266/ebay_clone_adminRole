@@ -48,6 +48,7 @@ public interface IApplicationDbContext
     DbSet<DisputeMessage> DisputeMessages { get; }
     DbSet<PayoutConfig> PayoutConfigs { get; }
     DbSet<PayoutTransaction> PayoutTransactions { get; }
+    DbSet<SellerLevelCriteria> SellerLevelCriteria { get; }
 
 
     // 2. Hàm lưu thay đổi (Quan trọng nhất)
