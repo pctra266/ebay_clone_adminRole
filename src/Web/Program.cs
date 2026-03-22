@@ -3,6 +3,7 @@ using System;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Hubs;
+using EbayClone.Web.Infrastructure; // <-- added for InternalIpMiddleware
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,8 @@ else
 // ── Core middleware (ORDER MATTERS) ──────────────────────────
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
+app.UseMiddleware<InternalIpMiddleware>(); // <-- restrict to internal IPs early
+
 app.UseStaticFiles();          // serve React build from wwwroot
 app.UseExceptionHandler(options => { });
 app.UseCors("FrontendPolicy");
