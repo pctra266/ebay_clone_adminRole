@@ -145,7 +145,6 @@ export const SellersPage = () => {
         setCurrentPage(1);
     };
     // Derived Data: Filtering & Sorting
-    // Derived Data: Filtering & Sorting
     const filteredWallets = useMemo(() => {
         let result = [...wallets];
 
@@ -202,14 +201,19 @@ export const SellersPage = () => {
             direction = 'desc';
         }
         setSortConfig({ key, direction });
-        setCurrentPage(1); // Reset to first page to see the new top results
+        setCurrentPage(1);
     };
 
     const getSortIcon = (key) => {
         if (!sortConfig || sortConfig.key !== key) return <i className="bi bi-arrow-down-up opacity-25 ms-1" style={{ fontSize: '0.7em' }}></i>;
-        return sortConfig.direction === 'asc'
-            ? <i className="bi bi-arrow-up text-primary ms-1" style={{ fontSize: '0.8em' }}></i>
-            : <i className="bi bi-arrow-down text-primary ms-1" style={{ fontSize: '0.8em' }}></i>;
+        
+        return (
+            <span className="d-inline-flex align-items-center text-primary">
+                {sortConfig.direction === 'asc' 
+                    ? <i className="bi bi-arrow-up ms-1" style={{ fontSize: '0.8em' }}></i> 
+                    : <i className="bi bi-arrow-down ms-1" style={{ fontSize: '0.8em' }}></i>}
+            </span>
+        );
     };
 
     // Derived Data: Pagination
@@ -428,7 +432,10 @@ export const SellersPage = () => {
                     <table className="table table-hover align-middle pe-table mb-0">
                         <thead className="table-light">
                             <tr>
-                                <th className="ps-4 cursor-pointer" onClick={() => requestSort('sellerName')} style={{ cursor: 'pointer' }}>
+                                <th className="ps-4 cursor-pointer" onClick={() => requestSort('sellerId')} style={{ cursor: 'pointer' }}>
+                                    ID {getSortIcon('sellerId')}
+                                </th>
+                                <th className="cursor-pointer" onClick={() => requestSort('sellerName')} style={{ cursor: 'pointer' }}>
                                     Seller {getSortIcon('sellerName')}
                                 </th>
                                 <th className="cursor-pointer" onClick={() => requestSort('sellerLevel')} style={{ cursor: 'pointer' }}>
@@ -437,16 +444,16 @@ export const SellersPage = () => {
                                 <th className="cursor-pointer" onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
                                     Status {getSortIcon('status')}
                                 </th>
-                                <th>Detail</th>
-                                <th className="text-end cursor-pointer" onClick={() => requestSort('pendingBalance')} style={{ cursor: 'pointer' }}>
-                                    Pending {getSortIcon('pendingBalance')}
-                                </th>
                                 <th className="text-end cursor-pointer" onClick={() => requestSort('availableBalance')} style={{ cursor: 'pointer' }}>
                                     Available {getSortIcon('availableBalance')}
                                 </th>
-                                <th className="text-end pe-4 cursor-pointer" onClick={() => requestSort('totalWithdrawn')} style={{ cursor: 'pointer' }}>
+                                <th className="text-end cursor-pointer" onClick={() => requestSort('pendingBalance')} style={{ cursor: 'pointer' }}>
+                                    Pending {getSortIcon('pendingBalance')}
+                                </th>
+                                <th className="text-end cursor-pointer" onClick={() => requestSort('totalWithdrawn')} style={{ cursor: 'pointer' }}>
                                     Total Withdrawn {getSortIcon('totalWithdrawn')}
                                 </th>
+                                <th className="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -457,27 +464,29 @@ export const SellersPage = () => {
                             ) : paginatedWallets.map(wallet => (
                                 <tr key={wallet.id}>
                                     <td className="ps-4">
-                                        <div className="fw-bold text-dark fs-6">{wallet.sellerName}</div>
-                                        <small className="text-muted text-monospace">UID: {wallet.sellerId}</small>
+                                        <code className="text-muted small">#{wallet.sellerId}</code>
+                                    </td>
+                                    <td>
+                                        <div className="fw-bold text-dark">{wallet.sellerName}</div>
                                     </td>
                                     <td>{renderLevelBadge(wallet)}</td>
                                     <td>
-                                        <span className={`pe-badge ${wallet.status === 'Active' ? 'badge-success' : wallet.status === 'Suspended' ? 'badge-failed' : 'bg-secondary-subtle text-secondary'}`}>
+                                        <span className={`pe-badge ${wallet.status === 'Active' ? 'badge-success' : wallet.status === 'Suspended' ? 'badge-hold' : wallet.status === 'Banned' ? 'badge-failed' : 'bg-secondary-subtle text-secondary'}`}>
                                             {wallet.status}
                                         </span>
                                     </td>
-                                    <td>
-                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-sm btn-light rounded-pill px-3 text-primary fw-bold" style={{ fontSize: '0.8rem' }}>
-                                            <i className="bi bi-eye-fill me-1"></i> View
-                                        </Link>
-                                    </td>
+                                    <td className="text-end text-success fw-bold" style={{ fontSize: '1.05rem', letterSpacing: '-0.5px' }}>{formatCurrency(wallet.availableBalance)}</td>
                                     <td className="text-end">
                                         <Link to={`/sellers/pending/${wallet.sellerId}`} className="text-warning text-decoration-none fw-bold" style={{ fontSize: '1rem' }}>
                                             {formatCurrency(wallet.pendingBalance)}
                                         </Link>
                                     </td>
-                                    <td className="text-end text-success fw-bold" style={{ fontSize: '1.05rem', letterSpacing: '-0.5px' }}>{formatCurrency(wallet.availableBalance)}</td>
-                                    <td className="text-end text-muted pe-4 fw-medium">{formatCurrency(wallet.totalWithdrawn)}</td>
+                                    <td className="text-end text-muted fw-medium">{formatCurrency(wallet.totalWithdrawn)}</td>
+                                    <td className="text-center">
+                                        <Link to={`/users/${wallet.sellerId}`} className="btn btn-sm btn-light rounded-pill px-3 text-primary fw-bold" style={{ fontSize: '0.8rem' }}>
+                                            <i className="bi bi-eye-fill me-1"></i> View
+                                        </Link>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
