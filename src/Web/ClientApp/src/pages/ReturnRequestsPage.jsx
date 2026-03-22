@@ -49,187 +49,155 @@ export default function ReturnRequestsPage() {
   );
 
   const badge = (status) => {
-    const b = statusBadge[status] || { bg: '#f3f4f6', color: '#374151', text: status };
+    const b = statusBadge[status] || { color: '#64748b', text: status };
     return (
-      <span style={{
-        background: b.bg, color: b.color,
-        padding: '2px 10px', borderRadius: 20,
-        fontSize: 12, fontWeight: 600,
-      }}>
-        {b.text}
+      <span className="d-inline-flex align-items-center gap-2 px-2 py-1 rounded-pill" style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.3px', background: 'rgba(0,0,0,0.03)' }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: b.color }}></span>
+        <span style={{ color: '#1e293b' }}>{b.text?.toUpperCase()}</span>
       </span>
     );
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
-      {/* Google Font */}
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-      {/* Header */}
-      <div style={{
-        background: '#fff', borderBottom: '1px solid #e5e7eb',
-        padding: '24px 36px 0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#111827' }}>
-              📦 Return & Refund Management
-            </h1>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-              Review and process customer return requests
-            </p>
-          </div>
-
-          {/* Search box */}
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              placeholder="Search by Order ID..."
-              value={searchId}
-              onChange={(e) => setSearchId(e.target.value)}
-              style={{
-                padding: '9px 14px 9px 38px',
-                border: '1.5px solid #e5e7eb', borderRadius: 10,
-                fontSize: 13, width: 220, outline: 'none',
-                transition: 'border 0.2s',
-              }}
-              onFocus={e => e.target.style.borderColor = '#6366f1'}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-            />
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 15 }}>🔍</span>
-          </div>
+    <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
+      <div className="container-fluid" style={{ maxWidth: 1200 }}>
+        {/* ── Page Header (Standardized) ── */}
+        <div className="text-center mb-5 animate-fade-in">
+          <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-0.5px' }}>Return & Refund Management</h1>
+          <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
+            Review, adjudicate, and process customer return requests to ensure fair outcomes and marketplace trust.
+          </p>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 0 }}>
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setSearchId(''); }}
-              style={{
-                padding: '10px 22px',
-                border: 'none', background: 'none',
-                cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                color: activeTab === tab.key ? tab.color : '#6b7280',
-                borderBottom: activeTab === tab.key ? `2.5px solid ${tab.color}` : '2.5px solid transparent',
-                transition: 'all 0.2s',
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              {tab.label}
-              {activeTab === tab.key && requests.length > 0 && (
-                <span style={{
-                  marginLeft: 8, background: tab.color,
-                  color: '#fff', borderRadius: 10,
-                  padding: '1px 7px', fontSize: 11,
-                }}>
-                  {requests.length}
-                </span>
-              )}
-            </button>
+        {/* ── Quick Stats Grid ── */}
+        <div className="row g-3 mb-5 justify-content-center">
+          {[
+            { label: 'Total in View', value: requests.length, icon: 'bi-box-seam', color: 'primary' },
+            { label: 'Pending Review', value: activeTab === 'Pending' ? requests.length : '—', icon: 'bi-clock-history', color: 'warning' },
+            { label: 'Escalated Cases', value: activeTab === 'Escalated' ? requests.length : '—', icon: 'bi-exclamation-triangle', color: 'danger' },
+            { label: 'Refunded (Success)', value: activeTab === 'Approved' ? requests.length : '—', icon: 'bi-check-circle-fill', color: 'success' },
+          ].map((stat, idx) => (
+            <div key={idx} className="col-12 col-sm-6 col-lg-3">
+              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
+                <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-3`}>
+                  <i className={`bi ${stat.icon} h4 mb-0`}></i>
+                </div>
+                <div>
+                  <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
+                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Body */}
-      <div style={{ padding: '28px 36px' }}>
-        {error && (
-          <div style={{
-            background: '#fee2e2', border: '1px solid #fca5a5',
-            color: '#991b1b', borderRadius: 10, padding: '12px 18px',
-            marginBottom: 20, fontSize: 13,
-          }}>
-            ⚠️ {error}
-          </div>
-        )}
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 80 }}>
-            <div style={{
-              width: 40, height: 40, border: '3px solid #e5e7eb',
-              borderTop: '3px solid #6366f1', borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite', margin: '0 auto 16px',
-            }} />
-            <p style={{ color: '#9ca3af', fontSize: 13 }}>Loading data...</p>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div style={{
-            textAlign: 'center', padding: 80,
-            background: '#fff', borderRadius: 14,
-            border: '1px dashed #d1d5db',
-          }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
-            <p style={{ color: '#6b7280', fontSize: 15, fontWeight: 500 }}>
-              {searchId ? `No order found with #${searchId}` : 'No requests found in this section'}
-            </p>
-          </div>
-        ) : (
-          <div style={{
-            background: '#fff', borderRadius: 14,
-            border: '1px solid #e5e7eb',
-            overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
-          }}>
-            {/* Table Header */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '80px 100px 1fr 1fr 130px 120px 100px',
-              padding: '12px 20px', background: '#f9fafb',
-              borderBottom: '1px solid #e5e7eb',
-              fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase',
-            }}>
-              <span>ID</span>
-              <span>Order #</span>
-              <span>Customer</span>
-              <span>Reason</span>
-              <span>Total</span>
-              <span>Created At</span>
-              <span>Status</span>
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div className="card-body p-0">
+            {/* ── Table Toolbar ── */}
+            <div className="px-4 py-3 bg-light border-bottom">
+              <div className="row align-items-center g-3">
+                <div className="col-md-7">
+                  <div className="d-flex flex-wrap gap-1 p-1 bg-white border rounded-pill shadow-sm" style={{ width: 'fit-content' }}>
+                    {STATUS_TABS.map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => { setActiveTab(tab.key); setSearchId(''); }}
+                        className={`btn btn-sm rounded-pill px-3 py-1 fw-bold transition-all ${activeTab === tab.key ? 'btn-primary shadow-sm' : 'btn-link text-secondary text-decoration-none'}`}
+                        style={{ fontSize: '0.75rem' }}
+                      >
+                        {tab.label}
+                        {activeTab === tab.key && requests.length > 0 && (
+                          <span className="badge bg-white text-primary ms-2 rounded-pill px-2">{requests.length}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="position-relative">
+                    <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style={{ fontSize: '0.85rem' }}></i>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm border-0 bg-white rounded-pill ps-5 py-2 shadow-sm"
+                      placeholder="Search Order ID..."
+                      value={searchId}
+                      onChange={(e) => setSearchId(e.target.value)}
+                      style={{ fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Rows */}
-            {filtered.map((r, idx) => (
-              <div
-                key={r.id}
-                onClick={() => navigate(`/return-requests/${r.id}`)}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '80px 100px 1fr 1fr 130px 120px 100px',
-                  padding: '15px 20px',
-                  borderBottom: idx < filtered.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  cursor: 'pointer', alignItems: 'center',
-                  transition: 'background 0.15s',
-                  fontSize: 13,
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#fafbff'}
-                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-              >
-                <span style={{ color: '#6b7280', fontWeight: 500 }}>#{r.id}</span>
-                <span style={{ fontWeight: 600, color: '#4f46e5' }}>#{r.orderId}</span>
-                <div>
-                  <div style={{ fontWeight: 600, color: '#111827' }}>{r.buyerUsername || '—'}</div>
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>{r.buyerEmail}</div>
-                </div>
-                <span style={{
-                  color: '#374151',
-                  overflow: 'hidden', textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap', display: 'block',
-                  maxWidth: 200,
-                }}>
-                  {r.reason || '—'}
-                </span>
-                <span style={{ fontWeight: 600, color: '#111827' }}>
-                  {r.totalPrice ? `$${Number(r.totalPrice).toLocaleString('en-US')}` : '—'}
-                </span>
-                <span style={{ color: '#6b7280' }}>
-                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US') : '—'}
-                </span>
-                {badge(r.status)}
-              </div>
-            ))}
+            <div className="table-responsive">
+              <table className="table pe-table mb-0 align-middle">
+                <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
+                  <tr>
+                    <th className="ps-4 py-3 border-0" style={{ width: '80px' }}>ID</th>
+                    <th className="py-3 border-0" style={{ width: '120px' }}>Order #</th>
+                    <th className="py-3 border-0">Customer</th>
+                    <th className="py-3 border-0" style={{ width: '250px' }}>Return Reason</th>
+                    <th className="py-3 border-0">Price</th>
+                    <th className="py-3 border-0">Requested</th>
+                    <th className="pe-4 py-3 border-0 text-end">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-5">
+                        <div className="spinner-border text-primary" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-5 text-muted">
+                        <i className="bi bi-inbox h1 d-block mb-3 opacity-25"></i>
+                        {searchId ? `No orders found for #${searchId}` : 'No return requests found.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map(r => (
+                      <tr key={r.id} onClick={() => navigate(`/return-requests/${r.id}`)} style={{ cursor: 'pointer' }} className="transition-all hover-translate-y">
+                        <td className="ps-4 py-3 text-secondary fw-medium">#{r.id}</td>
+                        <td>
+                          <span className="fw-bold text-primary">#{r.orderId}</span>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center gap-2">
+                            <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style={{ width: 32, height: 32, fontSize: '0.8rem' }}>
+                              {r.buyerUsername?.charAt(0) || 'U'}
+                            </div>
+                            <div>
+                              <div className="fw-bold text-dark small">{r.buyerUsername || 'Anonymous'}</div>
+                              <div className="text-muted" style={{ fontSize: '0.7rem' }}>{r.buyerEmail}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-dark small text-truncate" style={{ maxWidth: 200 }} title={r.reason}>
+                            {r.reason || 'No reason provided'}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="fw-bold text-dark">{r.totalPrice ? `$${Number(r.totalPrice).toLocaleString('en-US')}` : '—'}</span>
+                        </td>
+                        <td className="text-secondary small">
+                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                        </td>
+                        <td className="pe-4 text-end">
+                          {badge(r.status)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
