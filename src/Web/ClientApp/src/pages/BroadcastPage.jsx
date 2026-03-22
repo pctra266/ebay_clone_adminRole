@@ -110,210 +110,266 @@ export function BroadcastPage() {
     }
   };
 
+  const scheduledCount = (listData.items || []).filter(item => item.status === "Scheduled").length;
+
   return (
-    <section className="py-3">
-      <h1 className="h3 mb-3">Broadcast Center</h1>
+    <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
+      <div className="container-fluid" style={{ maxWidth: 1200 }}>
+        {/* ── Page Header (Standardized) ── */}
+        <div className="text-center mb-5 animate-fade-in">
+          <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Broadcast Center</h1>
+          <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
+            Multi-channel communication engine for platform notices and announcements.
+          </p>
+        </div>
 
-      <ToastMessage
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ message: "", type: "success" })}
-      />
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ message: "", type: "success" })}
+        />
 
-      <div className="card mb-4">
-        <div className="card-body">
-          <h2 className="h5">Create Broadcast</h2>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label htmlFor="broadcast-title" className="form-label">Title</label>
-              <input
-                id="broadcast-title"
-                className="form-control"
-                value={form.title}
-                onChange={(event) => updateForm("title", event.target.value)}
-              />
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="broadcast-audience" className="form-label">Target Audience</label>
-              <select
-                id="broadcast-audience"
-                className="form-select"
-                value={form.targetAudience}
-                onChange={(event) => updateForm("targetAudience", event.target.value)}
-              >
-                {audienceOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-            {form.targetAudience === "Group" && (
-              <div className="col-md-6">
-                <label htmlFor="broadcast-group" className="form-label">Group Name</label>
-                <input
-                  id="broadcast-group"
-                  className="form-control"
-                  value={form.targetGroup}
-                  onChange={(event) => updateForm("targetGroup", event.target.value)}
-                />
-              </div>
-            )}
-            <div className="col-12">
-              <label htmlFor="broadcast-content" className="form-label">Content</label>
-              <textarea
-                id="broadcast-content"
-                className="form-control"
-                rows="4"
-                value={form.content}
-                onChange={(event) => updateForm("content", event.target.value)}
-              />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label d-block">Channels</label>
-              {channelOptions.map((channel) => (
-                <div className="form-check form-check-inline" key={channel}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`channel-${channel}`}
-                    checked={form.channels.includes(channel)}
-                    onChange={() => toggleChannel(channel)}
-                  />
-                  <label className="form-check-label" htmlFor={`channel-${channel}`}>
-                    {channel}
-                  </label>
+        {/* ── Quick Stats Grid ── */}
+        <div className="row g-3 mb-5 justify-content-center">
+          {[
+            { label: 'Total Announcements', value: listData.totalCount, icon: 'bi-megaphone-fill', color: 'primary' },
+            { label: 'Scheduled Pulses', value: scheduledCount, icon: 'bi-calendar-event-fill', color: 'info' },
+            { label: 'Channel Spread', value: '3 Active', icon: 'bi-share-fill', color: 'success' },
+            { label: 'System Reach', value: 'Global', icon: 'bi-globe2', color: 'warning' },
+          ].map((stat, idx) => (
+            <div key={idx} className="col-12 col-sm-6 col-lg-3">
+              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
+                <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-circle`}>
+                  <i className={`bi ${stat.icon} h4 mb-0`}></i>
                 </div>
-              ))}
+                <div>
+                  <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
+                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
+                </div>
+              </div>
             </div>
-            <div className="col-md-6">
-              <label htmlFor="broadcast-schedule" className="form-label">Schedule At (optional)</label>
-              <input
-                id="broadcast-schedule"
-                className="form-control"
-                type="datetime-local"
-                value={form.scheduleAt}
-                onChange={(event) => updateForm("scheduleAt", event.target.value)}
-              />
-            </div>
-            <div className="col-12 d-flex gap-2 flex-wrap">
-              <button type="button" className="btn btn-primary" disabled={submitting} onClick={submitNow}>
-                Send Now
-              </button>
-              <button type="button" className="btn btn-outline-primary" disabled={submitting} onClick={submitSchedule}>
-                Schedule
-              </button>
-              <span className="align-self-center text-muted small">Created By Admin ID: {adminId}</span>
+          ))}
+        </div>
+
+        {/* ── Create Broadcast Section ── */}
+        <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 animate-fade-in-up">
+          <div className="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+            <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-plus-circle me-2 text-primary"></i>Compose New Broadcast</h5>
+            <span className="badge bg-light text-secondary border fw-bold px-3 py-2 rounded-pill shadow-inner" style={{ fontSize: '0.7rem' }}>
+              <i className="bi bi-person-workspace me-1"></i> Admin Session: #{adminId}
+            </span>
+          </div>
+          <div className="card-body p-4 p-lg-5">
+            <div className="row g-4">
+              <div className="col-md-7">
+                <div className="mb-4">
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">Announcement Title</label>
+                  <input
+                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-sm"
+                    placeholder="Enter a descriptive subject..."
+                    value={form.title}
+                    onChange={(e) => updateForm("title", e.target.value)}
+                    style={{ fontSize: '1.1rem', fontWeight: 600 }}
+                  />
+                </div>
+                <div>
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">Content Body</label>
+                  <textarea
+                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-sm"
+                    rows="6"
+                    placeholder="Type your message here..."
+                    value={form.content}
+                    onChange={(e) => updateForm("content", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="col-md-5">
+                <div className="bg-light rounded-4 p-4 h-100 border border-white shadow-inner">
+                  <div className="mb-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-2">Target Audience</label>
+                    <select
+                      className="form-select border-0 bg-white rounded-pill px-4 shadow-sm"
+                      value={form.targetAudience}
+                      onChange={(e) => updateForm("targetAudience", e.target.value)}
+                      style={{ height: '48px', fontWeight: 500 }}
+                    >
+                      {audienceOptions.map(opt => <option key={opt} value={opt}>{opt} Users</option>)}
+                    </select>
+                  </div>
+
+                  {form.targetAudience === "Group" && (
+                    <div className="mb-4 animate-fade-in">
+                      <label className="form-label fw-bold small text-muted text-uppercase mb-2">Segment Group</label>
+                      <input
+                        className="form-control border-0 bg-white rounded-pill px-4 shadow-sm"
+                        placeholder="Group ID or Label"
+                        value={form.targetGroup}
+                        onChange={(e) => updateForm("targetGroup", e.target.value)}
+                        style={{ height: '48px' }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-3">Transmission Channels</label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {channelOptions.map(channel => (
+                        <button
+                          key={channel}
+                          type="button"
+                          onClick={() => toggleChannel(channel)}
+                          className={`btn rounded-pill px-4 py-2 fw-bold transition-all shadow-sm ${form.channels.includes(channel) ? 'btn-primary' : 'btn-outline-secondary bg-white'}`}
+                          style={{ fontSize: '0.8rem' }}
+                        >
+                          <i className={`bi bi-${channel === 'Email' ? 'envelope' : channel === 'InApp' ? 'app-indicator' : 'chat-dots'} me-2`}></i>
+                          {channel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-2">Scheduled Delivery (Optional)</label>
+                    <input
+                      className="form-control border-0 bg-white rounded-pill px-4 shadow-sm"
+                      type="datetime-local"
+                      value={form.scheduleAt}
+                      onChange={(e) => updateForm("scheduleAt", e.target.value)}
+                      style={{ height: '48px' }}
+                    />
+                  </div>
+
+                  <div className="d-grid gap-2 pt-2">
+                    <button className="btn btn-primary btn-lg rounded-pill fw-extrabold shadow-sm py-3" disabled={submitting} onClick={submitNow}>
+                      {submitting ? 'Transmitting...' : <><i className="bi bi-send-fill me-2"></i>Execute Broadcast Now</>}
+                    </button>
+                    <button className="btn btn-outline-primary btn-lg rounded-pill fw-bold py-3" disabled={submitting} onClick={submitSchedule}>
+                      <i className="bi bi-clock-fill me-2"></i>Schedule for Later
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="card">
-        <div className="card-body">
-          <h2 className="h5">Broadcast History</h2>
-          <div className="row g-2 align-items-end mb-3">
-            <div className="col-md-4">
-              <label htmlFor="filter-status" className="form-label">Status</label>
+        {/* ── Broadcast History Section ── */}
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 animate-fade-in-up">
+          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
+            <h5 className="mb-0 fw-bold text-dark mb-3 mb-sm-0">Transmission History</h5>
+            <div className="d-flex gap-2 flex-wrap">
               <select
-                id="filter-status"
-                className="form-select"
+                className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
+                style={{ width: '160px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
                 value={filters.status}
-                onChange={(event) => {
-                  setFilters((prev) => ({ ...prev, status: event.target.value }));
-                  setPageNumber(1);
-                }}
+                onChange={(e) => { setFilters(p => ({ ...p, status: e.target.value })); setPageNumber(1); }}
               >
-                <option value="">All</option>
+                <option value="">All Status</option>
                 <option value="Sent">Sent</option>
                 <option value="Scheduled">Scheduled</option>
                 <option value="Pending">Pending</option>
               </select>
-            </div>
-            <div className="col-md-4">
-              <label htmlFor="filter-type" className="form-label">Channel Type</label>
               <select
-                id="filter-type"
-                className="form-select"
+                className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
+                style={{ width: '160px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
                 value={filters.type}
-                onChange={(event) => {
-                  setFilters((prev) => ({ ...prev, type: event.target.value }));
-                  setPageNumber(1);
-                }}
+                onChange={(e) => { setFilters(p => ({ ...p, type: e.target.value })); setPageNumber(1); }}
               >
-                <option value="">All</option>
-                {channelOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
+                <option value="">All Channels</option>
+                {channelOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
             </div>
           </div>
-
-          {loading ? (
-            <LoadingIndicator text="Loading broadcasts..." />
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped align-middle">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Audience</th>
-                    <th>Channel</th>
-                    <th>Status</th>
-                    <th>Schedule</th>
-                    <th>Sent</th>
-                    <th>Created At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(listData.items || []).map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.title}</td>
-                      <td>{item.userRole || "All"}</td>
-                      <td>{item.type}</td>
-                      <td>{item.status}</td>
-                      <td>{formatDate(item.scheduledAt)}</td>
-                      <td>{formatDate(item.sentAt)}</td>
-                      <td>{formatDate(item.createdAt)}</td>
-                    </tr>
-                  ))}
-                  {(listData.items || []).length === 0 && (
+          <div className="card-body p-0">
+            {loading ? (
+              <div className="py-5 text-center">
+                <LoadingIndicator text="Syncing history..." />
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table pe-table mb-0 align-middle">
+                  <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
                     <tr>
-                      <td colSpan="7" className="text-center text-muted py-4">
-                        No broadcast records.
-                      </td>
+                      <th className="ps-4 py-3 border-0">Announcement</th>
+                      <th className="py-3 border-0">Target Audience</th>
+                      <th className="py-3 border-0 text-center">Channels</th>
+                      <th className="py-3 border-0 text-center">Status</th>
+                      <th className="py-3 border-0 text-end pe-4">Timestamps</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">Total: {listData.totalCount || 0}</small>
-            <div className="d-flex gap-2">
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                disabled={pageNumber <= 1}
-                onClick={() => setPageNumber((prev) => prev - 1)}
-              >
-                Previous
-              </button>
-              <span className="align-self-center small">
-                Page {pageNumber} / {listData.totalPages || 1}
-              </span>
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                disabled={pageNumber >= (listData.totalPages || 1)}
-                onClick={() => setPageNumber((prev) => prev + 1)}
-              >
-                Next
-              </button>
+                  </thead>
+                  <tbody>
+                    {(listData.items || []).length === 0 ? (
+                      <tr><td colSpan="5" className="text-center py-5 text-muted">No transmission logs found.</td></tr>
+                    ) : (
+                      (listData.items || []).map((item) => (
+                        <tr key={item.id} className="transition-all hover-translate-y border-bottom">
+                          <td className="ps-4 py-3">
+                            <div className="fw-bold text-dark" style={{ letterSpacing: '-0.2px' }}>{item.title}</div>
+                            <div className="text-muted small truncate-1" style={{ maxWidth: '300px' }}>{item.content}</div>
+                          </td>
+                          <td>
+                            <span className="badge bg-light text-dark border px-3 py-1 rounded-pill" style={{ fontSize: '0.7rem' }}>
+                              <i className="bi bi-people me-1"></i>{item.userRole || "All Users"}
+                            </span>
+                          </td>
+                          <td className="text-center">
+                            <span className="text-primary fw-bold small"><i className="bi bi-broadcast me-1"></i>{item.type}</span>
+                          </td>
+                          <td className="text-center">
+                            <span className={`badge rounded-pill px-3 py-1 ${
+                              item.status === 'Sent' ? 'bg-success-subtle text-success border border-success-subtle' :
+                              item.status === 'Scheduled' ? 'bg-info-subtle text-info border border-info-subtle' :
+                              'bg-warning-subtle text-warning border border-warning-subtle'
+                            }`} style={{ fontSize: '0.65rem', fontWeight: 700 }}>
+                              {item.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="text-end pe-4">
+                            <div className="text-dark small fw-medium">{item.status === 'Scheduled' ? formatDate(item.scheduledAt) : formatDate(item.sentAt)}</div>
+                            <div className="text-muted x-small">Created: {formatDate(item.createdAt).split(',')[0]}</div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* ── Pagination ── */}
+            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+              <span className="text-muted small">Record Count: <strong className="text-dark">{listData.totalCount || 0}</strong></span>
+              <div className="d-flex gap-2">
+                <button
+                  className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold"
+                  disabled={pageNumber <= 1}
+                  onClick={() => setPageNumber(p => p - 1)}
+                >
+                  <i className="bi bi-chevron-left"></i>
+                </button>
+                <span className="align-self-center small fw-bold mx-2">
+                  {pageNumber} / {listData.totalPages || 1}
+                </span>
+                <button
+                  className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold"
+                  disabled={pageNumber >= (listData.totalPages || 1)}
+                  onClick={() => setPageNumber(p => p + 1)}
+                >
+                  <i className="bi bi-chevron-right"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+      <style>{`
+        .truncate-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .x-small { font-size: 0.7rem; }
+        .fw-extrabold { font-weight: 800; }
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+      `}</style>
+    </div>
   );
 }
 
