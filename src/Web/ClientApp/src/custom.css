@@ -52,19 +52,21 @@ a:hover {
   width: 260px;
   background: var(--ebay-light-bg);
   border-right: 1px solid var(--ebay-border);
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1050;
 }
 
 .sidebar-header {
-  padding: 30px 20px;
+  padding: 24px 20px;
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--ebay-black);
-  text-align: center;
-  letter-spacing: -2px;
+  letter-spacing: -1px;
+  border-bottom: 1px solid var(--ebay-border);
 }
 
 .sidebar-menu {
@@ -111,7 +113,11 @@ a:hover {
   overflow-x: hidden;
   min-height: 100vh;
   width: 100%;
-  transition: padding 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-container.sidebar-closed .sidebar {
+  margin-left: -260px;
 }
 
 /* --- Admin Responsive Rules --- */
@@ -119,18 +125,27 @@ a:hover {
   .sidebar {
     position: fixed;
     top: 0;
-    left: -260px;
+    left: -260px !important; /* Force off-screen by default on mobile */
+    margin-left: 0 !important;
     height: 100vh;
-    z-index: 1050;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
   }
 
   .sidebar.show {
-    left: 0;
+    left: 0 !important;
+  }
+
+  /* When sidebar is closed on desktop but app-container has sidebar-closed class, 
+     we need to override mobile behavior if necessary, but usually @media is enough */
+  .app-container.sidebar-open .sidebar {
+     left: 0 !important;
+  }
+  
+  .app-container.sidebar-closed .sidebar {
+     left: -260px !important;
   }
 
   .main-content {
-    padding-top: 70px; /* Space for mobile header */
+    padding-top: 70px; 
     padding-left: 15px;
     padding-right: 15px;
   }

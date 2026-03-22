@@ -22,49 +22,36 @@ const SidebarLink = ({ to, icon, children }) => {
   );
 };
 
-export const NavMenu = () => {
+export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
-  const closeSidebar = () => setIsOpen(false);
-
   return (
     <>
-      {/* ── Mobile Header (Admin Only) ── */}
-      <div className="mobile-admin-header d-lg-none py-3 px-4 bg-white border-bottom shadow-sm d-flex align-items-center justify-content-between fixed-top" style={{ zIndex: 1030 }}>
-        <button className="btn btn-link text-dark p-0 border-0 fs-3" onClick={toggleSidebar}>
-          <i className="bi bi-list"></i>
-        </button>
-        <Link to="/" className="text-decoration-none d-flex align-items-center" onClick={closeSidebar}>
-          <span className="fw-bold" style={{ color: '#e53238' }}>e</span>
-          <span className="fw-bold" style={{ color: '#0064d2' }}>b</span>
-          <span className="fw-bold" style={{ color: '#f5af02' }}>a</span>
-          <span className="fw-bold" style={{ color: '#86b817' }}>y</span>
-          <span className="ms-1 text-dark small fw-semibold">Admin</span>
-        </Link>
-        <div style={{ width: '32px' }}></div> {/* Spacer */}
-      </div>
-
-      {/* ── Sidebar Drawer ── */}
-      <nav className={`sidebar shadow-sm ${isOpen ? 'show' : ''}`}>
-        <div className="sidebar-header">
-          <Link to="/" className="text-decoration-none d-flex align-items-center justify-content-center" onClick={closeSidebar}>
-            <span style={{ color: '#e53238' }}>e</span>
-            <span style={{ color: '#0064d2' }}>b</span>
-            <span style={{ color: '#f5af02' }}>a</span>
-            <span style={{ color: '#86b817' }}>y</span>
-            <span className="ms-2 text-dark" style={{fontSize: '1rem', letterSpacing: 'normal'}}>Admin</span>
+      <nav className={`sidebar shadow-sm ${isOpen ? 'show' : 'collapsed'}`}>
+        <div className="sidebar-header d-flex align-items-center justify-content-between px-3">
+          <Link to="/" className="text-decoration-none d-flex align-items-center" onClick={closeSidebar}>
+            <span className="fw-bold" style={{ color: '#e53238' }}>e</span>
+            <span className="fw-bold" style={{ color: '#0064d2' }}>b</span>
+            <span className="fw-bold" style={{ color: '#f5af02' }}>a</span>
+            <span className="fw-bold" style={{ color: '#86b817' }}>y</span>
+            <span className="ms-1 text-dark small fw-semibold">Admin</span>
           </Link>
+          <button 
+            className="btn btn-link text-dark p-0 border-0 fs-4 d-flex align-items-center justify-content-center" 
+            onClick={toggleSidebar}
+            title="Toggle Sidebar"
+          >
+            <i className="bi bi-list"></i>
+          </button>
         </div>
         <div className="sidebar-menu">
-          <ul className="navbar-nav w-100" onClick={closeSidebar}>
+          <ul className="navbar-nav w-100" onClick={() => { if(window.innerWidth < 992) closeSidebar(); }}>
             <SidebarLink to="/dashboard" icon="bi bi-speedometer2">Dashboard</SidebarLink>
             
             {(user?.role === 'SuperAdmin' || user?.role === 'Support' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Support')) && (
@@ -122,9 +109,6 @@ export const NavMenu = () => {
           </ul>
         </div>
       </nav>
-
-      {/* ── Sidebar Overlay for Mobile ── */}
-      <div className={`sidebar-overlay ${isOpen ? 'show' : ''}`} onClick={closeSidebar}></div>
     </>
   );
 };
