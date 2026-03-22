@@ -27,11 +27,11 @@ export default function ReturnRequestsPage() {
   const [searchId, setSearchId] = useState('');
   const [error, setError] = useState('');
 
-  const fetchData = useCallback(async (status) => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await returnRequestService.getReturnRequests(status);
+      const data = await returnRequestService.getReturnRequests(''); // Fetch all requests
       setRequests(data);
     } catch {
       setError('Could not load requests. Please try again.');
@@ -41,10 +41,17 @@ export default function ReturnRequestsPage() {
   }, []);
 
   useEffect(() => {
-    fetchData(activeTab);
-  }, [activeTab, fetchData]);
+    fetchData(); // Sẽ chỉ fetch 1 lần khi load (bỏ activeTab ra khỏi dependency)
+  }, [fetchData]);
 
-  const filtered = requests.filter((r) =>
+  // Derived Statistics
+  const totalCount = requests.length;
+  const pendingCount = requests.filter(r => r.status === 'Pending').length;
+  const escalatedCount = requests.filter(r => r.status === 'Escalated').length;
+  const approvedCount = requests.filter(r => r.status === 'Approved').length;
+
+  const requestsForTab = requests.filter((r) => r.status === activeTab);
+  const filtered = requestsForTab.filter((r) =>
     searchId ? String(r.orderId).includes(searchId.trim()) : true
   );
 
@@ -72,10 +79,10 @@ export default function ReturnRequestsPage() {
         {/* ── Quick Stats Grid ── */}
         <div className="row g-3 mb-5 justify-content-center">
           {[
-            { label: 'Total in View', value: requests.length, icon: 'bi-box-seam', color: 'primary' },
-            { label: 'Pending Review', value: activeTab === 'Pending' ? requests.length : '—', icon: 'bi-clock-history', color: 'warning' },
-            { label: 'Escalated Cases', value: activeTab === 'Escalated' ? requests.length : '—', icon: 'bi-exclamation-triangle', color: 'danger' },
-            { label: 'Refunded (Success)', value: activeTab === 'Approved' ? requests.length : '—', icon: 'bi-check-circle-fill', color: 'success' },
+            { label: 'Total Requests', value: totalCount, icon: 'bi-box-seam', color: 'primary' },
+            { label: 'Pending Review', value: pendingCount, icon: 'bi-clock-history', color: 'warning' },
+            { label: 'Escalated Cases', value: escalatedCount, icon: 'bi-exclamation-triangle', color: 'danger' },
+            { label: 'Refunded (Success)', value: approvedCount, icon: 'bi-check-circle-fill', color: 'success' },
           ].map((stat, idx) => (
             <div key={idx} className="col-12 col-sm-6 col-lg-3">
               <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
@@ -106,8 +113,8 @@ export default function ReturnRequestsPage() {
                         style={{ fontSize: '0.75rem' }}
                       >
                         {tab.label}
-                        {activeTab === tab.key && requests.length > 0 && (
-                          <span className="badge bg-white text-primary ms-2 rounded-pill px-2">{requests.length}</span>
+                        {activeTab === tab.key && requestsForTab.length > 0 && (
+                          <span className="badge bg-white text-primary ms-2 rounded-pill px-2">{requestsForTab.length}</span>
                         )}
                       </button>
                     ))}

@@ -100,4 +100,14 @@ public partial class SellerWallet
         TotalWithdrawn += amount;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void DeductFromLockedForRefund(decimal amount)
+    {
+        if (amount < 0) throw new ArgumentException("Amount must be positive");
+        
+        // Trừ tiền từ LockedBalance (cho phép về âm nếu seller chưa có đủ tiền bị giam)
+        LockedBalance -= amount;
+        TotalRefunded += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

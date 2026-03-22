@@ -28,6 +28,8 @@ public class ApproveReturnRequestCommandHandler
     {
         var returnRequest = await _context.ReturnRequests
             .Include(r => r.Order)
+                .ThenInclude(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(r => r.Id == request.ReturnRequestId, cancellationToken);
 
         if (returnRequest == null)
@@ -56,6 +58,26 @@ public class ApproveReturnRequestCommandHandler
             if (returnRequest.Order != null)
             {
                 returnRequest.Order.Status = "Refunded";
+
+                // Trừ tiền từ LockedBalance của Seller nếu không phải Ebay đền bù
+                if (!request.IsRefundedByEbayFund)
+                {
+                    int? sellerId = returnRequest.Order.OrderItems.FirstOrDefault()?.Product?.SellerId;
+                    if (sellerId.HasValue)
+                    {
+                        var sellerWallet = await _context.SellerWallets
+                            .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
+
+                        if (sellerWallet != null)
+                        {
+                            decimal refundAmount = returnRequest.Order.SellerEarnings ?? returnRequest.Order.TotalPrice ?? 0m;
+                            if (refundAmount > 0)
+                            {
+                                sellerWallet.DeductFromLockedForRefund(refundAmount);
+                            }
+                        }
+                    }
+                }
             }
         }
 
