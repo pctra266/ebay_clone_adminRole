@@ -40,12 +40,15 @@ const EbayHomepage = () => {
     }, []);
 
     const parseImageUrl = (imgStr) => {
-        if (!imgStr) return 'https://via.placeholder.com/200';
+        if (!imgStr || imgStr === "[]" || imgStr === "null") return '/images/default-product.png';
         try {
+            // Trường hợp parse được JSON (mảng ảnh)
             const parsed = JSON.parse(imgStr);
             if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+            if (Array.isArray(parsed) && parsed.length === 0) return '/images/default-product.png';
             return imgStr;
         } catch (e) {
+            // Trường hợp là string URL thuần túy
             return imgStr;
         }
     };
@@ -281,7 +284,12 @@ const EbayHomepage = () => {
                                                         className="ebay-featured-card__image-link"
                                                         to={`/product/${deal.id}`}
                                                     >
-                                                        <img src={parseImageUrl(deal.images)} alt={deal.title} loading="lazy" />
+                                                        <img 
+                                                            src={parseImageUrl(deal.images || deal.image)} 
+                                                            alt={deal.title} 
+                                                            loading="lazy" 
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                                                        />
                                                         <span className="ebay-featured-card__scrim" aria-hidden="true" />
                                                     </Link>
                                                 </div>
@@ -353,7 +361,12 @@ const EbayHomepage = () => {
                                                 to={`/product/${destination.id}`}
                                             >
                                                 <span className="ebay-trending-card__media">
-                                                    <img src={parseImageUrl(destination.images)} alt={destination.title} loading="lazy" />
+                                                    <img 
+                                                        src={parseImageUrl(destination.images || destination.image)} 
+                                                        alt={destination.title} 
+                                                        loading="lazy" 
+                                                        onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                                                    />
                                                     <span className="ebay-trending-card__scrim" aria-hidden="true" />
                                                 </span>
                                                 <span className="ebay-trending-card__label">{destination.title}</span>

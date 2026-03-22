@@ -32,7 +32,7 @@ export const OrderDistribution = ({ orderStats }) => {
   };
 
   return (
-    <GlassCard className="p-4 flex-grow-1">
+    <GlassCard className="p-4 h-100">
       <h6 className="fw-bold mb-4 text-center">Order Distribution</h6>
       <div style={{ height: 180, position: 'relative' }}>
         <Doughnut data={chartData} options={options} />
