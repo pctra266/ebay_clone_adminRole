@@ -43,6 +43,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<PlatformFee> PlatformFees { get; set; }
     public virtual DbSet<AdminAction> AdminActions { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<UserNotificationRead> UserNotificationReads { get; set; }
     public virtual DbSet<AdminRole> AdminRoles { get; set; }
     public virtual DbSet<AdminUserRole> AdminUserRoles { get; set; }
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
@@ -489,6 +490,13 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
                 .WithMany()
                 .HasForeignKey(e => e.WithdrawalId)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<UserNotificationRead>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(d => d.Notification).WithMany().HasForeignKey(d => d.NotificationId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
         // NEW: Apply configurations from assembly for new entities

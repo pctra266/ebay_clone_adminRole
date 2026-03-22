@@ -25,6 +25,8 @@ public partial class Notification
 
     public int? CreatedBy { get; set; } // Admin ID
 
+    public bool IsRead { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties

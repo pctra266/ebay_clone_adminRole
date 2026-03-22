@@ -66,6 +66,9 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, bool>
             _context.AdminUserRoles.Add(assignment);
         }
 
+        // Keep User.Role in sync
+        user.Role = role.RoleName;
+
         _context.Notifications.Add(new Notification
         {
             UserId = request.UserId,

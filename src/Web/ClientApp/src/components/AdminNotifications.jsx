@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getActiveBroadcasts } from '../services/broadcastService';
+import { getActiveBroadcasts, markNotificationAsRead } from '../services/broadcastService';
+import { useNotificationHub } from '../hooks/useNotificationHub';
 
 export const AdminNotifications = () => {
     const { user } = useAuth();
@@ -23,6 +24,26 @@ export const AdminNotifications = () => {
         }
     };
 
+    useNotificationHub((newNotif) => {
+        // Tránh trùng lặp nếu API load chậm hơn SignalR
+        setBroadcasts(prev => {
+            if (prev.find(b => b.id === newNotif.id)) return prev;
+            return [newNotif, ...prev];
+        });
+    });
+
+    const handleMarkAsRead = async (id) => {
+        try {
+            await markNotificationAsRead(id);
+            setBroadcasts(prev => prev.map(b => b.id === id ? { ...b, isRead: true } : b));
+        } catch (error) {
+            console.error("Failed to mark as read", error);
+        }
+    };
+
+    // Tính số lượng chưa đọc
+    const unreadCount = broadcasts.filter(b => !b.isRead).length;
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -43,12 +64,12 @@ export const AdminNotifications = () => {
                 style={{ width: '45px', height: '45px', border: '1px solid #dee2e6' }}
             >
                 <i className="bi bi-bell-fill text-primary" style={{ fontSize: '1.2rem' }}></i>
-                {broadcasts.length > 0 && (
+                {unreadCount > 0 && (
                     <span 
                         className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                         style={{ fontSize: '0.75rem' }}
                     >
-                        {broadcasts.length > 9 ? '9+' : broadcasts.length}
+                        {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
             </button>
@@ -67,13 +88,21 @@ export const AdminNotifications = () => {
                     <div className="list-group list-group-flush">
                         {broadcasts.length > 0 ? (
                             broadcasts.map((br) => (
-                                <div key={br.id} className="list-group-item list-group-item-action py-3">
+                                <div 
+                                    key={br.id} 
+                                    className={`list-group-item list-group-item-action py-3 ${!br.isRead ? 'bg-light' : ''}`}
+                                    onClick={() => !br.isRead && handleMarkAsRead(br.id)}
+                                    style={{ cursor: 'pointer', borderLeft: !br.isRead ? '4px solid #007bff' : 'none' }}
+                                >
                                     <div className="d-flex w-100 justify-content-between mb-1">
-                                        <h6 className="mb-1 fw-bold text-dark">{br.title}</h6>
+                                        <h6 className={`mb-1 ${!br.isRead ? 'fw-bold' : ''} text-dark`}>{br.title}</h6>
                                         <small className="text-muted">{new Date(br.sentAt || br.createdAt).toLocaleDateString()}</small>
                                     </div>
                                     <p className="mb-1 text-secondary" style={{ fontSize: '0.9rem' }}>{br.content}</p>
-                                    <small className="badge bg-secondary">{br.type || 'In-App'}</small>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <small className="badge bg-secondary">{br.type || 'In-App'}</small>
+                                        {!br.isRead && <small className="text-primary fw-bold" style={{ fontSize: '0.7rem' }}>NEW</small>}
+                                    </div>
                                 </div>
                             ))
                         ) : (

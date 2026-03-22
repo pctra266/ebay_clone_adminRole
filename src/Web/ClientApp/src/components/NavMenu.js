@@ -47,6 +47,7 @@ export const NavMenu = () => {
           
           {(user?.role === 'SuperAdmin' || user?.role === 'Support' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Support')) && (
             <>
+              <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
               <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
               <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
               <SidebarLink to="/settlements" icon="bi bi-cart-check">Orders</SidebarLink>
@@ -55,13 +56,17 @@ export const NavMenu = () => {
             </>
           )}
 
+          {(user?.role === 'SuperAdmin' || user?.role === 'Monitor' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Monitor')) && (
+            <>
+              <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
+            </>
+          )}
+
           {(user?.role === 'SuperAdmin' || user?.roles?.includes('SuperAdmin')) && (
             <>
-              <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
               <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
               <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
               <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
-              <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
               <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
               <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
             </>

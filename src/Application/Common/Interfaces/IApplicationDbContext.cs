@@ -43,6 +43,7 @@ public interface IApplicationDbContext
     DbSet<PlatformFee> PlatformFees { get; }
     DbSet<AdminAction> AdminActions { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<UserNotificationRead> UserNotificationReads { get; }
     DbSet<AdminRole> AdminRoles { get; }
     DbSet<AdminUserRole> AdminUserRoles { get; }
     DbSet<FinancialTransaction> FinancialTransactions { get; }

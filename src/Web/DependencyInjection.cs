@@ -140,6 +140,7 @@ public static class DependencyInjection
         }
 
         builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
+        builder.Services.AddScoped<INotificationNotifier, NotificationNotifier>();
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

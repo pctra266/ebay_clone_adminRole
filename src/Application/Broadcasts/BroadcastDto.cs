@@ -12,5 +12,6 @@ public class BroadcastDto
     public DateTime? SentAt { get; set; }
     public int? CreatedBy { get; set; }
     public string? CreatedByUsername { get; set; }
+    public bool IsRead { get; set; }
     public DateTime CreatedAt { get; set; }
 }

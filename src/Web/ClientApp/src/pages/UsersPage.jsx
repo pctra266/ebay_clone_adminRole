@@ -31,7 +31,7 @@ export function UsersPage() {
         pageNumber,
         pageSize,
         orderBy: "id",
-        isDescending: true,
+        isDescending: false,
       });
       setUsersData(result);
     } catch (error) {

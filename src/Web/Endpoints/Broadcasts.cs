@@ -23,6 +23,15 @@ public class Broadcasts : EndpointGroupBase
         // New endpoint for users to read active broadcasts:
         var activeGroup = groupBuilder.MapGroup("active").RequireAuthorization(); // Any authenticated user can access
         activeGroup.MapGet("", GetActiveBroadcasts);
+        activeGroup.MapPost("{id}/read", MarkAsRead);
+    }
+
+    public async Task<Results<Ok<bool>, BadRequest<string>>> MarkAsRead(
+        [FromRoute] int id,
+        ISender sender)
+    {
+        var result = await sender.Send(new EbayClone.Application.Notifications.Commands.MarkAsRead.MarkNotificationAsReadCommand(id));
+        return result ? TypedResults.Ok(true) : TypedResults.BadRequest("Failed to mark notification as read");
     }
 
     public async Task<Ok<List<BroadcastDto>>> GetActiveBroadcasts(

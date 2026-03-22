@@ -1,5 +1,6 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Application.Common.Models;
+using EbayClone.Domain.Constants;
 using EbayClone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,15 +22,33 @@ public record GetUsersQuery : IRequest<PaginatedList<UserBriefDto>>
 public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedList<UserBriefDto>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
+    private readonly IIdentityService _identityService;
 
-    public GetUsersQueryHandler(IApplicationDbContext context)
+    public GetUsersQueryHandler(IApplicationDbContext context, IUser user, IIdentityService identityService)
     {
         _context = context;
+        _user = user;
+        _identityService = identityService;
     }
 
     public async Task<PaginatedList<UserBriefDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         IQueryable<User> query = _context.Users.AsNoTracking();
+
+        // 1. Role-based filtering based on requester's role
+        var currentUserId = _user.Id;
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            var isSuperAdmin = await _identityService.IsInRoleAsync(currentUserId, Roles.SuperAdmin);
+            
+            if (!isSuperAdmin)
+            {
+                // If not SuperAdmin, restrict to Buyer and Seller roles only
+                var allowedRoles = new[] { "Buyer", "Seller" };
+                query = query.Where(u => u.Role != null && allowedRoles.Contains(u.Role));
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Tab))
         {
@@ -82,7 +101,7 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedList
         var items = await query
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(u => u.ToBriefDto())
+            .Select(UserMappings.Projection)
             .ToListAsync(cancellationToken);
 
         return new PaginatedList<UserBriefDto>(items, totalCount, request.PageNumber, request.PageSize);

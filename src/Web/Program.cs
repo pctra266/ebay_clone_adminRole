@@ -56,6 +56,7 @@ app.UseSwaggerUi(settings =>
 //   vì fallback bắt mọi route chưa match — kể cả /hubs/dispute/negotiate
 // Redis backplane đảm bảo message được route đúng khi chạy 2+ pods.
 app.MapHub<DisputeHub>("/hubs/dispute");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.MapEndpoints();
 

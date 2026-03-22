@@ -46,7 +46,7 @@ public static class DependencyInjection
 
         builder.Services.AddAuthorization(options =>
         {
-            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator, Roles.SuperAdmin));
+            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.SuperAdmin));
 
             options.AddPolicy(Policies.ViewDashboard, policy =>
                 policy.RequireRole(Roles.Monitor, Roles.Support, Roles.SuperAdmin));
@@ -55,7 +55,7 @@ public static class DependencyInjection
                 policy.RequireRole(Roles.Monitor, Roles.SuperAdmin));
 
             options.AddPolicy(Policies.ManageUsers, policy =>
-                policy.RequireRole(Roles.Support, Roles.SuperAdmin, Roles.Administrator));
+                policy.RequireRole(Roles.Support, Roles.SuperAdmin));
 
             options.AddPolicy(Policies.ManageProducts, policy =>
                 policy.RequireRole(Roles.Support, Roles.SuperAdmin));

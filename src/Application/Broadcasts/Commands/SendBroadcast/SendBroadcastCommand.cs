@@ -18,10 +18,12 @@ public record SendBroadcastCommand : IRequest<int>
 public class SendBroadcastCommandHandler : IRequestHandler<SendBroadcastCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly INotificationNotifier _notificationNotifier;
 
-    public SendBroadcastCommandHandler(IApplicationDbContext context)
+    public SendBroadcastCommandHandler(IApplicationDbContext context, INotificationNotifier notificationNotifier)
     {
         _context = context;
+        _notificationNotifier = notificationNotifier;
     }
 
     public async Task<int> Handle(SendBroadcastCommand request, CancellationToken cancellationToken)
@@ -92,6 +94,27 @@ public class SendBroadcastCommandHandler : IRequestHandler<SendBroadcastCommand,
         });
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Notify via SignalR for InApp notifications that are NOT scheduled (sent immediately)
+        if (!request.ScheduleAt.HasValue && request.Channels.Contains("InApp", StringComparer.OrdinalIgnoreCase))
+        {
+            // We need to find the ID of the InApp notification we just added
+            // Since we just saved, the IDs should be populated.
+            // (Note: this assumes only one InApp notification was added in this loop, which is true by logic)
+            var inAppNotification = _context.Notifications.Local
+                .FirstOrDefault(n => n.Type.Equals("InApp", StringComparison.OrdinalIgnoreCase) && n.Title == request.Title && n.CreatedAt == now);
+            
+            if (inAppNotification != null)
+            {
+                await _notificationNotifier.NotifyNewNotificationAsync(
+                    inAppNotification.Id,
+                    inAppNotification.Title,
+                    inAppNotification.Content ?? "",
+                    inAppNotification.UserRole,
+                    inAppNotification.UserId,
+                    cancellationToken);
+            }
+        }
 
         return request.Channels.Count; // Return number of notifications created
     }

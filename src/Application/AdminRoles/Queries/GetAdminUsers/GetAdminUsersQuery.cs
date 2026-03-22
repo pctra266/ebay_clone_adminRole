@@ -1,5 +1,6 @@
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Application.Common.Models;
+using EbayClone.Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.AdminRoles.Queries.GetAdminUsers;
@@ -23,44 +24,50 @@ public class GetAdminUsersQueryHandler : IRequestHandler<GetAdminUsersQuery, Pag
 
     public async Task<PaginatedList<AdminUserRoleDto>> Handle(GetAdminUsersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.AdminUserRoles
-            .Include(aur => aur.User)
-            .Include(aur => aur.Role)
-            .Include(aur => aur.Assigner)
-            .AsQueryable();
+        var adminRoles = new[] { Roles.SuperAdmin, Roles.Support, Roles.Monitor, Roles.Administrator };
 
-        // Filter by role
-        if (request.RoleId.HasValue)
-        {
-            query = query.Where(aur => aur.RoleId == request.RoleId.Value);
-        }
+        var query = _context.Users
+            .AsNoTracking()
+            .Where(u => adminRoles.Contains(u.Role))
+            .GroupJoin(_context.AdminUserRoles.Include(aur => aur.Role).Include(aur => aur.Assigner),
+                u => u.Id,
+                aur => aur.UserId,
+                (u, aurs) => new { User = u, AdminUserRole = aurs.FirstOrDefault() })
+            .AsQueryable();
 
         // Search by username or email
         if (!string.IsNullOrEmpty(request.Search))
         {
             var searchLower = request.Search.ToLower();
-            query = query.Where(aur =>
-                (aur.User != null && aur.User.Username != null && aur.User.Username.ToLower().Contains(searchLower)) ||
-                (aur.User != null && aur.User.Email != null && aur.User.Email.ToLower().Contains(searchLower)));
+            query = query.Where(x =>
+                (x.User.Username != null && x.User.Username.ToLower().Contains(searchLower)) ||
+                (x.User.Email != null && x.User.Email.ToLower().Contains(searchLower)));
+        }
+
+        // Filter by role (AdminRole entity RoleId)
+        if (request.RoleId.HasValue)
+        {
+            query = query.Where(x => x.AdminUserRole != null && x.AdminUserRole.RoleId == request.RoleId.Value);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(aur => aur.AssignedAt)
+            .OrderByDescending(x => x.AdminUserRole != null ? x.AdminUserRole.AssignedAt : DateTime.MinValue)
+            .OrderBy(x => x.User.Username)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(aur => new AdminUserRoleDto
+            .Select(x => new AdminUserRoleDto
             {
-                Id = aur.Id,
-                UserId = aur.UserId,
-                Username = aur.User != null ? aur.User.Username : null,
-                Email = aur.User != null ? aur.User.Email : null,
-                RoleId = aur.RoleId,
-                RoleName = aur.Role != null ? aur.Role.RoleName : "",
-                AssignedBy = aur.AssignedBy,
-                AssignedByUsername = aur.Assigner != null ? aur.Assigner.Username : null,
-                AssignedAt = aur.AssignedAt
+                Id = x.AdminUserRole != null ? x.AdminUserRole.Id : 0,
+                UserId = x.User.Id,
+                Username = x.User.Username,
+                Email = x.User.Email,
+                RoleId = x.AdminUserRole != null ? x.AdminUserRole.RoleId : 0,
+                RoleName = x.AdminUserRole != null && x.AdminUserRole.Role != null ? x.AdminUserRole.Role.RoleName : (x.User.Role ?? ""),
+                AssignedBy = x.AdminUserRole != null ? x.AdminUserRole.AssignedBy : null,
+                AssignedByUsername = x.AdminUserRole != null && x.AdminUserRole.Assigner != null ? x.AdminUserRole.Assigner.Username : null,
+                AssignedAt = x.AdminUserRole != null ? x.AdminUserRole.AssignedAt : null
             })
             .ToListAsync(cancellationToken);
 
