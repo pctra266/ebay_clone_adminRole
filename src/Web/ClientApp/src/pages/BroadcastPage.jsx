@@ -131,58 +131,63 @@ export function BroadcastPage() {
 
 
 
-        {/* ── Create Broadcast Section (Refined 2-Widget Layout) ── */}
+        {/* ── Create Broadcast Section (Refined Sophisticated Widgets) ── */}
         <div className="row g-4 mb-5">
-          {/* Widget 1: Message Content */}
+          {/* Widget 1: Message Details */}
           <div className="col-lg-7">
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
-                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-pencil-square me-2 text-primary"></i>Message Details</h5>
-                <span className="badge bg-light text-secondary border fw-bold px-3 py-1 rounded-pill" style={{ fontSize: '0.65rem' }}>
-                  Admin Session: #{adminId}
-                </span>
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-pencil-square me-2 text-primary"></i>Message Details
+                </h6>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="badge bg-light text-muted border-0 fw-medium px-2 py-1 rounded" style={{ fontSize: '0.6rem' }}>SESSION: {adminId}</span>
+                  <span className="badge bg-primary bg-opacity-10 text-primary fw-medium px-2 py-1 rounded" style={{ fontSize: '0.6rem' }}>DRAFT</span>
+                </div>
               </div>
               <div className="card-body p-4">
                 <div className="mb-4">
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Announcement Title</label>
+                  <label className="form-label fw-semibold small text-secondary mb-2">Announcement Title</label>
                   <input
-                    className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
-                    placeholder="Enter short subject..."
+                    className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                    placeholder="Short & punchy subject..."
                     value={form.title}
                     onChange={(e) => updateForm("title", e.target.value)}
-                    style={{ height: '45px', fontSize: '0.95rem', fontWeight: 600 }}
+                    style={{ height: '44px', fontSize: '0.9rem' }}
                   />
                 </div>
                 <div>
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Content Body</label>
+                  <label className="form-label fw-semibold small text-secondary mb-2">Content Body</label>
                   <textarea
-                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-inner"
-                    rows="8"
-                    placeholder="Type your message here..."
+                    className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 py-3"
+                    rows="9"
+                    placeholder="Describe the update clearly..."
                     value={form.content}
                     onChange={(e) => updateForm("content", e.target.value)}
-                    style={{ fontSize: '0.95rem' }}
+                    style={{ fontSize: '0.9rem', lineHeight: '1.5' }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Widget 2: Configuration & Dispatch */}
+          {/* Widget 2: Dispatch Settings */}
           <div className="col-lg-5">
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4">
-                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-gear-fill me-2 text-primary"></i>Dispatch Settings</h5>
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-gear-fill me-2 text-primary"></i>Dispatch Settings
+                </h6>
               </div>
-              <div className="card-body p-4 d-flex flex-column justify-content-between">
-                <div>
+              <div className="card-body p-4 d-flex flex-column">
+                <div className="flex-grow-1">
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Target Audience</label>
+                    <label className="form-label fw-semibold small text-secondary mb-2">Target Audience</label>
                     <select
-                      className="form-select border-0 bg-light rounded-pill px-4 shadow-inner"
+                      className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
                       value={form.targetAudience}
                       onChange={(e) => updateForm("targetAudience", e.target.value)}
-                      style={{ height: '45px', fontWeight: 500, fontSize: '0.9rem' }}
+                      style={{ height: '44px', fontSize: '0.85rem' }}
                     >
                       {audienceOptions.map(opt => <option key={opt} value={opt}>{opt} Users</option>)}
                     </select>
@@ -190,53 +195,57 @@ export function BroadcastPage() {
 
                   {form.targetAudience === "Group" && (
                     <div className="mb-4">
-                      <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Segment Group</label>
+                      <label className="form-label fw-semibold small text-secondary mb-2">Segment Group</label>
                       <input
-                        className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
-                        placeholder="Group ID or Label"
+                        className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                        placeholder="Label or ID"
                         value={form.targetGroup}
                         onChange={(e) => updateForm("targetGroup", e.target.value)}
-                        style={{ height: '45px' }}
+                        style={{ height: '44px', fontSize: '0.85rem' }}
                       />
                     </div>
                   )}
 
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-3" style={{ letterSpacing: '0.5px' }}>Channels</label>
-                    <div className="d-flex flex-wrap gap-2">
+                    <label className="form-label fw-semibold small text-secondary mb-3">Delivery Channels</label>
+                    <div className="row g-2">
                       {channelOptions.map(channel => (
-                        <button
-                          key={channel}
-                          type="button"
-                          onClick={() => toggleChannel(channel)}
-                          className={`btn rounded-pill px-3 py-1 fw-bold transition-all shadow-sm ${form.channels.includes(channel) ? 'btn-primary' : 'btn-outline-secondary bg-white'}`}
-                          style={{ fontSize: '0.75rem' }}
-                        >
-                          <i className={`bi bi-${channel === 'Email' ? 'envelope' : channel === 'InApp' ? 'app-indicator' : 'chat-dots'} me-2`}></i>
-                          {channel}
-                        </button>
+                        <div key={channel} className="col-4">
+                          <button
+                            type="button"
+                            onClick={() => toggleChannel(channel)}
+                            className={`btn w-100 rounded-3 py-3 transition-all border ${form.channels.includes(channel) ? 'btn-primary border-primary fw-bold' : 'btn-light border-light text-muted fw-medium'}`}
+                            style={{ fontSize: '0.65rem' }}
+                          >
+                            <i className={`bi bi-${channel === 'Email' ? 'envelope' : channel === 'InApp' ? 'app-indicator' : 'chat-dots'} d-block mb-1 fs-6`}></i>
+                            {channel}
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Scheduled Delivery</label>
-                    <input
-                      className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
-                      type="datetime-local"
-                      value={form.scheduleAt}
-                      onChange={(e) => updateForm("scheduleAt", e.target.value)}
-                      style={{ height: '45px', fontSize: '0.9rem' }}
-                    />
+                    <label className="form-label fw-semibold small text-secondary mb-2">Scheduled Delivery</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-end-0 border rounded-start-3 px-2 text-muted" style={{ fontSize: '0.8rem' }}><i className="bi bi-calendar-event"></i></span>
+                      <input
+                        className="form-control border border-start-0 shadow-none bg-light bg-opacity-25 rounded-end-3 px-3"
+                        type="datetime-local"
+                        value={form.scheduleAt}
+                        onChange={(e) => updateForm("scheduleAt", e.target.value)}
+                        style={{ height: '44px', fontSize: '0.85rem' }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="d-grid gap-2 pt-3">
-                  <button className="btn btn-primary rounded-pill fw-bold shadow-sm py-2" disabled={submitting} onClick={submitNow}>
-                    {submitting ? 'Transmitting...' : <><i className="bi bi-send-fill me-2"></i>Execute Now</>}
+                <div className="mt-auto d-grid gap-2">
+                  <button className="btn btn-primary rounded-3 fw-bold py-2 shadow-sm border-0" disabled={submitting} onClick={submitNow} style={{ fontSize: '0.9rem' }}>
+                    {submitting ? 'Processing...' : <><i className="bi bi-send-fill me-2"></i>Send Immediate</>}
                   </button>
-                  <button className="btn btn-outline-primary rounded-pill fw-bold py-2" disabled={submitting} onClick={submitSchedule}>
-                    <i className="bi bi-clock-fill me-2"></i>Schedule
+                  <button className="btn btn-outline-primary rounded-3 fw-bold py-2 border-2" disabled={submitting} onClick={submitSchedule} style={{ fontSize: '0.9rem' }}>
+                    <i className="bi bi-clock-fill me-2"></i>Reserve Schedule
                   </button>
                 </div>
               </div>
