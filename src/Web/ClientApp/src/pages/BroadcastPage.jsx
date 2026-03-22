@@ -255,12 +255,12 @@ export function BroadcastPage() {
 
         {/* ── Broadcast History Section ── */}
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
-            <h5 className="mb-0 fw-bold text-dark mb-3 mb-sm-0">Transmission History</h5>
+          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <h5 className="mb-0 fw-bold text-dark">Transmission History</h5>
             <div className="d-flex gap-2 flex-wrap">
               <select
                 className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
-                style={{ width: '160px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
+                style={{ width: '150px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
                 value={filters.status}
                 onChange={(e) => { setFilters(p => ({ ...p, status: e.target.value })); setPageNumber(1); }}
               >
@@ -336,8 +336,8 @@ export function BroadcastPage() {
               </div>
             )}
             
-            {/* ── Pagination ── */}
-            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+            {/* ── Pagination (Responsive) ── */}
+            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
               <span className="text-muted small">Record Count: <strong className="text-dark">{listData.totalCount || 0}</strong></span>
               <div className="d-flex gap-2">
                 <button

@@ -332,9 +332,9 @@ export function AdminRolesPage() {
 
         {/* ── Admin Users Management ── */}
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
+          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3 flex-wrap">
             <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>Administrative Accounts</h6>
-            <div className="d-flex gap-2 flex-wrap flex-grow-1 justify-content-end" style={{ maxWidth: '600px' }}>
+            <div className="d-flex gap-2 flex-wrap flex-grow-1 justify-content-md-end" style={{ maxWidth: '600px' }}>
               <input
                 className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 flex-grow-1"
                 placeholder="Search administrators..."
@@ -344,14 +344,14 @@ export function AdminRolesPage() {
               />
               <select
                 className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
-                style={{ width: '150px', height: '38px', fontSize: '0.85rem' }}
+                style={{ width: '140px', height: '38px', fontSize: '0.85rem' }}
                 value={roleFilter}
                 onChange={(e) => { setRoleFilter(e.target.value); setPageNumber(1); }}
               >
                 <option value="">All Roles</option>
                 {roles.map(r => <option key={r.id} value={r.id}>{r.roleName}</option>)}
               </select>
-              <button className="btn btn-primary rounded-3 px-3 shadow-none fw-bold border-0" style={{ height: '38px', fontSize: '0.85rem' }} onClick={() => { setPageNumber(1); loadAdminUsers(); }}>
+              <button className="btn btn-primary rounded-3 px-4 shadow-none fw-bold border-0" style={{ height: '38px', fontSize: '0.85rem' }} onClick={() => { setPageNumber(1); loadAdminUsers(); }}>
                 Search
               </button>
             </div>
@@ -415,8 +415,8 @@ export function AdminRolesPage() {
               </div>
             )}
 
-            {/* ── Pagination ── */}
-            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+            {/* ── Pagination (Responsive) ── */}
+            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
               <span className="text-muted small">Active Personnel: <strong className="text-dark">{adminUsers.totalCount || 0}</strong></span>
               <div className="d-flex gap-2">
                 <button className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" disabled={pageNumber <= 1} onClick={() => setPageNumber(p => p - 1)}>
