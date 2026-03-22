@@ -18,7 +18,7 @@ const ActionItem = ({ title, count, icon, link, colorClass }) => (
 );
 
 export const ActionCenter = ({ metrics }) => (
-  <GlassCard className="p-4">
+  <GlassCard className="p-4 h-100">
     <h6 className="fw-bold mb-3 d-flex align-items-center">
       <i className="bi bi-lightning-charge-fill text-warning me-2"></i>
       Action Center

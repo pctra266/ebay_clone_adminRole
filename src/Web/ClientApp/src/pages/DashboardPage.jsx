@@ -126,26 +126,27 @@ export function DashboardPage() {
           {/* KPI Section - Easily extendable by adding more tiles or rows */}
           <MetricTiles metrics={metrics} />
 
-          <div className="row g-4">
-            {/* Main Statistics Column */}
-            <div className="col-lg-8">
-              <div className="d-flex flex-column gap-4 h-100">
+          <div className="d-flex flex-column gap-4">
+            {/* Row 1: Revenue Trend & Action Center (Matched Height) */}
+            <div className="row g-4">
+              <div className="col-lg-8">
                 <RevenueChart revenueData={stats.revenue} />
-
-                {/* [EXTENSION POINT] - Add more large charts here (e.g. User Growth Trend) */}
-                {/* <UserGrowthChart data={stats.users} /> */}
+              </div>
+              <div className="col-lg-4">
+                <ActionCenter metrics={metrics} />
               </div>
             </div>
 
-            {/* Operational Widgets Column */}
-            <div className="col-lg-4">
-              <div className="d-flex flex-column gap-4 h-100">
-                <ActionCenter metrics={metrics} />
+            {/* Row 2: Secondary Insights & Configurations (Equal Height) */}
+            <div className="row g-4">
+              <div className="col-lg-4">
                 <OrderDistribution orderStats={stats.orders} />
+              </div>
+              <div className="col-lg-4">
                 <PlatformFeeWidget />
+              </div>
+              <div className="col-lg-4">
                 <SellerLevelConfigWidget />
-
-                {/* [EXTENSION POINT] - Add more side widgets here (e.g. Top Sellers, Recent Activity) */}
               </div>
             </div>
           </div>

@@ -23,6 +23,18 @@ export const ProductList = () => {
         comment: ''
     });
 
+    const parseImageUrl = (imgStr) => {
+        if (!imgStr || imgStr === "[]") return '/images/default-product.png';
+        try {
+            const parsed = JSON.parse(imgStr);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+            if (Array.isArray(parsed) && parsed.length === 0) return '/images/default-product.png';
+            return imgStr;
+        } catch (e) {
+            return imgStr;
+        }
+    };
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -138,10 +150,17 @@ export const ProductList = () => {
                     <li>No products found.</li>
                 ) : (
                     products.map((product) => (
-                        <li key={product.id} style={{ padding: '10px', borderBottom: '1px solid #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 500 }}>
-                            <span>
-                                <strong>{product.title}</strong> - Price: {product.price}
-                            </span>
+                        <li key={product.id} style={{ padding: '12px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: '16px', alignItems: 'center', maxWidth: 600 }}>
+                            <img 
+                                src={parseImageUrl(product.image)} 
+                                alt={product.title} 
+                                style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', border: '1px solid #e2e8f0' }} 
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-product.png'; }}
+                            />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '15px', fontWeight: 'Bold', color: '#1e293b' }}>{product.title}</div>
+                                <div style={{ fontSize: '14px', color: '#64748b', marginTop: '2px' }}>Price: <span style={{ color: '#0d6efd', fontWeight: 'Bold' }}>${product.price}</span></div>
+                            </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <button 
                                     onClick={() => handleOpenReview(product.id)}

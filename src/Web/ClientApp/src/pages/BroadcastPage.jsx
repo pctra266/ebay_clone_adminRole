@@ -110,210 +110,265 @@ export function BroadcastPage() {
     }
   };
 
+  const scheduledCount = (listData.items || []).filter(item => item.status === "Scheduled").length;
+
   return (
-    <section className="py-3">
-      <h1 className="h3 mb-3">Broadcast Center</h1>
+    <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
+      <div className="container-fluid" style={{ maxWidth: 1200 }}>
+        {/* ── Page Header (Standardized) ── */}
+        <div className="text-center mb-5">
+          <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Broadcast Center</h1>
+          <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
+            Multi-channel communication engine for platform notices and announcements.
+          </p>
+        </div>
 
-      <ToastMessage
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ message: "", type: "success" })}
-      />
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ message: "", type: "success" })}
+        />
 
-      <div className="card mb-4">
-        <div className="card-body">
-          <h2 className="h5">Create Broadcast</h2>
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label htmlFor="broadcast-title" className="form-label">Title</label>
-              <input
-                id="broadcast-title"
-                className="form-control"
-                value={form.title}
-                onChange={(event) => updateForm("title", event.target.value)}
-              />
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="broadcast-audience" className="form-label">Target Audience</label>
-              <select
-                id="broadcast-audience"
-                className="form-select"
-                value={form.targetAudience}
-                onChange={(event) => updateForm("targetAudience", event.target.value)}
-              >
-                {audienceOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-            {form.targetAudience === "Group" && (
-              <div className="col-md-6">
-                <label htmlFor="broadcast-group" className="form-label">Group Name</label>
-                <input
-                  id="broadcast-group"
-                  className="form-control"
-                  value={form.targetGroup}
-                  onChange={(event) => updateForm("targetGroup", event.target.value)}
-                />
-              </div>
-            )}
-            <div className="col-12">
-              <label htmlFor="broadcast-content" className="form-label">Content</label>
-              <textarea
-                id="broadcast-content"
-                className="form-control"
-                rows="4"
-                value={form.content}
-                onChange={(event) => updateForm("content", event.target.value)}
-              />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label d-block">Channels</label>
-              {channelOptions.map((channel) => (
-                <div className="form-check form-check-inline" key={channel}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`channel-${channel}`}
-                    checked={form.channels.includes(channel)}
-                    onChange={() => toggleChannel(channel)}
-                  />
-                  <label className="form-check-label" htmlFor={`channel-${channel}`}>
-                    {channel}
-                  </label>
+
+
+        {/* ── Create Broadcast Section (Refined Sophisticated Widgets) ── */}
+        <div className="row g-4 mb-5">
+          {/* Widget 1: Message Details */}
+          <div className="col-lg-7">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+              <div className="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-pencil-square me-2 text-primary"></i>Message Details
+                </h6>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="badge bg-light text-muted border-0 fw-medium px-2 py-1 rounded" style={{ fontSize: '0.6rem' }}>SESSION: {adminId}</span>
+                  <span className="badge bg-primary bg-opacity-10 text-primary fw-medium px-2 py-1 rounded" style={{ fontSize: '0.6rem' }}>DRAFT</span>
                 </div>
-              ))}
+              </div>
+              <div className="card-body p-4">
+                <div className="mb-4">
+                  <label className="form-label fw-semibold small text-secondary mb-2">Announcement Title</label>
+                  <input
+                    className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                    placeholder="Short & punchy subject..."
+                    value={form.title}
+                    onChange={(e) => updateForm("title", e.target.value)}
+                    style={{ height: '44px', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div>
+                  <label className="form-label fw-semibold small text-secondary mb-2">Content Body</label>
+                  <textarea
+                    className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 py-3"
+                    rows="9"
+                    placeholder="Describe the update clearly..."
+                    value={form.content}
+                    onChange={(e) => updateForm("content", e.target.value)}
+                    style={{ fontSize: '0.9rem', lineHeight: '1.5' }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="col-md-6">
-              <label htmlFor="broadcast-schedule" className="form-label">Schedule At (optional)</label>
-              <input
-                id="broadcast-schedule"
-                className="form-control"
-                type="datetime-local"
-                value={form.scheduleAt}
-                onChange={(event) => updateForm("scheduleAt", event.target.value)}
-              />
-            </div>
-            <div className="col-12 d-flex gap-2 flex-wrap">
-              <button type="button" className="btn btn-primary" disabled={submitting} onClick={submitNow}>
-                Send Now
-              </button>
-              <button type="button" className="btn btn-outline-primary" disabled={submitting} onClick={submitSchedule}>
-                Schedule
-              </button>
-              <span className="align-self-center text-muted small">Created By Admin ID: {adminId}</span>
+          </div>
+
+          {/* Widget 2: Dispatch Settings */}
+          <div className="col-lg-5">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+              <div className="card-header bg-white border-bottom py-3 px-4">
+                <h6 className="mb-0 fw-bold text-dark" style={{ letterSpacing: '-0.2px', fontSize: '1rem' }}>
+                  <i className="bi bi-gear-fill me-2 text-primary"></i>Dispatch Settings
+                </h6>
+              </div>
+              <div className="card-body p-4 d-flex flex-column">
+                <div className="flex-grow-1">
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold small text-secondary mb-2">Target Audience</label>
+                    <select
+                      className="form-select border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                      value={form.targetAudience}
+                      onChange={(e) => updateForm("targetAudience", e.target.value)}
+                      style={{ height: '44px', fontSize: '0.85rem' }}
+                    >
+                      {audienceOptions.map(opt => <option key={opt} value={opt}>{opt} Users</option>)}
+                    </select>
+                  </div>
+
+                  {form.targetAudience === "Group" && (
+                    <div className="mb-4">
+                      <label className="form-label fw-semibold small text-secondary mb-2">Segment Group</label>
+                      <input
+                        className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3"
+                        placeholder="Label or ID"
+                        value={form.targetGroup}
+                        onChange={(e) => updateForm("targetGroup", e.target.value)}
+                        style={{ height: '44px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold small text-secondary mb-3">Delivery Channels</label>
+                    <div className="row g-2">
+                      {channelOptions.map(channel => (
+                        <div key={channel} className="col-4">
+                          <button
+                            type="button"
+                            onClick={() => toggleChannel(channel)}
+                            className={`btn w-100 rounded-3 py-3 transition-all border ${form.channels.includes(channel) ? 'btn-primary border-primary fw-bold' : 'btn-light border-light text-muted fw-medium'}`}
+                            style={{ fontSize: '0.65rem' }}
+                          >
+                            <i className={`bi bi-${channel === 'Email' ? 'envelope' : channel === 'InApp' ? 'app-indicator' : 'chat-dots'} d-block mb-1 fs-6`}></i>
+                            {channel}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold small text-secondary mb-2">Scheduled Delivery</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-light border-end-0 border rounded-start-3 px-2 text-muted" style={{ fontSize: '0.8rem' }}><i className="bi bi-calendar-event"></i></span>
+                      <input
+                        className="form-control border border-start-0 shadow-none bg-light bg-opacity-25 rounded-end-3 px-3"
+                        type="datetime-local"
+                        value={form.scheduleAt}
+                        onChange={(e) => updateForm("scheduleAt", e.target.value)}
+                        style={{ height: '44px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto d-grid gap-2">
+                  <button className="btn btn-primary rounded-3 fw-bold py-2 shadow-sm border-0" disabled={submitting} onClick={submitNow} style={{ fontSize: '0.9rem' }}>
+                    {submitting ? 'Processing...' : <><i className="bi bi-send-fill me-2"></i>Send Immediate</>}
+                  </button>
+                  <button className="btn btn-outline-primary rounded-3 fw-bold py-2 border-2" disabled={submitting} onClick={submitSchedule} style={{ fontSize: '0.9rem' }}>
+                    <i className="bi bi-clock-fill me-2"></i>Reserve Schedule
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="card">
-        <div className="card-body">
-          <h2 className="h5">Broadcast History</h2>
-          <div className="row g-2 align-items-end mb-3">
-            <div className="col-md-4">
-              <label htmlFor="filter-status" className="form-label">Status</label>
+        {/* ── Broadcast History Section ── */}
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+          <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <h5 className="mb-0 fw-bold text-dark">Transmission History</h5>
+            <div className="d-flex gap-2 flex-wrap">
               <select
-                id="filter-status"
-                className="form-select"
+                className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
+                style={{ width: '150px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
                 value={filters.status}
-                onChange={(event) => {
-                  setFilters((prev) => ({ ...prev, status: event.target.value }));
-                  setPageNumber(1);
-                }}
+                onChange={(e) => { setFilters(p => ({ ...p, status: e.target.value })); setPageNumber(1); }}
               >
-                <option value="">All</option>
+                <option value="">All Status</option>
                 <option value="Sent">Sent</option>
                 <option value="Scheduled">Scheduled</option>
                 <option value="Pending">Pending</option>
               </select>
-            </div>
-            <div className="col-md-4">
-              <label htmlFor="filter-type" className="form-label">Channel Type</label>
               <select
-                id="filter-type"
-                className="form-select"
+                className="form-select border-0 bg-light rounded-pill px-4 shadow-sm"
+                style={{ width: '160px', height: '40px', fontSize: '0.85rem', fontWeight: 600 }}
                 value={filters.type}
-                onChange={(event) => {
-                  setFilters((prev) => ({ ...prev, type: event.target.value }));
-                  setPageNumber(1);
-                }}
+                onChange={(e) => { setFilters(p => ({ ...p, type: e.target.value })); setPageNumber(1); }}
               >
-                <option value="">All</option>
-                {channelOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
+                <option value="">All Channels</option>
+                {channelOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
             </div>
           </div>
-
-          {loading ? (
-            <LoadingIndicator text="Loading broadcasts..." />
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-striped align-middle">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Audience</th>
-                    <th>Channel</th>
-                    <th>Status</th>
-                    <th>Schedule</th>
-                    <th>Sent</th>
-                    <th>Created At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(listData.items || []).map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.title}</td>
-                      <td>{item.userRole || "All"}</td>
-                      <td>{item.type}</td>
-                      <td>{item.status}</td>
-                      <td>{formatDate(item.scheduledAt)}</td>
-                      <td>{formatDate(item.sentAt)}</td>
-                      <td>{formatDate(item.createdAt)}</td>
-                    </tr>
-                  ))}
-                  {(listData.items || []).length === 0 && (
+          <div className="card-body p-0">
+            {loading ? (
+              <div className="py-5 text-center">
+                <LoadingIndicator text="Syncing history..." />
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table pe-table mb-0 align-middle">
+                  <thead className="bg-primary bg-opacity-10 text-primary fw-bold small text-uppercase">
                     <tr>
-                      <td colSpan="7" className="text-center text-muted py-4">
-                        No broadcast records.
-                      </td>
+                      <th className="ps-4 py-3 border-0">Announcement</th>
+                      <th className="py-3 border-0">Target Audience</th>
+                      <th className="py-3 border-0 text-center">Channels</th>
+                      <th className="py-3 border-0 text-center">Status</th>
+                      <th className="py-3 border-0 text-end pe-4">Timestamps</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">Total: {listData.totalCount || 0}</small>
-            <div className="d-flex gap-2">
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                disabled={pageNumber <= 1}
-                onClick={() => setPageNumber((prev) => prev - 1)}
-              >
-                Previous
-              </button>
-              <span className="align-self-center small">
-                Page {pageNumber} / {listData.totalPages || 1}
-              </span>
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                disabled={pageNumber >= (listData.totalPages || 1)}
-                onClick={() => setPageNumber((prev) => prev + 1)}
-              >
-                Next
-              </button>
+                  </thead>
+                  <tbody>
+                    {(listData.items || []).length === 0 ? (
+                      <tr><td colSpan="5" className="text-center py-5 text-muted">No transmission logs found.</td></tr>
+                    ) : (
+                      (listData.items || []).map((item) => (
+                        <tr key={item.id} className="transition-all border-bottom">
+                          <td className="ps-4 py-3">
+                            <div className="fw-bold text-dark" style={{ letterSpacing: '-0.2px' }}>{item.title}</div>
+                            <div className="text-muted small truncate-1" style={{ maxWidth: '300px' }}>{item.content}</div>
+                          </td>
+                          <td>
+                            <span className="badge bg-light text-dark border px-3 py-1 rounded-pill" style={{ fontSize: '0.7rem' }}>
+                              <i className="bi bi-people me-1"></i>{item.userRole || "All Users"}
+                            </span>
+                          </td>
+                          <td className="text-center">
+                            <span className="text-primary fw-bold small"><i className="bi bi-broadcast me-1"></i>{item.type}</span>
+                          </td>
+                          <td className="text-center">
+                            <span className={`badge rounded-pill px-3 py-1 ${
+                              item.status === 'Sent' ? 'bg-success-subtle text-success border border-success-subtle' :
+                              item.status === 'Scheduled' ? 'bg-info-subtle text-info border border-info-subtle' :
+                              'bg-warning-subtle text-warning border border-warning-subtle'
+                            }`} style={{ fontSize: '0.65rem', fontWeight: 700 }}>
+                              {item.status?.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="text-end pe-4">
+                            <div className="text-dark small fw-medium">{item.status === 'Scheduled' ? formatDate(item.scheduledAt) : formatDate(item.sentAt)}</div>
+                            <div className="text-muted x-small">Created: {formatDate(item.createdAt).split(',')[0]}</div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* ── Pagination (Responsive) ── */}
+            <div className="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <span className="text-muted small">Record Count: <strong className="text-dark">{listData.totalCount || 0}</strong></span>
+              <div className="d-flex gap-2">
+                <button
+                  className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold"
+                  disabled={pageNumber <= 1}
+                  onClick={() => setPageNumber(p => p - 1)}
+                >
+                  <i className="bi bi-chevron-left"></i>
+                </button>
+                <span className="align-self-center small fw-bold mx-2">
+                  {pageNumber} / {listData.totalPages || 1}
+                </span>
+                <button
+                  className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold"
+                  disabled={pageNumber >= (listData.totalPages || 1)}
+                  onClick={() => setPageNumber(p => p + 1)}
+                >
+                  <i className="bi bi-chevron-right"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+      <style>{`
+        .truncate-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .x-small { font-size: 0.7rem; }
+        .fw-extrabold { font-weight: 800; }
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+      `}</style>
+    </div>
   );
 }
 
