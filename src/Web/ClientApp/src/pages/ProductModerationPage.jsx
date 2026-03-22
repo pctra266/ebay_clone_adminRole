@@ -275,11 +275,11 @@ export const ProductModerationPage = () => {
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
       `}</style>
 
-            <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }} className="animate-fade-in">
+            <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
                 <div className="container-fluid" style={{ maxWidth: 1200 }}>
 
                     {/* ── Page Header (Standardized) ── */}
-                    <div className="mb-5 animate-fade-in-up">
+                    <div className="mb-5">
                         <div className="d-flex flex-column align-items-center text-center">
                             <div className="d-flex align-items-center gap-3">
                                 <h1 className="h2 fw-bold mb-0 text-dark" style={{ letterSpacing: '-1px' }}>Product Moderation</h1>
@@ -337,7 +337,7 @@ export const ProductModerationPage = () => {
                     </div>
 
                     {/* ── Main Content Card ── */}
-                    <div className="bg-white rounded-4 shadow-sm border-0 overflow-hidden animate-slide-up">
+                    <div className="bg-white rounded-4 shadow-sm border-0 overflow-hidden">
                         
                         {/* ── Toolbar: Search & Filters ── */}
                         <div className="p-4 bg-white border-bottom">

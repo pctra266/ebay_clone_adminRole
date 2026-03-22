@@ -116,7 +116,7 @@ export function BroadcastPage() {
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
       <div className="container-fluid" style={{ maxWidth: 1200 }}>
         {/* ── Page Header (Standardized) ── */}
-        <div className="text-center mb-5 animate-fade-in">
+        <div className="text-center mb-5">
           <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Broadcast Center</h1>
           <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
             Multi-channel communication engine for platform notices and announcements.
@@ -129,98 +129,88 @@ export function BroadcastPage() {
           onClose={() => setToast({ message: "", type: "success" })}
         />
 
-        {/* ── Quick Stats Grid ── */}
-        <div className="row g-3 mb-5 justify-content-center">
-          {[
-            { label: 'Total Announcements', value: listData.totalCount, icon: 'bi-megaphone-fill', color: 'primary' },
-            { label: 'Scheduled Pulses', value: scheduledCount, icon: 'bi-calendar-event-fill', color: 'info' },
-            { label: 'Channel Spread', value: '3 Active', icon: 'bi-share-fill', color: 'success' },
-            { label: 'System Reach', value: 'Global', icon: 'bi-globe2', color: 'warning' },
-          ].map((stat, idx) => (
-            <div key={idx} className="col-12 col-sm-6 col-lg-3">
-              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
-                <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-circle`}>
-                  <i className={`bi ${stat.icon} h4 mb-0`}></i>
-                </div>
-                <div>
-                  <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
-                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* ── Create Broadcast Section ── */}
-        <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 animate-fade-in-up">
-          <div className="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
-            <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-plus-circle me-2 text-primary"></i>Compose New Broadcast</h5>
-            <span className="badge bg-light text-secondary border fw-bold px-3 py-2 rounded-pill shadow-inner" style={{ fontSize: '0.7rem' }}>
-              <i className="bi bi-person-workspace me-1"></i> Admin Session: #{adminId}
-            </span>
-          </div>
-          <div className="card-body p-4 p-lg-5">
-            <div className="row g-4">
-              <div className="col-md-7">
+
+        {/* ── Create Broadcast Section (Refined 2-Widget Layout) ── */}
+        <div className="row g-4 mb-5">
+          {/* Widget 1: Message Content */}
+          <div className="col-lg-7">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+              <div className="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-pencil-square me-2 text-primary"></i>Message Details</h5>
+                <span className="badge bg-light text-secondary border fw-bold px-3 py-1 rounded-pill" style={{ fontSize: '0.65rem' }}>
+                  Admin Session: #{adminId}
+                </span>
+              </div>
+              <div className="card-body p-4">
                 <div className="mb-4">
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">Announcement Title</label>
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Announcement Title</label>
                   <input
-                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-sm"
-                    placeholder="Enter a descriptive subject..."
+                    className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
+                    placeholder="Enter short subject..."
                     value={form.title}
                     onChange={(e) => updateForm("title", e.target.value)}
-                    style={{ fontSize: '1.1rem', fontWeight: 600 }}
+                    style={{ height: '45px', fontSize: '0.95rem', fontWeight: 600 }}
                   />
                 </div>
                 <div>
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">Content Body</label>
+                  <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Content Body</label>
                   <textarea
-                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-sm"
-                    rows="6"
+                    className="form-control border-0 bg-light rounded-4 px-4 py-3 shadow-inner"
+                    rows="8"
                     placeholder="Type your message here..."
                     value={form.content}
                     onChange={(e) => updateForm("content", e.target.value)}
+                    style={{ fontSize: '0.95rem' }}
                   />
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="col-md-5">
-                <div className="bg-light rounded-4 p-4 h-100 border border-white shadow-inner">
+          {/* Widget 2: Configuration & Dispatch */}
+          <div className="col-lg-5">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+              <div className="card-header bg-white border-bottom py-3 px-4">
+                <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-gear-fill me-2 text-primary"></i>Dispatch Settings</h5>
+              </div>
+              <div className="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-2">Target Audience</label>
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Target Audience</label>
                     <select
-                      className="form-select border-0 bg-white rounded-pill px-4 shadow-sm"
+                      className="form-select border-0 bg-light rounded-pill px-4 shadow-inner"
                       value={form.targetAudience}
                       onChange={(e) => updateForm("targetAudience", e.target.value)}
-                      style={{ height: '48px', fontWeight: 500 }}
+                      style={{ height: '45px', fontWeight: 500, fontSize: '0.9rem' }}
                     >
                       {audienceOptions.map(opt => <option key={opt} value={opt}>{opt} Users</option>)}
                     </select>
                   </div>
 
                   {form.targetAudience === "Group" && (
-                    <div className="mb-4 animate-fade-in">
-                      <label className="form-label fw-bold small text-muted text-uppercase mb-2">Segment Group</label>
+                    <div className="mb-4">
+                      <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Segment Group</label>
                       <input
-                        className="form-control border-0 bg-white rounded-pill px-4 shadow-sm"
+                        className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
                         placeholder="Group ID or Label"
                         value={form.targetGroup}
                         onChange={(e) => updateForm("targetGroup", e.target.value)}
-                        style={{ height: '48px' }}
+                        style={{ height: '45px' }}
                       />
                     </div>
                   )}
 
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-3">Transmission Channels</label>
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-3" style={{ letterSpacing: '0.5px' }}>Channels</label>
                     <div className="d-flex flex-wrap gap-2">
                       {channelOptions.map(channel => (
                         <button
                           key={channel}
                           type="button"
                           onClick={() => toggleChannel(channel)}
-                          className={`btn rounded-pill px-4 py-2 fw-bold transition-all shadow-sm ${form.channels.includes(channel) ? 'btn-primary' : 'btn-outline-secondary bg-white'}`}
-                          style={{ fontSize: '0.8rem' }}
+                          className={`btn rounded-pill px-3 py-1 fw-bold transition-all shadow-sm ${form.channels.includes(channel) ? 'btn-primary' : 'btn-outline-secondary bg-white'}`}
+                          style={{ fontSize: '0.75rem' }}
                         >
                           <i className={`bi bi-${channel === 'Email' ? 'envelope' : channel === 'InApp' ? 'app-indicator' : 'chat-dots'} me-2`}></i>
                           {channel}
@@ -230,24 +220,24 @@ export function BroadcastPage() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase mb-2">Scheduled Delivery (Optional)</label>
+                    <label className="form-label fw-bold small text-muted text-uppercase mb-2" style={{ letterSpacing: '0.5px' }}>Scheduled Delivery</label>
                     <input
-                      className="form-control border-0 bg-white rounded-pill px-4 shadow-sm"
+                      className="form-control border-0 bg-light rounded-pill px-4 shadow-inner"
                       type="datetime-local"
                       value={form.scheduleAt}
                       onChange={(e) => updateForm("scheduleAt", e.target.value)}
-                      style={{ height: '48px' }}
+                      style={{ height: '45px', fontSize: '0.9rem' }}
                     />
                   </div>
+                </div>
 
-                  <div className="d-grid gap-2 pt-2">
-                    <button className="btn btn-primary btn-lg rounded-pill fw-extrabold shadow-sm py-3" disabled={submitting} onClick={submitNow}>
-                      {submitting ? 'Transmitting...' : <><i className="bi bi-send-fill me-2"></i>Execute Broadcast Now</>}
-                    </button>
-                    <button className="btn btn-outline-primary btn-lg rounded-pill fw-bold py-3" disabled={submitting} onClick={submitSchedule}>
-                      <i className="bi bi-clock-fill me-2"></i>Schedule for Later
-                    </button>
-                  </div>
+                <div className="d-grid gap-2 pt-3">
+                  <button className="btn btn-primary rounded-pill fw-bold shadow-sm py-2" disabled={submitting} onClick={submitNow}>
+                    {submitting ? 'Transmitting...' : <><i className="bi bi-send-fill me-2"></i>Execute Now</>}
+                  </button>
+                  <button className="btn btn-outline-primary rounded-pill fw-bold py-2" disabled={submitting} onClick={submitSchedule}>
+                    <i className="bi bi-clock-fill me-2"></i>Schedule
+                  </button>
                 </div>
               </div>
             </div>
@@ -255,7 +245,7 @@ export function BroadcastPage() {
         </div>
 
         {/* ── Broadcast History Section ── */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 animate-fade-in-up">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
             <h5 className="mb-0 fw-bold text-dark mb-3 mb-sm-0">Transmission History</h5>
             <div className="d-flex gap-2 flex-wrap">
@@ -303,7 +293,7 @@ export function BroadcastPage() {
                       <tr><td colSpan="5" className="text-center py-5 text-muted">No transmission logs found.</td></tr>
                     ) : (
                       (listData.items || []).map((item) => (
-                        <tr key={item.id} className="transition-all hover-translate-y border-bottom">
+                        <tr key={item.id} className="transition-all border-bottom">
                           <td className="ps-4 py-3">
                             <div className="fw-bold text-dark" style={{ letterSpacing: '-0.2px' }}>{item.title}</div>
                             <div className="text-muted small truncate-1" style={{ maxWidth: '300px' }}>{item.content}</div>

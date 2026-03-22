@@ -139,7 +139,7 @@ export function AdminRolesPage() {
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
       <div className="container-fluid" style={{ maxWidth: 1400 }}>
         {/* ── Page Header (Standardized) ── */}
-        <div className="text-center mb-5 animate-fade-in">
+        <div className="text-center mb-5">
           <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Security & Governance</h1>
           <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
             Manage administrative access, define granular roles, and enforce platform-wide security policies.
@@ -152,32 +152,12 @@ export function AdminRolesPage() {
           onClose={() => setToast({ message: "", type: "success" })}
         />
 
-        {/* ── Quick Stats Grid ── */}
-        <div className="row g-3 mb-5 justify-content-center">
-          {[
-            { label: 'Active Administrators', value: adminUsers.totalCount, icon: 'bi-person-badge-fill', color: 'primary' },
-            { label: 'Security Roles', value: roles.length, icon: 'bi-shield-lock-fill', color: 'dark' },
-            { label: 'System Clearance', value: 'Authorized', icon: 'bi-check-circle-fill', color: 'success' },
-            { label: 'Platform Health', value: 'Secure', icon: 'bi-activity', color: 'info' },
-          ].map((stat, idx) => (
-            <div key={idx} className="col-12 col-sm-6 col-lg-3">
-              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
-                <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-circle`}>
-                  <i className={`bi ${stat.icon} h4 mb-0`}></i>
-                </div>
-                <div>
-                  <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
-                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+
 
         {/* ── Creation Forms Section ── */}
         <div className="row g-4 mb-5">
           <div className="col-lg-6">
-            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 animate-fade-in-up">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4">
                 <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-plus-circle me-2 text-primary"></i>Define New Role</h5>
               </div>
@@ -225,7 +205,7 @@ export function AdminRolesPage() {
           </div>
 
           <div className="col-lg-6">
-            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 animate-fade-in-up">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
               <div className="card-header bg-white border-bottom py-3 px-4">
                 <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-person-plus-fill me-2 text-primary"></i>Register Admin Account</h5>
               </div>
@@ -288,7 +268,7 @@ export function AdminRolesPage() {
         </div>
 
         {/* ── Role List Management ── */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 animate-fade-in-up">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
           <div className="card-header bg-white border-bottom py-3 px-4">
             <h5 className="mb-0 fw-bold text-dark"><i className="bi bi-list-check me-2 text-primary"></i>Defined Security Roles</h5>
           </div>
@@ -308,7 +288,7 @@ export function AdminRolesPage() {
                   </thead>
                   <tbody>
                     {roles.map((role) => (
-                      <tr key={role.id} className="transition-all hover-translate-y border-bottom">
+                      <tr key={role.id} className="transition-all border-bottom">
                         <td className="ps-4 py-3">
                           <div className="d-flex align-items-center gap-2">
                             <div className="bg-primary bg-opacity-10 p-2 rounded-circle text-primary">
@@ -344,7 +324,7 @@ export function AdminRolesPage() {
         </div>
 
         {/* ── Admin Users Management ── */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 animate-fade-in-up">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="card-header bg-white border-bottom py-3 px-4 d-sm-flex align-items-center justify-content-between gap-3">
             <h5 className="mb-0 fw-bold text-dark">Administrative Accounts</h5>
             <div className="d-flex gap-2 flex-wrap flex-grow-1 justify-content-end" style={{ maxWidth: '600px' }}>
@@ -385,7 +365,7 @@ export function AdminRolesPage() {
                   </thead>
                   <tbody>
                     {(adminUsers.items || []).map((item) => (
-                      <tr key={item.id} className="transition-all hover-translate-y border-bottom">
+                      <tr key={item.id} className="transition-all border-bottom">
                         <td className="ps-4 py-3">
                           <div className="d-flex align-items-center gap-2">
                             <div className="bg-light p-2 rounded-circle fw-bold text-primary" style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

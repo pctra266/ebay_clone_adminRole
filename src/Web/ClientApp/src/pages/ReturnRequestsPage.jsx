@@ -62,7 +62,7 @@ export default function ReturnRequestsPage() {
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
       <div className="container-fluid" style={{ maxWidth: 1200 }}>
         {/* ── Page Header (Standardized) ── */}
-        <div className="text-center mb-5 animate-fade-in">
+        <div className="text-center mb-5">
           <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-0.5px' }}>Return & Refund Management</h1>
           <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
             Review, adjudicate, and process customer return requests to ensure fair outcomes and marketplace trust.
@@ -78,13 +78,13 @@ export default function ReturnRequestsPage() {
             { label: 'Refunded (Success)', value: activeTab === 'Approved' ? requests.length : '—', icon: 'bi-check-circle-fill', color: 'success' },
           ].map((stat, idx) => (
             <div key={idx} className="col-12 col-sm-6 col-lg-3">
-              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
+              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
                 <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-3`}>
                   <i className={`bi ${stat.icon} h4 mb-0`}></i>
                 </div>
                 <div>
                   <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
-                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
+                  <h5 className="mb-0 fw-bold text-dark">{stat.value}</h5>
                 </div>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function ReturnRequestsPage() {
                     </tr>
                   ) : (
                     filtered.map(r => (
-                      <tr key={r.id} onClick={() => navigate(`/return-requests/${r.id}`)} style={{ cursor: 'pointer' }} className="transition-all hover-translate-y">
+                      <tr key={r.id} onClick={() => navigate(`/return-requests/${r.id}`)} style={{ cursor: 'pointer' }} className="transition-all">
                         <td className="ps-4 py-3 text-secondary fw-medium">#{r.id}</td>
                         <td>
                           <span className="fw-bold text-primary">#{r.orderId}</span>

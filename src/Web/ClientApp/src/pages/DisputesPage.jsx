@@ -189,13 +189,13 @@ export function DisputesPage() {
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
       <div className="container-fluid" style={{ maxWidth: 1400 }}>
         {/* ── Page Header (Standardized) ── */}
-        <div className="text-center mb-5 animate-fade-in position-relative">
+        <div className="text-center mb-5 position-relative">
           <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-1px' }}>Disputes Management</h1>
           <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
             Ensure buyer and seller protection by adjudicating conflicts with objectivity and speed.
           </p>
           <div className="position-absolute top-50 end-0 translate-middle-y d-none d-lg-block">
-            <Link to="/disputes/dashboard" className="btn btn-sm btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm transition-all hover-translate-y">
+            <Link to="/disputes/dashboard" className="btn btn-sm btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm transition-all">
               <i className="bi bi-graph-up-arrow me-2"></i>Dashboard
             </Link>
           </div>
@@ -216,20 +216,20 @@ export function DisputesPage() {
             { label: 'My Portfolio', value: onlyMyDisputes ? disputesData.items.length : '...', icon: 'bi-shield-shaded', color: 'success' },
           ].map((stat, idx) => (
             <div key={idx} className="col-12 col-sm-6 col-lg-3">
-              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
+              <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
                 <div className={`p-3 bg-${stat.color} bg-opacity-10 text-${stat.color} rounded-3`}>
                   <i className={`bi ${stat.icon} h4 mb-0`}></i>
                 </div>
                 <div>
                   <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
-                  <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
+                  <h5 className="mb-0 fw-bold text-dark">{stat.value}</h5>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 animate-fade-in-up">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="card-body p-0">
             {/* ── Enhanced Toolbar ── */}
             <div className="px-4 py-3 bg-light border-bottom">
@@ -340,7 +340,7 @@ export function DisputesPage() {
                       </tr>
                     ) : (
                       (disputesData.items || []).map((dispute) => (
-                        <tr key={dispute.id} className="transition-all hover-translate-y">
+                        <tr key={dispute.id} className="transition-all">
                           <td className="ps-4 py-3">
                             <Link to={`/disputes/${dispute.id}`} className="fw-bold text-primary text-decoration-none">
                               {dispute.caseId}

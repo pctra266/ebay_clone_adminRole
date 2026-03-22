@@ -274,7 +274,7 @@ export const SellersPage = () => {
                 onClose={() => setToast({ message: '', type: 'success' })}
             />
 
-            <div className="mb-5 animate-fade-in-up">
+            <div className="mb-5">
                 {/* ── Top Row: Title ── */}
                 <div className="d-flex flex-column align-items-center mb-4 w-100 text-center">
                     <div className="d-flex align-items-center gap-3">
@@ -349,7 +349,7 @@ export const SellersPage = () => {
 
             {/* Leveling Guide Note */}
             {criteria && showGuide && (
-                <div className="guide-container mb-4 animate-fade-in-up">
+                <div className="guide-container mb-4">
                     <div className="d-flex align-items-center justify-content-between mb-3 px-1">
                         <h6 className="fw-bold text-uppercase text-primary mb-0" style={{ letterSpacing: '1px', fontSize: '0.75rem' }}>
                             <i className="bi bi-stars me-2"></i> Leveling Requirements
@@ -429,7 +429,7 @@ export const SellersPage = () => {
                 </div>
             )}
 
-            <div className="glass-panel border-0 mb-4 overflow-hidden animate-fade-in-up" stagger="stagger-1">
+            <div className="glass-panel border-0 mb-4 overflow-hidden" stagger="stagger-1">
                 <div className="p-4 border-bottom bg-white">
                     <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 

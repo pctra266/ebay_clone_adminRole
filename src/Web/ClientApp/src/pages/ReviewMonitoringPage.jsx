@@ -60,7 +60,7 @@ export const ReviewMonitoringPage = () => {
         <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '28px 20px' }}>
             <div className="container-fluid" style={{ maxWidth: 1200 }}>
                 {/* ── Page Header (Standardized) ── */}
-                <div className="text-center mb-5 animate-fade-in">
+                <div className="text-center mb-5">
                     <h1 className="h2 fw-bold text-dark mb-2" style={{ letterSpacing: '-0.5px' }}>Review Monitoring</h1>
                     <p className="text-secondary mx-auto mb-0" style={{ maxWidth: '600px', fontSize: '0.95rem' }}>
                         Maintain marketplace integrity by reviewing flagged feedback, resolving disputes, and ensuring authentic customer reviews.
@@ -76,13 +76,13 @@ export const ReviewMonitoringPage = () => {
                         { label: 'Pending Action', value: pendingAction || totalReports, icon: 'bi-hourglass-split' },
                     ].map((stat, idx) => (
                         <div key={idx} className="col-12 col-sm-6 col-lg-3">
-                            <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all hover-translate-y">
+                            <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
                                 <div className="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
                                     <i className={`bi ${stat.icon} h4 mb-0`}></i>
                                 </div>
                                 <div>
                                     <h6 className="text-secondary mb-1 small fw-bold text-uppercase" style={{ letterSpacing: '0.5px' }}>{stat.label}</h6>
-                                    <h4 className="mb-0 fw-bold text-dark">{stat.value}</h4>
+                                    <h5 className="mb-0 fw-bold text-dark">{stat.value}</h5>
                                 </div>
                             </div>
                         </div>
