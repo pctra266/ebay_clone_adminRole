@@ -15,7 +15,7 @@ export const SellersPage = () => {
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [rtIndicator, setRtIndicator] = useState(false); // flashes when real-time update arrives
     const [timeLeft, setTimeLeft] = useState('');
-    
+
     // Frontend Pagination, Search, Filter & Sort State
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +23,7 @@ export const SellersPage = () => {
     const [filterLevel, setFilterLevel] = useState("All");
     const [filterStatus, setFilterStatus] = useState("All");
     const [sortConfig, setSortConfig] = useState({ key: 'availableBalance', direction: 'desc' });
+    const [showGuide, setShowGuide] = useState(false);
 
     const [modal, setModal] = useState(false);
     const [selectedSeller, setSelectedSeller] = useState(null);
@@ -36,7 +37,7 @@ export const SellersPage = () => {
     useEffect(() => {
         const calculateTimeLeft = () => {
             if (!criteria || !criteria.nextEvaluationDate) return "Calculating...";
-            
+
             // Append Z to enforce UTC if the backend didn't
             const dateStr = criteria.nextEvaluationDate.endsWith('Z') ? criteria.nextEvaluationDate : criteria.nextEvaluationDate + 'Z';
             const target = new Date(dateStr);
@@ -111,9 +112,9 @@ export const SellersPage = () => {
                 financeService.getSellerWallets(),
                 apiRequest('/api/Users/seller-metrics')
             ]);
-            
+
             const metrics = metricsData.items || metricsData;
-            
+
             // Merge data
             const merged = walletData.map(w => {
                 const metric = metrics.find(m => m.id === w.sellerId);
@@ -144,7 +145,7 @@ export const SellersPage = () => {
         // 1. Search filter
         if (search.trim()) {
             const s = search.toLowerCase();
-            result = result.filter(w => 
+            result = result.filter(w =>
                 (w.sellerName && w.sellerName.toLowerCase().includes(s)) ||
                 (w.sellerId.toString().includes(s))
             );
@@ -196,8 +197,8 @@ export const SellersPage = () => {
 
     const getSortIcon = (key) => {
         if (!sortConfig || sortConfig.key !== key) return <i className="bi bi-arrow-down-up opacity-25 ms-1" style={{ fontSize: '0.7em' }}></i>;
-        return sortConfig.direction === 'asc' 
-            ? <i className="bi bi-arrow-up text-primary ms-1" style={{ fontSize: '0.8em' }}></i> 
+        return sortConfig.direction === 'asc'
+            ? <i className="bi bi-arrow-up text-primary ms-1" style={{ fontSize: '0.8em' }}></i>
             : <i className="bi bi-arrow-down text-primary ms-1" style={{ fontSize: '0.8em' }}></i>;
     };
 
@@ -227,8 +228,8 @@ export const SellersPage = () => {
         }
 
         return (
-            <span 
-                className={`badge ${badgeClass} cursor-pointer`} 
+            <span
+                className={`badge ${badgeClass} cursor-pointer`}
                 onClick={() => toggleModal(wallet)}
                 style={{ cursor: 'pointer' }}
                 title="Click to view performance statistics"
@@ -240,18 +241,26 @@ export const SellersPage = () => {
 
     return (
         <div className="container-fluid py-4">
-            <ToastMessage 
-                message={toast.message} 
-                type={toast.type} 
-                onClose={() => setToast({ message: '', type: 'success' })} 
+            <ToastMessage
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ message: '', type: 'success' })}
             />
 
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1 className="h3 fw-bold mb-0">
-                    Sellers Overview
+                <div className="d-flex align-items-center gap-3">
+                    <h1 className="h3 fw-bold mb-0">Sellers Overview</h1>
+                    <button
+                        className={`btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center ${showGuide ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        style={{ width: '32px', height: '32px' }}
+                        onClick={() => setShowGuide(!showGuide)}
+                        title="Toggle Seller Leveling Guide"
+                    >
+                        <i className={`bi ${showGuide ? 'bi-info-circle-fill' : 'bi-info-circle'}`}></i>
+                    </button>
                     {rtIndicator && <span className="badge bg-primary animate-pulse ms-2" style={{ fontSize: '0.7rem' }}>Real-time Update</span>}
-                </h1>
-                
+                </div>
+
                 <div className="bg-white border rounded-pill px-3 py-2 shadow-sm d-flex align-items-center animate-fade-in">
                     <i className="bi bi-clock-history text-primary me-2"></i>
                     <span className="text-secondary small me-2">Next Auto-Evaluation:</span>
@@ -260,88 +269,149 @@ export const SellersPage = () => {
             </div>
 
             {/* Leveling Guide Note */}
-            {criteria && (
-                <div className="alert bg-white border-0 shadow-sm rounded-4 mb-4 p-4 d-flex align-items-center gap-4 animate-fade-in">
-                    <div className="bg-primary bg-opacity-10 p-3 rounded-circle">
-                        <i className="bi bi-info-circle-fill text-primary fs-4"></i>
+            {criteria && showGuide && (
+                <div className="guide-container mb-4 animate-fade-in-up">
+                    <div className="d-flex align-items-center justify-content-between mb-3 px-1">
+                        <h6 className="fw-bold text-uppercase text-primary mb-0" style={{ letterSpacing: '1px', fontSize: '0.75rem' }}>
+                            <i className="bi bi-stars me-2"></i> Leveling Requirements
+                        </h6>
+                        <button className="btn-close small" onClick={() => setShowGuide(false)} style={{ fontSize: '0.6rem' }}></button>
                     </div>
-                    <div className="flex-grow-1">
-                        <h6 className="fw-bold text-dark mb-1">Seller Leveling Guide</h6>
-                        <div className="row g-2 small text-muted">
-                            <div className="col-md-4">
-                                <span className="badge bg-success-subtle text-success me-1">Top Rated</span>
-                                &ge; {criteria.topRatedMinTransactions} orders, &ge; {criteria.topRatedMinDays} days on platform, &le; {(criteria.topRatedMaxDefectRate * 100).toFixed(1)}% defect.
+
+                    <div className="row g-3">
+                        {/* Top Rated Card */}
+                        <div className="col-lg-4">
+                            <div className="level-card h-100 border-0 shadow-sm rounded-4 bg-white p-3 border-top border-5 border-success">
+                                <div className="d-flex align-items-center gap-2 mb-3">
+                                    <div className="icon-box bg-success bg-opacity-10 text-success rounded-circle p-2">
+                                        <i className="bi bi-trophy-fill fs-5"></i>
+                                    </div>
+                                    <h6 className="fw-bold mb-0">Top Rated</h6>
+                                </div>
+                                <div className="level-criteria-list">
+                                    <div className="d-flex align-items-center justify-content-between small mb-2 p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-cart-check me-2"></i>Orders</span>
+                                        <span className="fw-bold">≥ {criteria.topRatedMinTransactions}</span>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between small mb-2 p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-calendar-event me-2"></i>Active Days</span>
+                                        <span className="fw-bold">≥ {criteria.topRatedMinDays}</span>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between small p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-exclamation-triangle me-2"></i>Defect Rate</span>
+                                        <span className="fw-bold text-success">≤ {(criteria.topRatedMaxDefectRate * 100).toFixed(1)}%</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="col-md-4">
-                                <span className="badge bg-warning-subtle text-warning me-1">Above Standard</span>
-                                &le; {(criteria.aboveStandardMaxDefectRate * 100).toFixed(1)}% defect, &le; {criteria.aboveStandardMaxUnresolvedCases} unresolved cases.
+                        </div>
+
+                        {/* Above Standard Card */}
+                        <div className="col-lg-4">
+                            <div className="level-card h-100 border-0 shadow-sm rounded-4 bg-white p-3 border-top border-5 border-warning">
+                                <div className="d-flex align-items-center gap-2 mb-3">
+                                    <div className="icon-box bg-warning bg-opacity-10 text-warning rounded-circle p-2">
+                                        <i className="bi bi-shield-check fs-5"></i>
+                                    </div>
+                                    <h6 className="fw-bold mb-0">Above Standard</h6>
+                                </div>
+                                <div className="level-criteria-list">
+                                    <div className="d-flex align-items-center justify-content-between small mb-2 p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-graph-down me-2"></i>Defect Rate</span>
+                                        <span className="fw-bold">≤ {(criteria.aboveStandardMaxDefectRate * 100).toFixed(1)}%</span>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between small p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-headset me-2"></i>Unresolved</span>
+                                        <span className="fw-bold text-warning">≤ {criteria.aboveStandardMaxUnresolvedCases} cases</span>
+                                    </div>
+                                    <div className="mt-2 text-center">
+                                        <small className="text-muted italic" style={{ fontSize: '0.7rem' }}>Maintains good service standing</small>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="col-md-4">
-                                <span className="badge bg-danger-subtle text-danger me-1">Below Standard</span>
-                                Fails to meet Above Standard or Top Rated requirements.
+                        </div>
+
+                        {/* Below Standard Card */}
+                        <div className="col-lg-4">
+                            <div className="level-card h-100 border-0 shadow-sm rounded-4 bg-white p-3 border-top border-5 border-danger bg-opacity-75">
+                                <div className="d-flex align-items-center gap-2 mb-3">
+                                    <div className="icon-box bg-danger bg-opacity-10 text-danger rounded-circle p-2">
+                                        <i className="bi bi-exclamation-octagon fs-5"></i>
+                                    </div>
+                                    <h6 className="fw-bold mb-0 text-danger">Below Standard</h6>
+                                </div>
+                                <div className="p-3 border border-dashed rounded-4 text-center">
+                                    <p className="small text-muted mb-0">
+                                        Accounts that fail to meet the minimum requirements for <span className="fw-bold">Above Standard</span> or <span className="fw-bold text-success">Top Rated</span> status.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <Link to="/dashboard" className="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i className="bi bi-gear-fill me-1"></i> Configure
-                    </Link>
                 </div>
             )}
 
             <div className="glass-panel border-0 mb-4 overflow-hidden animate-fade-in-up" stagger="stagger-1">
-                <div className="p-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3 bg-white bg-opacity-50">
-                    <h5 className="mb-0 fw-bold d-flex align-items-center">
-                        <i className="bi bi-people-fill text-primary me-2 fs-4"></i>
-                        Seller Database
-                        <span className="badge bg-primary bg-opacity-10 text-primary ms-3 rounded-pill">
-                            {filteredWallets.length} Total
-                        </span>
-                    </h5>
-                    
-                    <div className="d-flex flex-wrap gap-2 align-items-center">
-                        {/* Status Filter */}
-                        <select 
-                            className="form-select form-select-sm pe-form-control pe-form-control-sm border-0 shadow-sm"
-                            style={{ width: '130px', backgroundColor: 'rgba(255,255,255,0.7)' }}
-                            value={filterStatus}
-                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                        >
-                            <option value="All">All Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Pending">Pending</option>
-                        </select>
+                <div className="p-4 border-bottom bg-white">
+                    <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
 
-                        {/* Level Filter */}
-                        <select 
-                            className="form-select form-select-sm pe-form-control pe-form-control-sm border-0 shadow-sm"
-                            style={{ width: '150px', backgroundColor: 'rgba(255,255,255,0.7)' }}
-                            value={filterLevel}
-                            onChange={(e) => { setFilterLevel(e.target.value); setCurrentPage(1); }}
-                        >
-                            <option value="All">All Levels</option>
-                            <option value="TopRated">Top Rated</option>
-                            <option value="AboveStandard">Above Standard</option>
-                            <option value="BelowStandard">Below Standard</option>
-                        </select>
-
-                        {/* Search Input */}
-                        <div className="input-group input-group-sm shadow-sm rounded-pill overflow-hidden" style={{ maxWidth: '250px' }}>
-                            <span className="input-group-text bg-white border-0 ps-3">
-                                <i className="bi bi-search text-muted"></i>
+                        {/* Bên trái: Chỉ để thanh Search và cho nó dài ra một chút */}
+                        <div className="input-group" style={{ maxWidth: '350px' }}>
+                            <span className="input-group-text bg-white border-end-0 text-muted pe-1">
+                                <i className="bi bi-search"></i>
                             </span>
-                            <input 
-                                type="text" 
-                                className="form-control border-0 bg-white" 
-                                placeholder="Search Name or UID..." 
+                            <input
+                                type="text"
+                                className="form-control border-start-0 shadow-none ps-2"
+                                placeholder="Search name, email, UID..."
                                 value={search}
                                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                             />
+                            {search && (
+                                <span
+                                    className="input-group-text bg-white border-start-0"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => setSearch("")}
+                                >
+                                    <i className="bi bi-x text-muted"></i>
+                                </span>
+                            )}
                         </div>
 
-                        <Button color="primary" size="sm" onClick={() => loadWallets()} className="rounded-pill px-3 shadow-sm ms-2">
-                            <i className="bi bi-arrow-clockwise me-1"></i> Refresh
-                        </Button>
+                        {/* Bên phải: Chỉ giữ lại Dropdown Filter và nút Refresh */}
+                        <div className="d-flex flex-wrap align-items-center gap-2">
+                            <select
+                                className="form-select shadow-none"
+                                style={{ width: '140px', cursor: 'pointer' }}
+                                value={filterStatus}
+                                onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                            >
+                                <option value="All">Status: All</option>
+                                <option value="Active">Active</option>
+                                <option value="Suspended">Suspended</option>
+                            </select>
+
+                            <select
+                                className="form-select shadow-none"
+                                style={{ width: '150px', cursor: 'pointer' }}
+                                value={filterLevel}
+                                onChange={(e) => { setFilterLevel(e.target.value); setCurrentPage(1); }}
+                            >
+                                <option value="All">Level: All</option>
+                                <option value="TopRated">Top Rated</option>
+                                <option value="AboveStandard">Above Std</option>
+                                <option value="BelowStandard">Below Std</option>
+                            </select>
+
+                            <button
+                                className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                onClick={() => loadWallets()}
+                                title="Refresh data"
+                                style={{ width: '38px', height: '38px' }}
+                            >
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+
                     </div>
                 </div>
                 <div className="table-responsive bg-white">
@@ -408,24 +478,28 @@ export const SellersPage = () => {
                 {!loading && filteredWallets.length > 0 && (
                     <div className="p-3 bg-white border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div className="d-flex align-items-center gap-2">
-                            <select 
-                                className="form-select border-0 bg-light rounded-pill py-1 px-3 text-muted small" 
-                                style={{ width: 'auto', fontSize: '0.8rem' }}
+                            <select
+                                className="form-select border-0 bg-light rounded-pill py-1 ps-3 pe-5 text-muted small" // Thay px-3 bằng ps-3 và pe-5 (hoặc pe-6 nếu cần)
+                                style={{
+                                    width: 'auto',
+                                    minWidth: '70px', // Đảm bảo đủ rộng ngay cả với số 10
+                                    fontSize: '0.8rem'
+                                }}
                                 value={pageSize}
                                 onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
                             >
-                                <option value={10}>10 records / page</option>
-                                <option value={20}>20 records / page</option>
-                                <option value={50}>50 records / page</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
                             </select>
                             <span className="text-muted small">
                                 Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredWallets.length)} of {filteredWallets.length}
                             </span>
                         </div>
                         <div className="d-flex gap-2">
-                            <Button 
-                                color="outline-secondary" 
-                                size="sm" 
+                            <Button
+                                color="outline-secondary"
+                                size="sm"
                                 disabled={currentPage <= 1}
                                 onClick={() => setCurrentPage(p => p - 1)}
                                 className="rounded-pill px-3"
@@ -435,9 +509,9 @@ export const SellersPage = () => {
                             <div className="align-self-center px-3 small border-start border-end">
                                 Page <strong>{currentPage}</strong> of {totalPages || 1}
                             </div>
-                            <Button 
-                                color="outline-secondary" 
-                                size="sm" 
+                            <Button
+                                color="outline-secondary"
+                                size="sm"
                                 disabled={currentPage >= totalPages}
                                 onClick={() => setCurrentPage(p => p + 1)}
                                 className="rounded-pill px-3"
