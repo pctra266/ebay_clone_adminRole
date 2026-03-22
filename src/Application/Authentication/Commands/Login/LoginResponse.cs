@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,4 +10,5 @@ public class LoginResponse
     public int UserId { get; set; }
     public bool Success { get; set; }      // thêm field này
     public string? ErrorMessage { get; set; } // thêm field này
+    public string? Role { get; set; } // thêm field này
 }

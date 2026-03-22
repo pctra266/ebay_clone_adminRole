@@ -1,16 +1,16 @@
-import { DashboardPage }  from "./pages/DashboardPage";
-import { UsersPage }      from "./pages/UsersPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { UsersPage } from "./pages/UsersPage";
 import { UserDetailPage } from "./pages/UserDetailPage";
-import { BroadcastPage }  from "./pages/BroadcastPage";
+import { BroadcastPage } from "./pages/BroadcastPage";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
-import { AuditLogsPage }  from "./pages/AuditLogsPage";
-import { FetchData }      from "./components/FetchData";
-import { DisputesPage }   from "./pages/DisputesPage";
+import { AuditLogsPage } from "./pages/AuditLogsPage";
+import { FetchData } from "./components/FetchData";
+import { DisputesPage } from "./pages/DisputesPage";
 import { DisputeDashboard } from "./pages/DisputeDashboard";
 import { DisputeDetailPage } from "./pages/DisputeDetailPage";
-import LoginPage          from "./pages/LoginPage";
-import Enable2FAPage      from "./pages/Enable2fapage";
-import ProtectedRoute     from "./components/ProtectedRoute";
+import LoginPage from "./pages/LoginPage";
+import Enable2FAPage from "./pages/Enable2fapage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
@@ -25,6 +25,7 @@ import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import { MockPage } from "./pages/MockPage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 import PayoutEnginePage from "./pages/PayoutEnginePage";
+import ActiveConnectionsPage from "./pages/ActiveConnectionsPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -107,7 +108,7 @@ const AppRoutes = [
   },
   {
     path: '/products',
-    element: protect(<ProductModerationPage/>)
+    element: protect(<ProductModerationPage />)
   },
   {
     path: '/review-monitoring',
@@ -145,6 +146,10 @@ const AppRoutes = [
   {
     path: "/payout-engine",
     element: protect(<PayoutEnginePage />)
+  },
+  {
+    path: "/active-connections",
+    element: protect(<ActiveConnectionsPage />)
   }
 ];
 
