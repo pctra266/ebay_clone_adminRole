@@ -28,7 +28,7 @@ public class ApproveReturnRequestCommandHandler
     {
         var returnRequest = await _context.ReturnRequests
             .Include(r => r.Order)
-                .ThenInclude(o => o.OrderItems)
+                .ThenInclude(o => o!.OrderItems)
                 .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(r => r.Id == request.ReturnRequestId, cancellationToken);
 
