@@ -1,14 +1,13 @@
-import httpClient from './httpClient';
+import { apiRequest } from './httpClient';
+import endpoints from './endpoints';
 
 const orderService = {
-  getOrders: async (params) => {
-    const response = await httpClient.get('/orders', { params });
-    return response.data;
+  getOrders: (query) => {
+    return apiRequest(endpoints.orders, { query });
   },
 
-  getOrderById: async (id) => {
-    const response = await httpClient.get(`/orders/${id}`);
-    return response.data;
+  getOrderById: (id) => {
+    return apiRequest(`${endpoints.orders}/${id}`);
   }
 };
 

@@ -151,6 +151,10 @@ const AppRoutes = [
   {
     path: "/active-connections",
     element: protect(<ActiveConnectionsPage />)
+  },
+  {
+    path: "/orders",
+    element: protect(<OrdersPage />)
   }
 ];
 
