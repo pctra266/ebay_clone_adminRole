@@ -14,7 +14,7 @@ namespace EbayClone.Infrastructure.Data.Interceptors;
 public class SellerWalletChangedInterceptor : SaveChangesInterceptor
 {
     private readonly ISellerHubService _sellerHubService;
-    private readonly AsyncLocal<List<SellerWallet>> _changedWallets = new();
+    private readonly AsyncLocal<List<SellerWallet>?> _changedWallets = new();
 
     public SellerWalletChangedInterceptor(ISellerHubService sellerHubService)
     {
