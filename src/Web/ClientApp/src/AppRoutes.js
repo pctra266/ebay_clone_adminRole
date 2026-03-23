@@ -26,6 +26,7 @@ import { MockPage } from "./pages/MockPage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 import PayoutEnginePage from "./pages/PayoutEnginePage";
 import ActiveConnectionsPage from "./pages/ActiveConnectionsPage";
+import OrdersPage from "./pages/OrdersPage";
 
 // Helper cho gọn
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
@@ -150,6 +151,10 @@ const AppRoutes = [
   {
     path: "/active-connections",
     element: protect(<ActiveConnectionsPage />)
+  },
+  {
+    path: "/orders",
+    element: protect(<OrdersPage />)
   }
 ];
 

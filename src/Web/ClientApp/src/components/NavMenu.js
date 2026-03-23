@@ -61,6 +61,7 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
             {(user?.role === 'SuperAdmin' || user?.role === 'Support' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Support')) && (
               <>
                 <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
+                <SidebarLink to="/orders" icon="bi bi-cart">Orders</SidebarLink>
                 <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
                 <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
                 <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
