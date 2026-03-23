@@ -21,6 +21,9 @@ var app = builder.Build();
 // Run DB migration + seeder on startup (idempotent — safe to run every time)
 await app.InitialiseDatabaseAsync();
 
+// Ensure real client IP is captured before any other middleware
+app.UseForwardedHeaders();
+
 // ── Environment-specific middleware ──────────────────────────
 if (app.Environment.IsDevelopment())
 {

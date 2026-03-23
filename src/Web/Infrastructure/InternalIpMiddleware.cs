@@ -40,6 +40,11 @@ public class InternalIpMiddleware
         var remoteIpString = remoteIp.ToString();
         
         _logger.LogInformation("Incoming request from IP: {RemoteIp}", remoteIpString);
+        
+        foreach (var header in context.Request.Headers)
+        {
+            _logger.LogInformation("Header: {Key} = {Value}", header.Key, header.Value);
+        }
 
         // Tracker the connection
         var tracker = context.RequestServices.GetService<IActiveConnectionTracker>();

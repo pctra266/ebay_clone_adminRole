@@ -14,10 +14,12 @@ public record GenerateMockReturnRequestCommand : IRequest<bool>
 public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateMockReturnRequestCommand, bool>
 {
     private readonly IApplicationDbContext _context;
+    private readonly INotificationNotifier _notifier;
 
-    public GenerateMockReturnRequestCommandHandler(IApplicationDbContext context)
+    public GenerateMockReturnRequestCommandHandler(IApplicationDbContext context, INotificationNotifier notifier)
     {
         _context = context;
+        _notifier = notifier;
     }
 
     public async Task<bool> Handle(GenerateMockReturnRequestCommand request, CancellationToken cancellationToken)
@@ -106,6 +108,9 @@ public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateM
         _context.Messages.AddRange(initialMessages);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Broadcast creation
+        await _notifier.NotifyReturnRequestCreatedAsync(returnRequest.Id, cancellationToken);
 
         return true;
     }
