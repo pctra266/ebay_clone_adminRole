@@ -26,7 +26,7 @@ public static class DependencyInjection
             options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All;
             options.ForwardLimit = null; // Trust all proxies (loopback by default is trusted)
             options.KnownProxies.Clear();
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
         });
 
         builder.Services.AddScoped<IUser, CurrentUser>();
