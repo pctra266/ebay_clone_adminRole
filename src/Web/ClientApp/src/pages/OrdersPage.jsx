@@ -12,7 +12,8 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageNumberSize] = useState(10); // Changed to state to support selection
+  const setPageSize = (size) => { setPageNumberSize(size); setPageNumber(1); }; // Helper to reset page
   const [status, setStatus] = useState('All');
   const [search, setSearch] = useState('');
   
@@ -30,7 +31,7 @@ const OrdersPage = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [pageNumber, status]);
+  }, [pageNumber, pageSize, status]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -82,6 +83,12 @@ const OrdersPage = () => {
   };
 
   const toggleModal = () => setModalOpen(!modalOpen);
+  
+  const resetFilters = () => {
+    setSearch('');
+    setStatus('All');
+    setPageNumber(1);
+  };
 
   const getStatusUI = (status) => {
     switch (status) {
@@ -145,11 +152,11 @@ const OrdersPage = () => {
 
   return (
     <div className="container-fluid py-4" style={{ background: '#ffffff', minHeight: '100vh' }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px' }}>Order Management</h2>
-          <p className="text-secondary small mb-0">Monitor and fulfill platform transactions</p>
-        </div>
+      <div className="d-flex flex-column align-items-center mb-5 text-center">
+        <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-1px' }}>Order Management</h2>
+        <p className="text-secondary mb-0 mt-2" style={{ fontSize: '0.95rem', maxWidth: '600px' }}>
+          Monitor and fulfill platform transactions with an overview of all customer activities.
+        </p>
       </div>
 
       {/* --- Visual Stats Widgets --- */}
@@ -218,6 +225,20 @@ const OrdersPage = () => {
                 </DropdownMenu>
               </UncontrolledDropdown>
             </div>
+            
+            {(status !== 'All' || search) && (
+              <div className="me-auto">
+                <Button 
+                  color="link" 
+                  className="text-secondary text-decoration-none small fw-bold d-flex align-items-center gap-1 border rounded-pill px-3 bg-light bg-opacity-50"
+                  onClick={resetFilters}
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  <i className="bi bi-x-circle text-danger"></i>
+                  Clear Filters
+                </Button>
+              </div>
+            )}
             <div style={{ minWidth: '350px' }}>
               <InputGroup className="shadow-sm rounded-pill overflow-hidden border">
                 <InputGroupText className="bg-white border-0 ps-3"><i className="bi bi-search text-secondary"></i></InputGroupText>
@@ -233,7 +254,7 @@ const OrdersPage = () => {
             </div>
           </div>
           
-          <Table responsive hover className="mb-0 align-middle pe-table">
+          <Table responsive className="mb-0 align-middle pe-table">
             <thead className="bg-light text-secondary small text-uppercase fw-bold">
               <tr>
                 <th className="ps-4">Order ID</th>
@@ -261,7 +282,7 @@ const OrdersPage = () => {
                 </tr>
               ) : (
                 orders.map(order => (
-                  <tr key={order.id} className="transition-all cursor-pointer" onClick={() => handleViewDetails(order.id)}>
+                  <tr key={order.id} className="transition-all">
                     <td className="ps-4 fw-bold text-primary">#{order.id}</td>
                     <td className="text-secondary small">{formatRelativeTime(order.orderDate)}</td>
                     <td>
@@ -278,7 +299,7 @@ const OrdersPage = () => {
                     </td>
                     <td>{getStatusBadge(order.status)}</td>
                     <td className="text-end pe-4">
-                      <Button color="light" size="sm" className="rounded-circle" title="View Details">
+                      <Button color="light" size="sm" className="rounded-circle" title="View Details" onClick={() => handleViewDetails(order.id)}>
                         <i className="bi bi-eye"></i>
                       </Button>
                     </td>
@@ -288,24 +309,54 @@ const OrdersPage = () => {
             </tbody>
           </Table>
 
-          {totalPages > 1 && (
-            <div className="p-3 border-top d-flex justify-content-between align-items-center bg-light bg-opacity-50">
-              <span className="small text-secondary">
-                Page <strong>{pageNumber}</strong> of {totalPages}
-              </span>
-              <Pagination size="sm" className="mb-0 gap-1 rounded-pill">
-                <PaginationItem disabled={pageNumber === 1}>
-                  <PaginationLink previous className="border-0 rounded-circle" onClick={() => setPageNumber(p => p - 1)} />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                   <PaginationItem key={p} active={pageNumber === p}>
-                     <PaginationLink className={`border-0 rounded-circle ${pageNumber === p ? 'shadow-sm' : ''}`} onClick={() => setPageNumber(p)}>{p}</PaginationLink>
-                   </PaginationItem>
-                ))}
-                <PaginationItem disabled={pageNumber === totalPages}>
-                  <PaginationLink next className="border-0 rounded-circle" onClick={() => setPageNumber(p => p + 1)} />
-                </PaginationItem>
-              </Pagination>
+          {/* Sellers-style Pagination Controls */}
+          {!loading && orders.length > 0 && (
+            <div className="p-3 bg-white border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2">
+                <select
+                  className="form-select border-0 bg-light rounded-pill py-1 ps-3 pe-5 text-muted small"
+                  style={{
+                    width: 'auto',
+                    minWidth: '70px',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
+                  }}
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-muted small">
+                  Showing {((pageNumber - 1) * pageSize) + 1} to {Math.min(pageNumber * pageSize, totalCount)} of {totalCount}
+                </span>
+              </div>
+              <div className="d-flex gap-2">
+                <Button
+                  color="outline-secondary"
+                  size="sm"
+                  disabled={pageNumber <= 1}
+                  onClick={() => setPageNumber(p => p - 1)}
+                  className="rounded-pill px-3 border-0 bg-light text-dark fw-bold"
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  <i className="bi bi-chevron-left me-1"></i> Previous
+                </Button>
+                <div className="align-self-center px-3 small border-start border-end fw-bold text-secondary">
+                  Page <strong>{pageNumber}</strong> of {totalPages || 1}
+                </div>
+                <Button
+                  color="outline-secondary"
+                  size="sm"
+                  disabled={pageNumber >= totalPages}
+                  onClick={() => setPageNumber(p => p + 1)}
+                  className="rounded-pill px-3 border-0 bg-light text-dark fw-bold"
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  Next <i className="bi bi-chevron-right ms-1"></i>
+                </Button>
+              </div>
             </div>
           )}
         </CardBody>
@@ -317,7 +368,7 @@ const OrdersPage = () => {
           <div className="d-flex align-items-center gap-2">
              <i className="bi bi-receipt h4 mb-0 text-primary"></i>
              <span className="fw-bold">Order Summary</span>
-             {selectedOrder && <Badge color="light" text="dark" className="border">#{selectedOrder.id}</Badge>}
+             {selectedOrder && <Badge color="primary" className="rounded-pill px-3 py-2 ms-2 shadow-sm">#{selectedOrder.id}</Badge>}
           </div>
         </ModalHeader>
         <ModalBody className="pt-3">
@@ -405,17 +456,11 @@ const OrdersPage = () => {
             </>
           )}
         </ModalBody>
-        <ModalFooter className="border-0 pt-0">
-          <Button color="light" outline className="rounded-pill px-4 fw-bold" onClick={toggleModal}>Close</Button>
-          <Button color="primary" className="rounded-pill px-4 fw-bold shadow-sm">Manage Fulfillment</Button>
-        </ModalFooter>
       </Modal>
 
       <style>{`
-        .pe-table tbody tr:hover {
-          background-color: rgba(13, 110, 253, 0.02) !important;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        .pe-table tbody tr {
+          border-bottom: 1px solid #f1f3f5;
         }
         .transition-all { transition: all 0.2s ease-in-out; }
         .x-small { font-size: 0.75rem; }
