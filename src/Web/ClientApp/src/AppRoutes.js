@@ -15,14 +15,14 @@ import EbayHomepage from "./pages/EbayHomepage";
 import ReturnRequestsPage from './pages/ReturnRequestsPage';
 import ReturnRequestDetailPage from "./pages/ReturnRequestDetailPage";
 import { SellersPage } from "./pages/SellersPage";
-import { PendingSettlementsPage } from "./pages/PendingSettlementsPage";
+
 import { ReviewMonitoringPage } from "./pages/ReviewMonitoringPage";
 import ProductModerationPage from "./pages/ProductModerationPage";
 import { ProductList } from "./pages/Public/Home";
 import EbayProductDetail from "./pages/EbayProductDetail";
-import { WalletsPage } from "./pages/WalletsPage";
-import { WithdrawalsPage } from "./pages/WithdrawalsPage";
-import StatisticsPage from "./pages/StatisticsPage";
+
+
+
 
 import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import { MockPage } from "./pages/MockPage";
@@ -106,22 +106,13 @@ const AppRoutes = [
     path: "/disputes/:id",
     element: protect(<DisputeDetailPage />, ["SuperAdmin", "Support"])
   },
-  {
-    path: "/wallets",
-    element: protect(<WalletsPage />, ["SuperAdmin"])
-  },
-  {
-    path: "/withdrawals",
-    element: protect(<WithdrawalsPage />, ["SuperAdmin"])
-  },
+
+
   {
     path: "/sellers",
     element: protect(<SellersPage />, ["SuperAdmin"])
   },
-  {
-    path: "/settlements",
-    element: protect(<PendingSettlementsPage />, ["SuperAdmin", "Support"])
-  },
+
   {
     path: '/products',
     element: protect(<ProductModerationPage/>, ["SuperAdmin", "Support"])
@@ -143,10 +134,7 @@ const AppRoutes = [
     element: <EbayProductDetail />,
     noLayout: true
   },
-  {
-    path: "/statistics",
-    element: protect(<StatisticsPage />, ["SuperAdmin", "Monitor"])
-  },
+
   {
     path: "/return-requests",
     element: protect(<ReturnRequestsPage />, ["SuperAdmin", "Support"])
