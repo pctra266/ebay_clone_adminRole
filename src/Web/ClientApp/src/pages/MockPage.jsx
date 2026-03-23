@@ -13,13 +13,13 @@ export function MockPage() {
     const [purchaseData, setPurchaseData] = useState({
         sellerId: '',
         orderType: 'Normal',
-        amount: 500000,
+        amount: 50.00,
         settleImmediately: true,
         ensureBankLinked: true
     });
     const [payoutData, setPayoutData] = useState({
         sellerId: '',
-        amount: 50000
+        amount: 10.00
     });
     const [loading, setLoading] = useState(false);
     const [payoutLoading, setPayoutLoading] = useState(false);
@@ -210,8 +210,8 @@ export function MockPage() {
                             </div>
 
                             <div className="pe-input-group">
-                                <label className="pe-input-label">Amount (VND)</label>
-                                <input type="number" className="pe-form-control" name="amount" value={purchaseData.amount} onChange={handlePurchaseChange} min="1000" required />
+                                <label className="pe-input-label">Amount (USD)</label>
+                                <input type="number" className="pe-form-control" name="amount" value={purchaseData.amount} onChange={handlePurchaseChange} step="0.01" min="0.01" required />
                             </div>
 
                             <div className="bg-light p-3 rounded-3">
@@ -249,8 +249,8 @@ export function MockPage() {
                             </div>
 
                             <div className="pe-input-group">
-                                <label className="pe-input-label">Withdrawal Amount (VND)</label>
-                                <input type="number" className="pe-form-control" name="amount" value={payoutData.amount} onChange={handlePayoutChange} min="1000" required />
+                                <label className="pe-input-label">Withdrawal Amount (USD)</label>
+                                <input type="number" className="pe-form-control" name="amount" value={payoutData.amount} onChange={handlePayoutChange} step="0.01" min="0.01" required />
                             </div>
 
                             <button type="submit" className="btn btn-outline-primary rounded-pill mt-4" disabled={payoutLoading}>
