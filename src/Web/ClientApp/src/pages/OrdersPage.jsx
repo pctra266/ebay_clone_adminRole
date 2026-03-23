@@ -262,7 +262,7 @@ const OrdersPage = () => {
                 <th>Customer</th>
                 <th>Total Value</th>
                 <th>Workflow</th>
-                <th className="text-end pe-4">Manage</th>
+                <th className="text-end pe-4">Detail</th>
               </tr>
             </thead>
             <tbody>
