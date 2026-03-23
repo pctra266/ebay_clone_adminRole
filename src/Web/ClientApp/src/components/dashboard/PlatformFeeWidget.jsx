@@ -96,13 +96,13 @@ export const PlatformFeeWidget = () => {
 
                     <div className="pe-input-group">
                         <label className="pe-input-label d-flex justify-content-between">
-                            <span>Listing Fee (VND)</span>
+                            <span>Listing Fee (USD)</span>
                             <span className="text-muted small">Fixed cost per listing</span>
                         </label>
                         <input 
                             type="number" 
                             min="0"
-                            step="1000"
+                            step="0.01"
                             className="pe-form-control" 
                             name="listingFee" 
                             value={fees.listingFee} 

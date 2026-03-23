@@ -192,7 +192,11 @@ export default function LoginPage() {
         // ✅ Không lưu token — server đã set HttpOnly cookie
         setStep("success");
         await sleep(1200);
-        window.location.href = "/";
+        if (data.role === "Seller") {
+          window.location.href = "/seller-products";
+        } else {
+          window.location.href = "/";
+        }
       }
     } catch (err) {
       setError("Không thể kết nối đến server. Vui lòng thử lại.");
@@ -228,7 +232,11 @@ export default function LoginPage() {
       // ✅ Không lưu token — server đã set HttpOnly cookie
       setStep("success");
       await sleep(1200);
-      window.location.href = "/dashboard";
+      if (data.role === "Seller") {
+        window.location.href = "/seller-products";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err) {
       setError("Không thể kết nối đến server. Vui lòng thử lại.");
       setCode("");

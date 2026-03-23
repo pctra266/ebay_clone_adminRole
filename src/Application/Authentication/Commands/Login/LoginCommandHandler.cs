@@ -74,7 +74,8 @@ public class LoginCommandHandler
             Success = true,
             Token = token,
             RequireTwoFactor = false,
-            UserId = user.Id
+            UserId = user.Id,
+            Role = user.Role
         };
     }
 }
