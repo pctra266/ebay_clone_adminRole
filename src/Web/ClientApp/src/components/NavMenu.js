@@ -64,24 +64,20 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
                 <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
                 <SidebarLink to="/orders" icon="bi bi-cart">Orders</SidebarLink>
                 <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
-                <SidebarLink to="/settlements" icon="bi bi-cart-check">Orders</SidebarLink>
+
                 <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
                 <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
               </>
             )}
 
-            {(user?.role === 'SuperAdmin' || user?.role === 'Monitor' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Monitor')) && (
-              <>
-                <SidebarLink to="/statistics" icon="bi bi-graph-up-arrow">Statistics</SidebarLink>
-              </>
-            )}
+
 
             {(user?.role === 'SuperAdmin' || user?.roles?.includes('SuperAdmin')) && (
               <>
                 <SidebarLink to="/sellers" icon="bi bi-person-badge">Sellers Overview</SidebarLink>
                 <SidebarLink to="/payout-engine" icon="bi bi-lightning-charge">Payout Engine</SidebarLink>
-                <SidebarLink to="/wallets" icon="bi bi-wallet2">Wallets</SidebarLink>
-                <SidebarLink to="/withdrawals" icon="bi bi-cash-stack">Withdrawals</SidebarLink>
+
+
                 <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
                 <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
                 <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
