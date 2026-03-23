@@ -66,7 +66,7 @@ export const SellersPage = () => {
     // ── Real-time: connect to SellerHub ──────────────────────────────────────
     useEffect(() => {
         const connection = new HubConnectionBuilder()
-            .withUrl('/hubs/sellers')
+            .withUrl('/hubs/seller')
             .withAutomaticReconnect()
             .configureLogging(LogLevel.Warning)
             .build();
@@ -80,6 +80,27 @@ export const SellersPage = () => {
                     setWallets(prev => prev.map(w =>
                         w.sellerId === data.sellerId
                             ? { ...w, availableBalance: data.availableBalance, pendingBalance: data.pendingBalance, totalWithdrawn: data.totalWithdrawn }
+                            : w
+                    ));
+                    // Flash the indicator briefly
+                    setRtIndicator(true);
+                    setTimeout(() => setRtIndicator(false), 1500);
+                });
+
+                connection.on('UpdateSellerMetrics', (metrics) => {
+                    console.log('[SellerHub] Metrics update:', metrics);
+                    setWallets(prev => prev.map(w =>
+                        w.sellerId === metrics.id
+                            ? { 
+                                ...w, 
+                                sellerLevel: metrics.sellerLevel, 
+                                status: metrics.status, 
+                                transactionCount: metrics.transactionCount, 
+                                totalSales: metrics.totalSales, 
+                                unresolvedCases: metrics.unresolvedCases, 
+                                defectRate: metrics.defectRate, 
+                                lateRate: metrics.lateRate 
+                              }
                             : w
                     ));
                     // Flash the indicator briefly
