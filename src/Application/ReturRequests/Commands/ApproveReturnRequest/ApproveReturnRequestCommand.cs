@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using EbayClone.Application.Common.Exceptions;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EbayClone.Application.ReturRequests.Commands.ApproveReturnRequest;
 public record ApproveReturnRequestCommand(
@@ -16,10 +16,12 @@ public class ApproveReturnRequestCommandHandler
     : IRequestHandler<ApproveReturnRequestCommand, Unit>
 {
     private readonly IApplicationDbContext _context;
+    private readonly INotificationNotifier _notifier;
 
-    public ApproveReturnRequestCommandHandler(IApplicationDbContext context)
+    public ApproveReturnRequestCommandHandler(IApplicationDbContext context, INotificationNotifier notifier)
     {
         _context = context;
+        _notifier = notifier;
     }
 
     public async Task<Unit> Handle(
@@ -82,6 +84,10 @@ public class ApproveReturnRequestCommandHandler
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        
+        // Broadcast update
+        await _notifier.NotifyReturnRequestUpdatedAsync(returnRequest.Id, returnRequest.Status, cancellationToken);
+
         return Unit.Value;
     }
 }

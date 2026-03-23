@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.SignalR;
+using EbayClone.Web.Hubs;
 
 namespace EbayClone.Web.Infrastructure;
 
@@ -19,8 +18,14 @@ public class ActiveConnection
 
 public class ActiveConnectionTracker : IActiveConnectionTracker
 {
+    private readonly IHubContext<NotificationHub> _hubContext;
     // A thread-safe dictionary to maintain the IP addresses and latest timestamps
     private readonly ConcurrentDictionary<string, DateTime> _activeIps = new();
+
+    public ActiveConnectionTracker(IHubContext<NotificationHub> hubContext)
+    {
+        _hubContext = hubContext;
+    }
 
     public void RecordActivity(string ipAddress)
     {
@@ -28,6 +33,13 @@ public class ActiveConnectionTracker : IActiveConnectionTracker
         {
             _activeIps.AddOrUpdate(ipAddress, DateTime.UtcNow, (key, oldValue) => DateTime.UtcNow);
             
+            // Broadcast to Admin group
+            _hubContext.Clients.Group("Admins").SendAsync("ConnectionUpdated", new { 
+                IpAddress = ipAddress, 
+                Timestamp = DateTime.UtcNow,
+                ActiveCount = _activeIps.Count 
+            });
+
             // Cleanup old records occasionally to avoid memory leaks
             if (_activeIps.Count % 100 == 0)
             {

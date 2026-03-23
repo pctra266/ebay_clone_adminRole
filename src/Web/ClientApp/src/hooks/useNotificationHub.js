@@ -8,12 +8,23 @@ import * as signalR from "@microsoft/signalr";
  * 
  * @param {Function} onNewNotification - Callback khi nhận thông báo mới
  */
-export function useNotificationHub(onNewNotification) {
-  const callbackRef = useRef(onNewNotification);
+export function useNotificationHub(events, callback) {
+  let eventNames = ["NewNotification"];
+  let cb = events;
+
+  if (typeof events === 'string') {
+    eventNames = [events];
+    cb = callback;
+  } else if (Array.isArray(events)) {
+    eventNames = events;
+    cb = callback;
+  }
+
+  const callbackRef = useRef(cb);
 
   useEffect(() => {
-    callbackRef.current = onNewNotification;
-  }, [onNewNotification]);
+    callbackRef.current = cb;
+  }, [cb]);
 
   useEffect(() => {
     const baseUrl = process.env.REACT_APP_HUB_BASE_URL || "";
@@ -31,10 +42,12 @@ export function useNotificationHub(onNewNotification) {
       .configureLogging(signalR.LogLevel.Warning)
       .build();
 
-    connection.on("NewNotification", (data) => {
-      if (callbackRef.current) {
-        callbackRef.current(data);
-      }
+    eventNames.forEach(eventName => {
+      connection.on(eventName, (...args) => {
+        if (callbackRef.current) {
+          callbackRef.current(...args);
+        }
+      });
     });
 
     connection.start().catch((err) => {
@@ -44,5 +57,6 @@ export function useNotificationHub(onNewNotification) {
     return () => {
       connection.stop();
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(eventNames)]);
 }

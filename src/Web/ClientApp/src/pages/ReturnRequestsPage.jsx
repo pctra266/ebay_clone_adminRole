@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import returnRequestService from '../services/returnRequestService';
+import { useNotificationHub } from '../hooks/useNotificationHub';
 
 const STATUS_TABS = [
   { key: 'Pending',   label: 'Pending Review', color: '#f59e0b' },
@@ -43,6 +44,11 @@ export default function ReturnRequestsPage() {
   useEffect(() => {
     fetchData(); // Sẽ chỉ fetch 1 lần khi load (bỏ activeTab ra khỏi dependency)
   }, [fetchData]);
+
+  useNotificationHub(['ReturnRequestCreated', 'ReturnRequestUpdated'], useCallback(() => {
+      // Re-fetch data when a return request is created or updated
+      fetchData();
+  }, [fetchData]));
 
   // Derived Statistics
   const totalCount = requests.length;

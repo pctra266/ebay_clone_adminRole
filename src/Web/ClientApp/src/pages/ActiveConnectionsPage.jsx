@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNotificationHub } from '../hooks/useNotificationHub';
 
 const ActiveConnectionsPage = () => {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const connectionsRef = useRef([]);
+
+  useEffect(() => {
+    connectionsRef.current = connections;
+  }, [connections]);
 
   const fetchConnections = useCallback(async () => {
     try {
@@ -31,9 +37,18 @@ const ActiveConnectionsPage = () => {
 
   useEffect(() => {
     fetchConnections();
-    const interval = setInterval(fetchConnections, 30000);
-    return () => clearInterval(interval);
   }, [fetchConnections]);
+
+  useNotificationHub('ConnectionUpdated', useCallback((data) => {
+    // Check if it's a connection update
+    // Note: The data structure depends on what we broadcast in backend
+    // Backend broadcasts "ConnectionUpdated" with { IpAddress, Timestamp, ActiveCount }
+    // Or we could just re-fetch to be safe and simple, or update state manually.
+    
+    // To be most accurate, let's re-fetch the full list when a change occurs
+    // to ensure we have the correct "lastSeen" for everyone and the list is sorted.
+    fetchConnections();
+  }, [fetchConnections]));
 
   const activeCount = connections.length;
   
