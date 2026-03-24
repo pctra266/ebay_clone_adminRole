@@ -13,6 +13,7 @@ public record UpdateSellerLevelCriteriaCommand : IRequest<bool>
     public int TopRatedMaxUnresolvedCases { get; init; }
     public double TopRatedMaxDefectRate { get; init; }
     public double TopRatedMaxLateRate { get; init; }
+    public int AboveStandardMinDays { get; init; }
     public double AboveStandardMaxDefectRate { get; init; }
     public int AboveStandardMaxUnresolvedCases { get; init; }
     public double AboveStandardMaxUnresolvedRate { get; init; }
@@ -44,6 +45,7 @@ public class UpdateSellerLevelCriteriaCommandHandler : IRequestHandler<UpdateSel
         criteria.TopRatedMaxUnresolvedCases = request.TopRatedMaxUnresolvedCases;
         criteria.TopRatedMaxDefectRate = request.TopRatedMaxDefectRate;
         criteria.TopRatedMaxLateRate = request.TopRatedMaxLateRate;
+        criteria.AboveStandardMinDays = request.AboveStandardMinDays;
         criteria.AboveStandardMaxDefectRate = request.AboveStandardMaxDefectRate;
         criteria.AboveStandardMaxUnresolvedCases = request.AboveStandardMaxUnresolvedCases;
         criteria.AboveStandardMaxUnresolvedRate = request.AboveStandardMaxUnresolvedRate;

@@ -16,6 +16,7 @@ public record SellerPerformanceMetricsDto
     public int UnresolvedCases { get; init; }
     public double DefectRate { get; init; }
     public double LateRate { get; init; }
+    public int ActiveDays { get; init; }
 }
 
 public record GetSellerPerformanceMetricsQuery : IRequest<List<SellerPerformanceMetricsDto>>;
@@ -84,6 +85,19 @@ public class GetSellerPerformanceMetricsQueryHandler : IRequestHandler<GetSeller
                                                             (o.CompletedAt.Value - o.OrderDate.Value).TotalDays > 7);
             double lateRate = transactionCount > 0 ? (double)lateShipments / transactionCount : 0;
 
+            var firstOrder = await _context.OrderTables
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == seller.Id) && o.Status == "Completed")
+                .OrderBy(o => o.OrderDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            int daysSinceFirstOrder = 0;
+            if (firstOrder?.OrderDate != null)
+            {
+                daysSinceFirstOrder = (int)(now - firstOrder.OrderDate.Value).TotalDays;
+            }
+
             metricsList.Add(new SellerPerformanceMetricsDto
             {
                 Id = seller.Id,
@@ -94,7 +108,8 @@ public class GetSellerPerformanceMetricsQueryHandler : IRequestHandler<GetSeller
                 TotalSales = totalSales,
                 UnresolvedCases = unresolvedCases,
                 DefectRate = defectRate,
-                LateRate = lateRate
+                LateRate = lateRate,
+                ActiveDays = daysSinceFirstOrder
             });
         }
 

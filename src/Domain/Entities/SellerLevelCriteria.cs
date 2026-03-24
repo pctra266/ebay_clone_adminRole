@@ -19,6 +19,7 @@ public class SellerLevelCriteria
     public double TopRatedMaxLateRate { get; set; } = 0.03;   // 3%
 
     // --- Above Standard Criteria ---
+    public int AboveStandardMinDays { get; set; } = 30;
     public double AboveStandardMaxDefectRate { get; set; } = 0.02; // 2%
     public double AboveStandardMaxLateRate { get; set; } = 0.08;
     public int AboveStandardMaxUnresolvedCases { get; set; } = 2;

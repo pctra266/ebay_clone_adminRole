@@ -13,6 +13,7 @@ public record SellerLevelCriteriaDto
     public int TopRatedMaxUnresolvedCases { get; init; }
     public double TopRatedMaxDefectRate { get; init; }
     public double TopRatedMaxLateRate { get; init; }
+    public int AboveStandardMinDays { get; init; }
     public double AboveStandardMaxDefectRate { get; init; }
     public int AboveStandardMaxUnresolvedCases { get; init; }
     public double AboveStandardMaxUnresolvedRate { get; init; }
@@ -46,6 +47,7 @@ public class GetSellerLevelCriteriaQueryHandler : IRequestHandler<GetSellerLevel
                 TopRatedMaxUnresolvedCases = 2,
                 TopRatedMaxDefectRate = 0.005,
                 TopRatedMaxLateRate = 0.03,
+                AboveStandardMinDays = 30,
                 AboveStandardMaxDefectRate = 0.02,
                 AboveStandardMaxUnresolvedCases = 2,
                 AboveStandardMaxUnresolvedRate = 0.003,
@@ -62,6 +64,7 @@ public class GetSellerLevelCriteriaQueryHandler : IRequestHandler<GetSellerLevel
             TopRatedMaxUnresolvedCases = criteria.TopRatedMaxUnresolvedCases,
             TopRatedMaxDefectRate = criteria.TopRatedMaxDefectRate,
             TopRatedMaxLateRate = criteria.TopRatedMaxLateRate,
+            AboveStandardMinDays = criteria.AboveStandardMinDays,
             AboveStandardMaxDefectRate = criteria.AboveStandardMaxDefectRate,
             AboveStandardMaxUnresolvedCases = criteria.AboveStandardMaxUnresolvedCases,
             AboveStandardMaxUnresolvedRate = criteria.AboveStandardMaxUnresolvedRate,

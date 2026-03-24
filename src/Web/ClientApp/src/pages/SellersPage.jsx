@@ -99,7 +99,8 @@ export const SellersPage = () => {
                                 totalSales: metrics.totalSales, 
                                 unresolvedCases: metrics.unresolvedCases, 
                                 defectRate: metrics.defectRate, 
-                                lateRate: metrics.lateRate 
+                                lateRate: metrics.lateRate,
+                                activeDays: metrics.activeDays
                               }
                             : w
                     ));
@@ -147,7 +148,8 @@ export const SellersPage = () => {
                     totalSales: metric?.totalSales || 0,
                     unresolvedCases: metric?.unresolvedCases || 0,
                     defectRate: metric?.defectRate || 0,
-                    lateRate: metric?.lateRate || 0
+                    lateRate: metric?.lateRate || 0,
+                    activeDays: metric?.activeDays || 0
                 };
             });
 
@@ -416,8 +418,12 @@ export const SellersPage = () => {
                                 </div>
                                 <div className="level-criteria-list">
                                     <div className="d-flex align-items-center justify-content-between small mb-2 p-2 bg-light rounded-3">
+                                        <span className="text-muted"><i className="bi bi-calendar-event me-2"></i>Active Days</span>
+                                        <span className="fw-bold">≥ {criteria.aboveStandardMinDays}</span>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between small mb-2 p-2 bg-light rounded-3">
                                         <span className="text-muted"><i className="bi bi-graph-down me-2"></i>Defect Rate</span>
-                                        <span className="fw-bold">≤ {(criteria.aboveStandardMaxDefectRate * 100).toFixed(1)}%</span>
+                                        <span className="fw-bold text-warning">≤ {(criteria.aboveStandardMaxDefectRate * 100).toFixed(1)}%</span>
                                     </div>
                                     <div className="d-flex align-items-center justify-content-between small p-2 bg-light rounded-3">
                                         <span className="text-muted"><i className="bi bi-headset me-2"></i>Unresolved</span>
@@ -648,13 +654,19 @@ export const SellersPage = () => {
                 <ModalBody className="py-4">
                     {selectedSeller && (
                         <div className="row g-3">
-                            <div className="col-6">
+                            <div className="col-4">
                                 <div className="p-3 bg-light rounded-4 text-center h-100">
                                     <div className="text-secondary small mb-1">Transactions</div>
                                     <div className="h4 mb-0 fw-bold">{selectedSeller.transactionCount}</div>
                                 </div>
                             </div>
-                            <div className="col-6">
+                            <div className="col-4">
+                                <div className="p-3 bg-light rounded-4 text-center h-100 border-start border-end">
+                                    <div className="text-secondary small mb-1">Active Days</div>
+                                    <div className="h4 mb-0 fw-bold">{selectedSeller.activeDays !== undefined ? selectedSeller.activeDays : 0}</div>
+                                </div>
+                            </div>
+                            <div className="col-4">
                                 <div className="p-3 bg-light rounded-4 text-center h-100">
                                     <div className="text-secondary small mb-1">Sales Vol.</div>
                                     <div className="h5 mb-0 fw-bold text-truncate">{formatCurrency(selectedSeller.totalSales)}</div>

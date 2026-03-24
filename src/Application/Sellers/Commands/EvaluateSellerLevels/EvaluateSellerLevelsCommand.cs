@@ -90,6 +90,20 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
             double lateRate = transactionCount > 0 ? (double)lateShipments / transactionCount : 0;
 
             // Evaluate Level using dynamic criteria
+            // Calculate days since first successful order
+            var firstOrder = await _context.OrderTables
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == seller.Id) && o.Status == "Completed")
+                .OrderBy(o => o.OrderDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            int daysSinceFirstOrder = 0;
+            if (firstOrder?.OrderDate != null)
+            {
+                daysSinceFirstOrder = (int)(now - firstOrder.OrderDate.Value).TotalDays;
+            }
+
             string newLevel = "BelowStandard";
 
             // Is Top Rated?
@@ -102,6 +116,8 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
 
             // Is Above Standard?
             bool isAboveStandard = !isTopRated && 
+                                   transactionCount > 0 && 
+                                   daysSinceFirstOrder >= criteria.AboveStandardMinDays &&
                                    defectRate <= criteria.AboveStandardMaxDefectRate && 
                                    (unresolvedCases <= criteria.AboveStandardMaxUnresolvedCases || unresolvedRate <= criteria.AboveStandardMaxUnresolvedRate);
 
