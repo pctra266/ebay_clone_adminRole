@@ -47,7 +47,8 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
         var timeline = BuildTimeline(dispute);
 
         // Get buyer stats
-        var buyerStats = await GetPartyStats(dispute.RaisedBy, true, cancellationToken);
+        var buyerId = dispute.Order?.BuyerId ?? dispute.RaisedBy;
+        var buyerStats = await GetPartyStats(buyerId, true, cancellationToken);
         
         // Get seller (from first order item)
         var sellerId = dispute.Order?.OrderItems.FirstOrDefault()?.Product?.SellerId;

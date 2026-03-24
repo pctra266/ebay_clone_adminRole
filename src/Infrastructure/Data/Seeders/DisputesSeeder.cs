@@ -20,13 +20,13 @@ public class DisputesSeeder : ISeeder
 
     public async Task SeedAsync()
     {
-        if (_context.Disputes.Count() >= 6)
+        int currentDisputeCount = await _context.Disputes.CountAsync();
+        if (currentDisputeCount >= 10)
         {
-            _logger.LogInformation("Disputes already seeded with 6+ records, skipping...");
+            _logger.LogInformation("Disputes already seeded with 10+ records, skipping...");
+            await PatchWalletDisputedBalancesAsync();
             return;
         }
-
-        bool hasInitial3 = _context.Disputes.Any();
 
         var johnBuyer = await _context.Users.FirstOrDefaultAsync(u => u.Username == "john_buyer");
         var techSeller = await _context.Users.FirstOrDefaultAsync(u => u.Username == "tech_seller_pro");
@@ -39,327 +39,189 @@ public class DisputesSeeder : ISeeder
             return;
         }
 
-        // Create sample orders first
-        var sampleOrders = new List<OrderTable>
+        // Wipe out any existing orphaned dummy disputes from old partial seeds if we are regenerating
+        if (currentDisputeCount > 0)
         {
-            new OrderTable
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-15),
-                TotalPrice = 1000.00m,
-                Status = "Delivered",
-                CompletedAt = DateTime.UtcNow.AddDays(-10),
-                CanDisputeUntil = DateTime.UtcNow.AddDays(20), // 30 days from delivery
-                PlatformFee = 129.00m, // 12.9%
-                SellerEarnings = 871.00m
-            },
-            new OrderTable
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-8),
-                TotalPrice = 1200.00m,
-                Status = "Shipped",
-                PlatformFee = 154.80m,
-                SellerEarnings = 1045.20m
-            },
-            new OrderTable
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-5),
-                TotalPrice = 150.50m,
-                Status = "Delivered",
-                CompletedAt = DateTime.UtcNow.AddDays(-2),
-                CanDisputeUntil = DateTime.UtcNow.AddDays(28),
-                PlatformFee = 19.41m,
-                SellerEarnings = 131.09m
-            },
-            new OrderTable // For Dispute 4
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-20),
-                TotalPrice = 500.00m,
-                Status = "Delivered",
-                CompletedAt = DateTime.UtcNow.AddDays(-15),
-                CanDisputeUntil = DateTime.UtcNow.AddDays(15),
-                PlatformFee = 60.00m,
-                SellerEarnings = 440.00m
-            },
-            new OrderTable // For Dispute 5
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-2),
-                TotalPrice = 80.00m,
-                Status = "Shipped",
-                PlatformFee = 8.00m,
-                SellerEarnings = 72.00m
-            },
-            new OrderTable // For Dispute 6
-            {
-                BuyerId = johnBuyer.Id,
-                OrderDate = DateTime.UtcNow.AddDays(-10),
-                TotalPrice = 350.00m,
-                Status = "Delivered",
-                CompletedAt = DateTime.UtcNow.AddDays(-5),
-                CanDisputeUntil = DateTime.UtcNow.AddDays(25),
-                PlatformFee = 35.00m,
-                SellerEarnings = 315.00m
-            }
-        };
-
-        if (!hasInitial3)
-        {
-            _context.OrderTables.AddRange(sampleOrders.Take(3));
-        }
-        _context.OrderTables.AddRange(sampleOrders.Skip(3));
-        await _context.SaveChangesAsync();
-
-        // Create disputes
-        var disputes = new List<Dispute>
-        {
-            // CASE 1: High Priority - INAD (Wrong Size) - Escalated
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-001",
-                OrderId = sampleOrders[0].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.INAD,
-                Subcategory = "WrongSize",
-                Description = "Received Size 8 instead of Size 10 as ordered",
-                DesiredOutcome = "FullRefund",
-                Amount = 1000.00m,
-                Priority = DisputePriorities.High,
-                Status = DisputeStatuses.Escalated,
-                CreatedAt = DateTime.UtcNow.AddDays(-4),
-                FirstResponseAt = DateTime.UtcNow.AddDays(-3),
-                EscalatedAt = DateTime.UtcNow.AddDays(-1),
-                Deadline = DateTime.UtcNow.AddHours(23),
-                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"size8-label.jpg\",\"description\":\"Photo showing Size 8 label\"},{\"type\":\"image\",\"url\":\"receipt.jpg\",\"description\":\"Receipt showing Size 10 order\"},{\"type\":\"video\",\"url\":\"unboxing.mp4\",\"description\":\"Unboxing video\"}]",
-                SellerEvidence = "[{\"type\":\"image\",\"url\":\"packing.jpg\",\"description\":\"Packing process\"},{\"type\":\"image\",\"url\":\"size10-tag.jpg\",\"description\":\"Size 10 tag visible\"},{\"type\":\"image\",\"url\":\"shipping-label.jpg\",\"description\":\"Shipping label with order number\"}]",
-                OfferHistory = "[{\"amount\":300,\"percentage\":30,\"offeredBy\":\"Seller\",\"timestamp\":\"" + DateTime.UtcNow.AddDays(-2).ToString("o") + "\",\"status\":\"Declined\",\"reason\":\"Goodwill gesture\"}]",
-                NegotiationRounds = 2,
-                LastOfferAmount = 300.00m,
-                TrackingNumber = "1Z999AA10123456784",
-                DeliveryStatus = "Delivered",
-                RequiresReturn = true,
-                IsHighValue = true,
-                ViewCount = 0
-            },
-
-            // CASE 2: Critical Priority - INR (Item Not Received)
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-002",
-                OrderId = sampleOrders[1].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.INR,
-                Subcategory = "NeverArrived",
-                Description = "Package shows delivered but I never received it. Checked with neighbors and building manager.",
-                DesiredOutcome = "FullRefund",
-                Amount = 1200.00m,
-                Priority = DisputePriorities.Critical,
-                Status = DisputeStatuses.UnderReview,
-                CreatedAt = DateTime.UtcNow.AddDays(-2),
-                FirstResponseAt = DateTime.UtcNow.AddDays(-1),
-                EscalatedAt = DateTime.UtcNow.AddHours(-12),
-                AssignedAt = DateTime.UtcNow.AddHours(-2),
-                Deadline = DateTime.UtcNow.AddHours(5),
-                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"front-door.jpg\",\"description\":\"No package at my door\"},{\"type\":\"image\",\"url\":\"tracking-screenshot.jpg\",\"description\":\"Tracking shows delivered\"}]",
-                SellerEvidence = "[{\"type\":\"image\",\"url\":\"packed-box.jpg\",\"description\":\"Properly packed MacBook\"},{\"type\":\"document\",\"url\":\"tracking-proof.pdf\",\"description\":\"Carrier confirmation\"}]",
-                TrackingNumber = "1Z999AA10987654321",
-                DeliveryStatus = "Delivered",
-                RequiresReturn = false,
-                IsHighValue = true,
-                ViewCount = 3,
-                LastViewedAt = DateTime.UtcNow.AddHours(-1)
-            },
-
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-003",
-                OrderId = sampleOrders[2].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.INAD,
-                Subcategory = "WrongColor",
-                Description = "Ordered Black phone case but received Blue",
-                DesiredOutcome = "Replacement",
-                Amount = 150.50m,
-                Priority = DisputePriorities.Medium,
-                Status = DisputeStatuses.AwaitingSellerResponse,
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                Deadline = DateTime.UtcNow.AddHours(48),
-                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"blue-case.jpg\",\"description\":\"Received blue case\"},{\"type\":\"image\",\"url\":\"order-screenshot.jpg\",\"description\":\"Order confirmation for black case\"}]",
-                TrackingNumber = "1Z999AA10555555555",
-                DeliveryStatus = "Delivered",
-                RequiresReturn = true,
-                ViewCount = 0
-            },
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-004",
-                OrderId = sampleOrders[3].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.Other,
-                Subcategory = "MissingParts",
-                Description = "The console arrived safely, but the power cord is missing.",
-                DesiredOutcome = "PartialRefund",
-                Amount = 50.00m,
-                Priority = DisputePriorities.Low,
-                Status = DisputeStatuses.Open,
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                Deadline = DateTime.UtcNow.AddHours(72),
-                IsHighValue = false,
-                ViewCount = 1
-            },
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-005",
-                OrderId = sampleOrders[4].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.Damaged,
-                Subcategory = "ShatteredScreen",
-                Description = "The TV was completely destroyed during shipping. The screen is shattered.",
-                DesiredOutcome = "FullRefund",
-                Amount = 80.00m,
-                Priority = DisputePriorities.High,
-                Status = DisputeStatuses.AssignedToAdmin,
-                AssignedTo = 1,
-                AssignedAt = DateTime.UtcNow.AddHours(-1),
-                CreatedAt = DateTime.UtcNow.AddDays(-2),
-                FirstResponseAt = DateTime.UtcNow.AddDays(-1),
-                EscalatedAt = DateTime.UtcNow.AddHours(-5),
-                Deadline = DateTime.UtcNow.AddHours(12),
-                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"broken_tv.jpg\",\"description\":\"Shattered TV screen\"}]",
-                RequiresReturn = false,
-                IsHighValue = false,
-                ViewCount = 5
-            },
-            new Dispute
-            {
-                CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-006",
-                OrderId = sampleOrders[5].Id,
-                RaisedBy = johnBuyer.Id,
-                Type = DisputeTypes.Counterfeit,
-                Subcategory = "FakeBrand",
-                Description = "The Airpods are clearly fake. They don't even have a valid serial number.",
-                DesiredOutcome = "FullRefund",
-                Amount = 350.00m,
-                Priority = DisputePriorities.Medium,
-                Status = DisputeStatuses.Resolved,
-                Winner = DisputeWinners.Buyer,
-                ResolvedBy = 1,
-                ResolvedAt = DateTime.UtcNow.AddHours(-10),
-                AdminNotes = "Buyer provided conclusive proof from Apple Store that the serial number is invalid. Full refund issued.",
-                RefundAmount = 350.00m,
-                RefundMethod = "OriginalPayment",
-                RefundProcessedAt = DateTime.UtcNow.AddHours(-9),
-                RefundTransactionId = "TXN-FAKE-12345",
-                CreatedAt = DateTime.UtcNow.AddDays(-6),
-                FirstResponseAt = DateTime.UtcNow.AddDays(-5),
-                EscalatedAt = DateTime.UtcNow.AddDays(-2),
-                BuyerEvidence = "[{\"type\":\"image\",\"url\":\"fake_airpods.jpg\",\"description\":\"Fake Airpods\"}]",
-                RequiresReturn = false,
-                IsHighValue = false,
-                IsVeRO = true,
-                ViewCount = 8
-            }
-        };
-
-        if (!hasInitial3)
-        {
-            _context.Disputes.AddRange(disputes.Take(3));
+            _logger.LogInformation("Dropping old boring disputes to replace with new immersive data...");
+            _context.DisputeMessages.RemoveRange(await _context.DisputeMessages.ToListAsync());
+            _context.Disputes.RemoveRange(await _context.Disputes.ToListAsync());
             await _context.SaveChangesAsync();
         }
 
-        _context.Disputes.AddRange(disputes.Skip(3));
+        _logger.LogInformation("Generating 10 highly immersive E-commerce Dispute scenarios...");
+
+        // 1. CREATE CUSTOM PRODUCTS JUST FOR THESE DISPUTES
+        var customProducts = new List<Product>
+        {
+            new Product { SellerId = techSeller.Id, Title = "Sony G-Master 24-70mm f/2.8 Lens (Pristine)", Price = 1850.00m, Status = "Active", Images = "sony-gm.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "Apple OLED iPad Pro M4 13-inch 512GB", Price = 1499.00m, Status = "Active", Images = "ipad-m4.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = fashionSeller.Id, Title = "Travis Scott x Air Jordan 1 Low 'Reverse Mocha'", Price = 950.00m, Status = "Active", Images = "travis-scott.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "Limited Edition Zelda 1/4 Scale Resin Figure", Price = 420.00m, Status = "Active", Images = "zelda-figure.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "PS5 DualSense Edge Wireless Controller - Brand New", Price = 199.00m, Status = "Active", Images = "dualsense.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "DJI Mini 4 Pro Fly More Combo", Price = 1099.00m, Status = "Active", Images = "dji-mini.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = fashionSeller.Id, Title = "Rolex Submariner Date 116610LN (Box & Papers)", Price = 12500.00m, Status = "Active", Images = "rolex-sub.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = fashionSeller.Id, Title = "Vintage Spider-Man Comic #1 (CGC 8.5)", Price = 850.00m, Status = "Active", Images = "spiderman-cgc.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "Keychron Q1 Pro Custom Mechanical Keyboard (Tactile Brown)", Price = 199.00m, Status = "Active", Images = "keychron.jpg", CreatedAt = DateTime.UtcNow },
+            new Product { SellerId = techSeller.Id, Title = "Alienware Aurora R16 Gaming Desktop (RTX 4090)", Price = 3800.00m, Status = "Active", Images = "alienware.jpg", CreatedAt = DateTime.UtcNow }
+        };
+        _context.Products.AddRange(customProducts);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Seeded {Count} Sample Disputes", disputes.Count);
-
-        // Seed dispute messages for Case 1 (chat history)
-        var case1 = disputes[0];
-        var messages = new List<DisputeMessage>
+        // 2. CREATE IMMERSIVE ORDERS
+        var immersiveOrders = new List<OrderTable>
         {
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = johnBuyer.Id,
-                SenderType = SenderTypes.Buyer,
-                MessageType = MessageTypes.Evidence,
-                Content = "Hi, I received the shoes but they're Size 8, not Size 10 as I ordered.",
-                CreatedAt = DateTime.UtcNow.AddDays(-4).AddHours(1),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = techSeller.Id,
-                SenderType = SenderTypes.Seller,
-                MessageType = MessageTypes.Response,
-                Content = "I'm sorry to hear that. Can you send me a photo of the size label?",
-                CreatedAt = DateTime.UtcNow.AddDays(-3).AddHours(-3),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = johnBuyer.Id,
-                SenderType = SenderTypes.Buyer,
-                MessageType = MessageTypes.Evidence,
-                Content = "Here are the photos showing Size 8 label.",
-                Attachments = "[{\"url\":\"size8-photo.jpg\",\"type\":\"image\"}]",
-                CreatedAt = DateTime.UtcNow.AddDays(-3).AddHours(-1),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = techSeller.Id,
-                SenderType = SenderTypes.Seller,
-                MessageType = MessageTypes.Offer,
-                Content = "I've checked my records and I'm confident I sent Size 10. However, to resolve this quickly, I can offer you a 30% refund ($300) as a goodwill gesture.",
-                OfferAmount = 300.00m,
-                OfferReason = "Goodwill gesture for inconvenience",
-                CreatedAt = DateTime.UtcNow.AddDays(-2).AddHours(3),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = johnBuyer.Id,
-                SenderType = SenderTypes.Buyer,
-                MessageType = MessageTypes.Decline,
-                Content = "No, I paid $1,000 for Size 10. I want a full refund.",
-                CreatedAt = DateTime.UtcNow.AddDays(-2).AddHours(6),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = techSeller.Id,
-                SenderType = SenderTypes.Seller,
-                MessageType = MessageTypes.Response,
-                Content = "I understand your frustration. Can you ship the item back to me for inspection? I'll cover the return shipping cost.",
-                CreatedAt = DateTime.UtcNow.AddDays(-1).AddHours(-12),
-                IsRead = true
-            },
-            new DisputeMessage
-            {
-                DisputeId = case1.Id,
-                SenderId = systemUser.Id, // Use system user instead of 0
-                SenderType = SenderTypes.System,
-                MessageType = MessageTypes.SystemUpdate,
-                Content = "This case has been escalated to eBay Customer Service due to no resolution after 72 hours.",
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                IsRead = false,
-                IsInternal = false
-            }
+            // O1: Sony Lens - INAD
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-15), TotalPrice = 1850.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-10), CanDisputeUntil = DateTime.UtcNow.AddDays(20), PlatformFee = 185.00m, SellerEarnings = 1665.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[0].Id, Quantity = 1, UnitPrice = 1850.00m } } },
+            // O2: iPad Pro - Fake Tracking INR
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-22), TotalPrice = 1499.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-18), CanDisputeUntil = DateTime.UtcNow.AddDays(12), PlatformFee = 149.90m, SellerEarnings = 1349.10m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[1].Id, Quantity = 1, UnitPrice = 1499.00m } } },
+            // O3: Fake Jordans - Counterfeit
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-12), TotalPrice = 950.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-8), CanDisputeUntil = DateTime.UtcNow.AddDays(22), PlatformFee = 95.00m, SellerEarnings = 855.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[2].Id, Quantity = 1, UnitPrice = 950.00m } } },
+            // O4: Crushed Anime Figure - Damaged
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-6), TotalPrice = 420.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-2), CanDisputeUntil = DateTime.UtcNow.AddDays(28), PlatformFee = 42.00m, SellerEarnings = 378.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[3].Id, Quantity = 1, UnitPrice = 420.00m } } },
+            // O5: Greasy Controller - INAD
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-8), TotalPrice = 199.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-5), CanDisputeUntil = DateTime.UtcNow.AddDays(25), PlatformFee = 19.90m, SellerEarnings = 179.10m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[4].Id, Quantity = 1, UnitPrice = 199.00m } } },
+            // O6: Missing Drone Parts - INAD
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-14), TotalPrice = 1099.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-10), CanDisputeUntil = DateTime.UtcNow.AddDays(20), PlatformFee = 109.90m, SellerEarnings = 989.10m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[5].Id, Quantity = 1, UnitPrice = 1099.00m } } },
+            // O7: Fake Rolex - VeRO Auto Takedown (Counterfeit)
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-25), TotalPrice = 12500.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-20), CanDisputeUntil = DateTime.UtcNow.AddDays(10), PlatformFee = 1250.00m, SellerEarnings = 11250.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[6].Id, Quantity = 1, UnitPrice = 12500.00m } } },
+            // O8: Lost Comic - INR
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-45), TotalPrice = 850.00m, Status = "Shipped", CanDisputeUntil = DateTime.UtcNow.AddDays(-15), PlatformFee = 85.00m, SellerEarnings = 765.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[7].Id, Quantity = 1, UnitPrice = 850.00m } } },
+            // O9: Wrong Keyboard Switch - INAD
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-4), TotalPrice = 199.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-1), CanDisputeUntil = DateTime.UtcNow.AddDays(29), PlatformFee = 19.90m, SellerEarnings = 179.10m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[8].Id, Quantity = 1, UnitPrice = 199.00m } } },
+            // O10: PC DOA - Damaged
+            new OrderTable { BuyerId = johnBuyer.Id, OrderDate = DateTime.UtcNow.AddDays(-10), TotalPrice = 3800.00m, Status = "Delivered", CompletedAt = DateTime.UtcNow.AddDays(-8), CanDisputeUntil = DateTime.UtcNow.AddDays(22), PlatformFee = 380.00m, SellerEarnings = 3420.00m, OrderItems = new List<OrderItem> { new OrderItem { ProductId = customProducts[9].Id, Quantity = 1, UnitPrice = 3800.00m } } }
         };
+        _context.OrderTables.AddRange(immersiveOrders);
+        await _context.SaveChangesAsync();
 
-        if (!hasInitial3)
+        // 3. CREATE IMMERSIVE DISPUTES
+        var immersiveDisputes = new List<Dispute>
         {
-            _context.DisputeMessages.AddRange(messages);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Seeded {Count} Dispute Messages", messages.Count);
+            // Case 1: Lens Bait & Switch (Escalated, Toxic argument)
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-LENS", OrderId = immersiveOrders[0].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.INAD, Subcategory = "DamagedItem", Description = "The seller sent me a G-Master lens absolutely coated in fungus with a scratched front element! The listing photos were clearly stolen from someone else. Absolute scam.", DesiredOutcome = "FullRefund", Amount = 1850.00m, Priority = DisputePriorities.Critical, Status = DisputeStatuses.Escalated, CreatedAt = DateTime.UtcNow.AddDays(-4), FirstResponseAt = DateTime.UtcNow.AddDays(-3), EscalatedAt = DateTime.UtcNow.AddDays(-1), Deadline = DateTime.UtcNow.AddHours(23), BuyerEvidence = "[{\"type\":\"image\",\"url\":\"fungus_lens.jpg\",\"description\":\"Thick fungus inside lens\"},{\"type\":\"video\",\"url\":\"scratch_tilt.mp4\",\"description\":\"Video tilting lens to show deep gouges\"}]", SellerEvidence = "[{\"type\":\"image\",\"url\":\"my_lens_pristine.jpg\",\"description\":\"Photo of the lens I ACTUALLY sent\"}]", NegotiationRounds = 3, LastOfferAmount = 900.00m, TrackingNumber = "1Z999SCAM1234", DeliveryStatus = "Delivered", RequiresReturn = true, IsHighValue = true, ViewCount = 2 },
+            
+            // Case 2: Fake Tracking Zip Code (Admin assigned)
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-IPAD", OrderId = immersiveOrders[1].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.INR, Subcategory = "FakeTracking", Description = "Tracking says 'Delivered to front porch', but the destination zip code on the UPS site is 90210 (Beverly Hills). I live in New York! The seller intentionally shipped an empty envelope to a fake address to game the tracking system.", DesiredOutcome = "FullRefund", Amount = 1499.00m, Priority = DisputePriorities.Critical, Status = DisputeStatuses.AssignedToAdmin, AssignedTo = 1, AssignedAt = DateTime.UtcNow.AddHours(-5), CreatedAt = DateTime.UtcNow.AddDays(-2), EscalatedAt = DateTime.UtcNow.AddHours(-12), Deadline = DateTime.UtcNow.AddHours(5), BuyerEvidence = "[{\"type\":\"document\",\"url\":\"ups_zip_mismatch.pdf\",\"description\":\"UPS official proof of delivery showing wrong city/state\"}]", TrackingNumber = "1ZFAKE990001", DeliveryStatus = "Delivered", RequiresReturn = false, IsHighValue = true, ViewCount = 1 },
+
+            // Case 3: Fake Travis Scott Jordans
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-SNEAK", OrderId = immersiveOrders[2].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.Counterfeit, Subcategory = "FakeBrand", Description = "Ran these through CheckCheck app and they failed instantly. The suede is completely dead, the swoosh placement is 2cm too high, and it smells like toxic factory glue, not Nike leather. Seller is a counterfeiter.", DesiredOutcome = "FullRefund", Amount = 950.00m, Priority = DisputePriorities.High, Status = DisputeStatuses.UnderReview, CreatedAt = DateTime.UtcNow.AddDays(-5), FirstResponseAt = DateTime.UtcNow.AddDays(-4), Deadline = DateTime.UtcNow.AddHours(14), BuyerEvidence = "[{\"type\":\"image\",\"url\":\"dead_suede.jpg\",\"description\":\"Suede brushing test failed\"},{\"type\":\"document\",\"url\":\"checkcheck_fail.pdf\",\"description\":\"Failed Auth Report\"}]", SellerEvidence = "[{\"type\":\"image\",\"url\":\"snkrs_receipt_fake.jpg\",\"description\":\"SNKRS App Screenshot\"}]", IsVeRO = false, IsHighValue = false, ViewCount = 5 },
+
+            // Case 4: Crushed Zelda Figure
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-CRUSH", OrderId = immersiveOrders[3].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.Damaged, Subcategory = "Shattered", Description = "Who ships a $400 highly fragile resin figure in a plastic bag?! The sword is snapped, the base is shattered, and the collector's box is flattened like a pancake.", DesiredOutcome = "PartialRefund", Amount = 200.00m, Priority = DisputePriorities.Medium, Status = DisputeStatuses.AwaitingSellerResponse, CreatedAt = DateTime.UtcNow.AddHours(-15), Deadline = DateTime.UtcNow.AddHours(57), BuyerEvidence = "[{\"type\":\"image\",\"url\":\"crushed_box.jpg\",\"description\":\"Poly mailer and crushed box\"},{\"type\":\"image\",\"url\":\"broken_sword.jpg\",\"description\":\"Sword snapped in 3 places\"}]", RequiresReturn = false, ViewCount = 0 },
+
+            // Case 5: Greasy DualSense (Resolved - Split Decision)
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-GREASE", OrderId = immersiveOrders[4].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.INAD, Subcategory = "UsedSoldAsNew", Description = "Listed as 'Brand New Sealed'. Arrived with the seal deliberately cut, thumbsticks are shiny with human grease, and it has massive stick drift to the left.", DesiredOutcome = "FullRefund", Amount = 199.00m, Priority = DisputePriorities.Low, Status = DisputeStatuses.Resolved, Winner = DisputeWinners.Split, ResolvedBy = 1, ResolvedAt = DateTime.UtcNow.AddDays(-1), AdminNotes = "Seller admitted to opening it 'just to hold it'. Granted a partial refund to compensate for used condition.", RefundAmount = 80.00m, RefundMethod = "OriginalPayment", RefundProcessedAt = DateTime.UtcNow.AddDays(-1), CreatedAt = DateTime.UtcNow.AddDays(-4), FirstResponseAt = DateTime.UtcNow.AddDays(-3), EscalatedAt = DateTime.UtcNow.AddDays(-2), ViewCount = 4 },
+
+            // Case 6: Missing Drone Parts
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-DRONE", OrderId = immersiveOrders[5].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.Other, Subcategory = "MissingParts", Description = "I received the drone itself, but the 'Fly More Combo' batteries and the RC Controller are completely missing from the box. Looks like the seller parted it out to sell separately.", DesiredOutcome = "FullRefund", Amount = 1099.00m, Priority = DisputePriorities.High, Status = DisputeStatuses.Open, CreatedAt = DateTime.UtcNow.AddHours(-2), Deadline = DateTime.UtcNow.AddHours(70), BuyerEvidence = "[{\"type\":\"video\",\"url\":\"unboxing_cut.mp4\",\"description\":\"Showing empty compartments\"}]", RequiresReturn = true, IsHighValue = true, ViewCount = 0 },
+
+            // Case 7: VeRO Fake Rolex (System Raised)
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-ROLEX", OrderId = immersiveOrders[6].Id, RaisedBy = systemUser.Id, Type = DisputeTypes.Counterfeit, Subcategory = "BrandTakedown", Description = "[SYSTEM AUTO-HOLD] Rolex S.A. Legal Department filed a VeRO takedown regarding this listing immediately after sale. Funds frozen pending intensive physical authentication.", DesiredOutcome = "FullRefund", Amount = 12500.00m, Priority = DisputePriorities.Critical, Status = DisputeStatuses.AssignedToAdmin, AssignedTo = 1, AssignedAt = DateTime.UtcNow.AddDays(-1), CreatedAt = DateTime.UtcNow.AddDays(-2), Deadline = DateTime.UtcNow.AddHours(12), BuyerEvidence = "[{\"type\":\"document\",\"url\":\"vero_legal_notice.pdf\",\"description\":\"DMCA/VeRO Legal Document\"}]", SellerEvidence = "[{\"type\":\"document\",\"url\":\"dealer_stamp.jpg\",\"description\":\"Grey market dealer stamp\"}]", RequiresReturn = false, IsHighValue = true, IsVeRO = true, ViewCount = 28 },
+
+            // Case 8: Lost Comic
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-LOST", OrderId = immersiveOrders[7].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.INR, Subcategory = "LostInTransit", Description = "It's been 45 days. Tracking hasn't updated in a month. I've been patient but I need my money back now.", DesiredOutcome = "FullRefund", Amount = 850.00m, Priority = DisputePriorities.Medium, Status = DisputeStatuses.Resolved, Winner = DisputeWinners.Buyer, ResolvedBy = 1, ResolvedAt = DateTime.UtcNow.AddHours(-10), AdminNotes = "Carrier confirms item is lost in transit. Refunded buyer. Seller instructed to file carrier insurance claim.", RefundAmount = 850.00m, RefundMethod = "StoreCredit", RefundProcessedAt = DateTime.UtcNow.AddHours(-9), CreatedAt = DateTime.UtcNow.AddDays(-6), ViewCount = 3 },
+
+            // Case 9: Wrong Keyboard Switch (Petty argument)
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-KEYB", OrderId = immersiveOrders[8].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.INAD, Subcategory = "WrongColor", Description = "I ordered TACTILE BROWN switches because I work in an office. They sent CLICKY BLUE. My coworkers are literally threatening to murder me because of the typing noise.", DesiredOutcome = "Replacement", Amount = 199.00m, Priority = DisputePriorities.Low, Status = DisputeStatuses.Open, CreatedAt = DateTime.UtcNow.AddHours(-1), Deadline = DateTime.UtcNow.AddHours(71), ViewCount = 0 },
+
+            // Case 10: Dead PC
+            new Dispute { CaseId = $"DSP-{DateTime.UtcNow:yyyyMMdd}-DOAPC", OrderId = immersiveOrders[9].Id, RaisedBy = johnBuyer.Id, Type = DisputeTypes.Damaged, Subcategory = "Defective", Description = "Turned it on, fans spin, then immediate sparks and smoke from the GPU slot. The RTX 4090 wasn't shipped with foam expansion packs inside the case, so it tore the PCIe slot completely off the motherboard during shipping.", DesiredOutcome = "FullRefund", Amount = 3800.00m, Priority = DisputePriorities.Critical, Status = DisputeStatuses.UnderReview, CreatedAt = DateTime.UtcNow.AddDays(-2), EscalatedAt = DateTime.UtcNow.AddDays(-1), Deadline = DateTime.UtcNow.AddHours(4), BuyerEvidence = "[{\"type\":\"image\",\"url\":\"torn_pcie.jpg\",\"description\":\"Motherboard destroyed\"},{\"type\":\"video\",\"url\":\"sparks.mp4\",\"description\":\"Smoke coming out on boot\"}]", RequiresReturn = true, IsHighValue = true, ViewCount = 7 }
+        };
+        _context.Disputes.AddRange(immersiveDisputes);
+        await _context.SaveChangesAsync();
+
+        // 4. CREATE INTENSE CHAT HISTORIES
+        var messages = new List<DisputeMessage>();
+
+        // Chat for Case 1 (Lens Bait & Switch)
+        var c1 = immersiveDisputes[0];
+        messages.AddRange(new[] {
+            new DisputeMessage { DisputeId = c1.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Note, Content = "Is this a joke? The lens is infested with fungus. The front glass looks like it was rubbed with sandpaper.", CreatedAt = c1.CreatedAt.AddHours(1) },
+            new DisputeMessage { DisputeId = c1.Id, SenderId = techSeller.Id, SenderType = SenderTypes.Seller, MessageType = MessageTypes.Response, Content = "Nice try, scammer. I took a video of myself packing a flawless lens at the post office. You're trying to send me back your broken trash.", CreatedAt = c1.CreatedAt.AddHours(5) },
+            new DisputeMessage { DisputeId = c1.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Evidence, Content = "I HAVE AN UNBOXING VIDEO. Your tape was still sealed. Look at the serial number in my video, it matches yours!", CreatedAt = c1.CreatedAt.AddHours(6) },
+            new DisputeMessage { DisputeId = c1.Id, SenderId = techSeller.Id, SenderType = SenderTypes.Seller, MessageType = MessageTypes.Offer, OfferAmount = 900m, OfferReason = "Bribe to go away", Content = "Fine, the post office must have swapped it... I'll give you half your money back if you close this right now. If admin steps in, you get nothing.", CreatedAt = c1.CreatedAt.AddDays(1) },
+            new DisputeMessage { DisputeId = c1.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Decline, Content = "Absolutely not. Escalating to admin.", CreatedAt = c1.CreatedAt.AddDays(1).AddHours(2) },
+            new DisputeMessage { DisputeId = c1.Id, SenderId = systemUser.Id, SenderType = SenderTypes.System, MessageType = MessageTypes.SystemUpdate, Content = "Case escalated by Buyer. Admin review pending due to conflicting high-value evidence.", CreatedAt = c1.EscalatedAt ?? DateTime.UtcNow }
+        });
+
+        // Chat for Case 3 (Fake Jordans)
+        var c3 = immersiveDisputes[2];
+        messages.AddRange(new[] {
+            new DisputeMessage { DisputeId = c3.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Note, Content = "These are terrible replicas. The stitching on the reverse swoosh is crooked.", CreatedAt = c3.CreatedAt.AddHours(2) },
+            new DisputeMessage { DisputeId = c3.Id, SenderId = fashionSeller.Id, SenderType = SenderTypes.Seller, MessageType = MessageTypes.Response, Content = "Bro Nike QC is just bad these days. I hit these on SNKRS app directly. Look at my receipt.", CreatedAt = c3.CreatedAt.AddDays(1) },
+            new DisputeMessage { DisputeId = c3.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Evidence, Content = "Your receipt doesn't even have your name on it. CheckCheck app authenticated them as FAKE. Return authorized please.", CreatedAt = c3.CreatedAt.AddDays(1).AddHours(5) }
+        });
+
+        // Chat for Case 9 (Wrong switch)
+        var c9 = immersiveDisputes[8];
+        messages.AddRange(new[] {
+            new DisputeMessage { DisputeId = c9.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Note, Content = "You sent clicky blue switches. The listing literally said 'Tactile Brown - Silent office use'. My boss yelled at me today.", CreatedAt = c9.CreatedAt.AddMinutes(15) },
+            new DisputeMessage { DisputeId = c9.Id, SenderId = techSeller.Id, SenderType = SenderTypes.Seller, MessageType = MessageTypes.Response, Content = "Ah sorry man, I ran out of Browns and figured Blues are gaming switches so you'd prefer them! I can send you a $10 coupon for next time?", CreatedAt = c9.CreatedAt.AddMinutes(45) },
+            new DisputeMessage { DisputeId = c9.Id, SenderId = johnBuyer.Id, SenderType = SenderTypes.Buyer, MessageType = MessageTypes.Note, Content = "Are you kidding me? I want to return this immediately.", CreatedAt = c9.CreatedAt.AddMinutes(50) }
+        });
+
+        _context.DisputeMessages.AddRange(messages);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Added intense chat histories to disputes.");
+
+        // Unconditionally patch newly seeded disputes so wallet balances match the UI requirements
+        await PatchWalletDisputedBalancesAsync();
+    }
+
+    private async Task PatchWalletDisputedBalancesAsync()
+    {
+        var activeDisputes = await _context.Disputes
+            .Include(d => d.Order).ThenInclude(o => o!.OrderItems).ThenInclude(oi => oi.Product)
+            .Where(d => d.Status != DisputeStatuses.Resolved && d.Status != DisputeStatuses.Closed)
+            .ToListAsync();
+            
+        var sellerWallets = await _context.SellerWallets.ToListAsync();
+        
+        foreach (var wallet in sellerWallets)
+        {
+            var sellerDisputes = activeDisputes.Where(d => d.Order?.OrderItems.FirstOrDefault()?.Product?.SellerId == wallet.SellerId);
+            var expectedDisputedSum = sellerDisputes.Sum(d => d.Amount ?? d.Order?.TotalPrice ?? 0);
+            
+            if (wallet.DisputedBalance != expectedDisputedSum)
+            {
+                var diff = expectedDisputedSum - wallet.DisputedBalance;
+                wallet.DisputedBalance = expectedDisputedSum;
+                
+                if (diff > 0)
+                {
+                    if (wallet.AvailableBalance >= diff) 
+                    {
+                        wallet.AvailableBalance -= diff;
+                    }
+                    else if (wallet.PendingBalance >= diff) 
+                    {
+                        wallet.PendingBalance -= diff;
+                    }
+                    else 
+                    {
+                        var remaining = diff;
+                        if (wallet.PendingBalance > 0)
+                        {
+                            remaining -= wallet.PendingBalance;
+                            wallet.PendingBalance = 0;
+                        }
+                        // To prevent negative balances in demo data, simulate that this money was just earned from the order
+                        // This keeps the accounting equation true: TotalEarnings = Pending + Available + Locked + Disputed + Withdrawn + Refunded
+                        wallet.CreditPending(remaining);
+                        wallet.PendingBalance -= remaining; // Instantly deduct it because it goes to DisputedBalance
+                    }
+                }
+            }
+            
+            // Rescue any pre-existing negative PendingBalances from legacy seeds
+            if (wallet.PendingBalance < 0)
+            {
+                var absNegative = Math.Abs(wallet.PendingBalance);
+                wallet.CreditPending(absNegative);
+                // CreditPending naturally brings PendingBalance back to 0 and fixes TotalEarnings
+            }
         }
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Auto-Patched SellerWallet DisputedBalances to align with realistic Data.");
     }
 }
