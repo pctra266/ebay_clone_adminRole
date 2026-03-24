@@ -14,7 +14,7 @@ metadata:
   labels:
     app: ebay-api
 spec:
-  clusterIP: None
+  type: ClusterIP
   selector:
     app: ebay-api   # route traffic đến tất cả Pods có label này
   ports:
