@@ -41,7 +41,7 @@ data:
 
         # ── Load Balance Upstream — Chia tải cho 2 Pods API ──
         upstream backend_api {
-            server ebay-api-service:80;
+            server ebay-api-service:8080;
             # Mặc định là Round Robin
         }
 
