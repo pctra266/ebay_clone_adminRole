@@ -222,46 +222,74 @@ export default function ReturnRequestDetailPage() {
             )}
           </Card>
 
-          {/* Chat Evidence */}
-          <Card title="💬 Buyer & Seller Chat History (Evidence)">
-            {messages.length === 0 ? (
-              <div style={{ padding: '24px 0', textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
-                No conversation history found between the two parties.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
-                {messages.map((msg, i) => {
-                  const isBuyer = msg.senderId === detail.userId;
-                  return (
-                    <div key={i} style={{
-                      alignSelf: isBuyer ? 'flex-start' : 'flex-end',
-                      maxWidth: '85%',
-                      background: isBuyer ? '#f3f4f6' : '#eff6ff',
-                      borderRadius: 12,
-                      padding: '10px 14px',
-                      border: `1px solid ${isBuyer ? '#e5e7eb' : '#dbeafe'}`,
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: isBuyer ? '#374151' : '#1d4ed8' }}>
-                          {msg.senderUsername} {isBuyer ? '(Buyer)' : '(Seller)'}
-                        </span>
-                        <span style={{ fontSize: 10, color: '#9ca3af' }}>
-                          {new Date(msg.timestamp).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
-                        </span>
+            {/* Timeline / Audit Log */}
+            <Card title="📜 Activity Timeline (Audit Log)">
+              {(!detail.history || detail.history.length === 0) ? (
+                <div style={{ padding: '12px 0', textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+                  No actions recorded yet.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 10 }}>
+                  {detail.history.map((item, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#6366f1', marginTop: 4 }}></div>
+                        {i < detail.history.length - 1 && <div style={{ width: 1, flex: 1, background: '#e5e7eb', margin: '4px 0' }}></div>}
                       </div>
-                      <p style={{ margin: 0, fontSize: 13, color: '#111827', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                        {msg.content}
-                      </p>
+                      <div style={{ flex: 1, paddingBottom: i < detail.history.length - 1 ? 16 : 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>{item.action}</span>
+                          <span style={{ fontSize: 11, color: '#9ca3af' }}>{new Date(item.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: '#4b5563', marginTop: 2 }}>{item.details}</div>
+                        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>Performed by: {item.adminUsername}</div>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-            <p style={{ marginTop: 16, fontSize: 11, color: '#6b7280', fontStyle: 'italic', textAlign: 'center' }}>
-              ⚠️ Note: This is the full direct chat history between the parties on the eBay system.
-            </p>
-          </Card>
-        </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            {/* Chat Evidence */}
+            <Card title="💬 Buyer & Seller Chat History (Evidence)">
+              {messages.length === 0 ? (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+                  No conversation history found between the two parties.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
+                  {messages.map((msg, i) => {
+                    const isBuyer = msg.senderId === detail.userId;
+                    return (
+                      <div key={i} style={{
+                        alignSelf: isBuyer ? 'flex-start' : 'flex-end',
+                        maxWidth: '85%',
+                        background: isBuyer ? '#f3f4f6' : '#eff6ff',
+                        borderRadius: 12,
+                        padding: '10px 14px',
+                        border: `1px solid ${isBuyer ? '#e5e7eb' : '#dbeafe'}`,
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: isBuyer ? '#374151' : '#1d4ed8' }}>
+                            {msg.senderUsername} {isBuyer ? '(Buyer)' : '(Seller)'}
+                          </span>
+                          <span style={{ fontSize: 10, color: '#9ca3af' }}>
+                            {new Date(msg.timestamp).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 13, color: '#111827', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                          {msg.content}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <p style={{ marginTop: 16, fontSize: 11, color: '#6b7280', fontStyle: 'italic', textAlign: 'center' }}>
+                ⚠️ Note: This is the full direct chat history between the parties on the eBay system.
+              </p>
+            </Card>
+          </div>
 
         {/* RIGHT COLUMN */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -621,6 +649,10 @@ function StatusChip({ status }) {
     ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', label: '🚚 Label Provided'   },
     Returned:              { bg: '#fef9c3', color: '#854d0e', label: '📦 Item Returned'     },
     Escalated:             { bg: '#ffedd5', color: '#9a3412', label: '⚖️ Escalated'       },
+    AwaitingShipment:      { bg: '#e0f2fe', color: '#0369a1', label: '🚢 Awaiting Shipment' },
+    InTransit:             { bg: '#faf5ff', color: '#7e22ce', label: '✈️ In Transit'        },
+    Delivered:             { bg: '#ecfdf5', color: '#047857', label: '🏁 Delivered'         },
+    Completed:             { bg: '#f9fafb', color: '#111827', label: '🏁 Completed'         },
   };
   const s = map[status] || { bg: '#f3f4f6', color: '#374151', label: status };
   return (

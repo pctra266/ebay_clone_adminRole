@@ -21,6 +21,7 @@ public class PayoutTransaction
     public const string StatusFailed     = "Failed";     // Gateway error, funds returned to Available
     public const string StatusHold       = "Hold";       // Blocked by dispute or risk check
     public const string StatusReleased   = "Released";   // Admin released a Hold; will retry next run
+    public const string StatusRefund     = "Refund";     // Refund to buyer from seller's wallet
 
     public string Status { get; set; } = StatusProcessing;
 

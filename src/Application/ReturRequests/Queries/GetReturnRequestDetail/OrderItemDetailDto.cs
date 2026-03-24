@@ -41,6 +41,17 @@ public record ReturnRequestDetailDto
     // Delivery & Tracking
     public string? TrackingNumber { get; init; }
     public string? DeliveryStatus { get; init; }
+
+    // History / Timeline
+    public List<AdminActionDto> History { get; init; } = new();
+}
+
+public record AdminActionDto
+{
+    public string? Action { get; init; }
+    public string? Details { get; init; }
+    public string? AdminUsername { get; init; }
+    public DateTime CreatedAt { get; init; }
 }
 
 public record GetReturnRequestDetailQuery(int Id)
@@ -72,6 +83,20 @@ public class GetReturnRequestDetailQueryHandler
         if (returnRequest == null)
             throw new NotFoundException(nameof(ReturnRequest), $"{request.Id}");
 
+        // Fetch History (Audit Log)
+        var history = await _context.AdminActions
+            .Include(a => a.Admin)
+            .Where(a => a.TargetType == "ReturnRequest" && a.TargetId == returnRequest.Id)
+            .OrderByDescending(a => a.CreatedAt)
+            .Select(a => new AdminActionDto
+            {
+                Action = a.Action,
+                Details = a.Details,
+                AdminUsername = a.Admin != null ? a.Admin.Username : "System",
+                CreatedAt = a.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
         return new ReturnRequestDetailDto
         {
             Id = returnRequest.Id,
@@ -93,6 +118,7 @@ public class GetReturnRequestDetailQueryHandler
             ReturnLabelUrl = returnRequest.ReturnLabelUrl,
             TrackingNumber = returnRequest.Order?.ShippingInfos.FirstOrDefault()?.TrackingNumber,
             DeliveryStatus = returnRequest.Order?.ShippingInfos.FirstOrDefault()?.Status,
+            History = history,
             OrderItems = returnRequest.Order?.OrderItems
                 .Select(oi => new OrderItemDetailDto
                 {
