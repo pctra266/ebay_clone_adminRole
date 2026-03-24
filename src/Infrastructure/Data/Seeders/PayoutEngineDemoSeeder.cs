@@ -156,21 +156,69 @@ public class PayoutEngineDemoSeeder : ISeeder
         // and Status = "Open" with no order (null orderId).
         // We'll also update the payout engine dispute check to handle this more broadly,
         // BUT for now the seeder also seeds a DisputeTransaction with Hold to show in the table.
-        if (!await _context.Disputes.AnyAsync(d => d.RaisedBy == dispSeller.Id && d.Status == "Open"))
+        var existingDemoCase = await _context.Disputes.FirstOrDefaultAsync(d => d.CaseId == "CASE-DEMO-001");
+        
+        if (existingDemoCase == null || existingDemoCase.OrderId == null)
         {
-            _context.Disputes.Add(new Dispute
+            var dummyBuyer = await _context.Users.FirstOrDefaultAsync(u => u.Email == "payout_poor@test.local") ?? poorSeller;
+
+            // Generate a dummy product to establish dispSeller as the seller
+            var dummyProduct = new Product
             {
-                OrderId = null,
-                RaisedBy = dispSeller.Id,   // simulating the seller is in a dispute
-                Description = "Buyer claims item not as described (demo seeded dispute).",
-                Status = "Open",
-                Priority = "High",
-                Amount = 150m,
-                Type = "INAD",
-                CreatedAt = DateTime.UtcNow.AddDays(-2),
-                CaseId = "CASE-DEMO-001"
-            });
+                SellerId = dispSeller.Id,
+                Title = "Demo Product for Dispute Hold",
+                Price = 150m,
+                Status = "Active",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Products.Add(dummyProduct);
             await _context.SaveChangesAsync();
+
+            // Link an order
+            var dummyOrder = new OrderTable
+            {
+                BuyerId = dummyBuyer.Id,
+                OrderDate = DateTime.UtcNow.AddDays(-3),
+                TotalPrice = 150m,
+                Status = "Delivered",
+                OrderItems = new List<OrderItem>
+                {
+                    new OrderItem { ProductId = dummyProduct.Id, Quantity = 1, UnitPrice = 150m }
+                }
+            };
+            _context.OrderTables.Add(dummyOrder);
+            await _context.SaveChangesAsync();
+
+            if (existingDemoCase == null)
+            {
+                _context.Disputes.Add(new Dispute
+                {
+                    OrderId = dummyOrder.Id,
+                    RaisedBy = dummyBuyer.Id,   // Valid buyer
+                    Description = "Buyer claims item not as described (demo seeded dispute).",
+                    Status = "Open",
+                    Priority = "High",
+                    Amount = 150m,
+                    Type = "INAD",
+                    CreatedAt = DateTime.UtcNow.AddDays(-2),
+                    CaseId = "CASE-DEMO-001"
+                });
+            }
+            else
+            {
+                existingDemoCase.OrderId = dummyOrder.Id;
+                existingDemoCase.RaisedBy = dummyBuyer.Id;
+            }
+            await _context.SaveChangesAsync();
+            
+            // Allocate dummy disputed balance to the seller's wallet so resolution flows work
+            var wallet = await _context.SellerWallets.FirstOrDefaultAsync(w => w.SellerId == dispSeller.Id);
+            if (wallet != null && wallet.DisputedBalance == 0)
+            {
+                wallet.DisputedBalance = 150m;
+                // Leave AvailableBalance intact as the payout engine expects 150m available to trigger the HOLD
+                await _context.SaveChangesAsync();
+            }
         }
 
         // ── 6. Historical PayoutTransactions for the chart ─────────────────────

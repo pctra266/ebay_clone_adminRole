@@ -287,9 +287,6 @@ export function DisputeDetailPage() {
                 <div>
                   <div className="fw-bold">{dispute.buyer.username}</div>
                   <div className="text-muted">{dispute.buyer.email}</div>
-                  <div className="mt-2">
-                    <small className="text-muted">ID: {dispute.buyer.id}</small>
-                  </div>
                 </div>
               ) : (
                 <span className="text-muted">No buyer information</span>
@@ -315,9 +312,6 @@ export function DisputeDetailPage() {
                       </span>
                     </div>
                   )}
-                  <div className="mt-2">
-                    <small className="text-muted">ID: {dispute.seller.id}</small>
-                  </div>
                 </div>
               ) : (
                 <span className="text-muted">No seller information</span>
@@ -511,6 +505,19 @@ export function DisputeDetailPage() {
               </div>
               <form onSubmit={handleResolveSubmit}>
                 <div className="modal-body">
+                  {/* Seller Context Info */}
+                  <div className="alert alert-info py-2 mb-3">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>Seller: </strong>
+                        {dispute.seller?.username || "Unknown"} ({dispute.seller?.email || "No email"})
+                      </div>
+                      <div className="text-end">
+                        <small className="d-block mb-1">Feedback Score: {dispute.seller?.feedbackScore || "0"} ?</small>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label">Decision *</label>

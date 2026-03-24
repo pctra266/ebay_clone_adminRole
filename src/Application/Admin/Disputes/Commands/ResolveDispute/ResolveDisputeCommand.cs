@@ -240,11 +240,11 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             {
                 var frozenAmount = dispute.Amount ?? 0;
                 
-                // Move money: DisputedBalance -> AvailableBalance
+                // Move money: DisputedBalance -> PendingBalance
                 var amountToRestore = Math.Min(sellerWallet.DisputedBalance, frozenAmount);
                 sellerWallet.DisputedBalance -= amountToRestore;
 
-                sellerWallet.CreditAvailable(frozenAmount);
+                sellerWallet.PendingBalance += frozenAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
         }
@@ -275,7 +275,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
                 var amountToDeductFromDispute = Math.Min(sellerWallet.DisputedBalance, disputedAmount);
                 sellerWallet.DisputedBalance -= amountToDeductFromDispute;
 
-                sellerWallet.CreditAvailable(sellerKeeps);
+                sellerWallet.PendingBalance += sellerKeeps;
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
