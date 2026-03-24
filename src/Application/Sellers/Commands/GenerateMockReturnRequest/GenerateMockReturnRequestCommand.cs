@@ -2,13 +2,20 @@ using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace EbayClone.Application.Sellers.Commands.GenerateMockReturnRequest;
 
 public record GenerateMockReturnRequestCommand : IRequest<bool>
 {
+    [JsonPropertyName("sellerId")]
     public int SellerId { get; init; }
+
+    [JsonPropertyName("reason")]
     public string Reason { get; init; } = "Item defective - screen won't turn on";
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; } = "Pending";
 }
 
 public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateMockReturnRequestCommand, bool>
@@ -24,6 +31,7 @@ public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateM
 
     public async Task<bool> Handle(GenerateMockReturnRequestCommand request, CancellationToken cancellationToken)
     {
+        Console.WriteLine($"[MOCK] Generating Return Request. Status: {request.Status}, Reason: {request.Reason}");
         // 1. Find Seller
         var seller = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == request.SellerId && (u.Role == "Seller" || _context.Stores.Any(s => s.SellerId == u.Id)), cancellationToken);
@@ -55,8 +63,8 @@ public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateM
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        var orderDate = DateTime.UtcNow.AddDays(-5);
-        var completedAt = DateTime.UtcNow.AddDays(-1);
+        var orderDate = DateTime.UtcNow.AddDays(-10);
+        var deliveredAt = DateTime.UtcNow.AddDays(-5);
 
         // 4. Create Order
         var order = new OrderTable
@@ -65,9 +73,9 @@ public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateM
             OrderDate = orderDate,
             TotalPrice = 500000,
             Status = "Delivered",
-            CompletedAt = completedAt,
-            EstimatedSettlementDate = completedAt.AddDays(21),
-            CanDisputeUntil = completedAt.AddDays(14),
+            CompletedAt = deliveredAt,
+            EstimatedSettlementDate = deliveredAt.AddDays(21),
+            CanDisputeUntil = deliveredAt.AddDays(14),
             PlatformFee = 25000,
             SellerEarnings = 475000
         };
@@ -90,11 +98,24 @@ public class GenerateMockReturnRequestCommandHandler : IRequestHandler<GenerateM
             OrderId = order.Id,
             UserId = buyer.Id,
             Reason = request.Reason,
-            Status = "Pending",
-            CreatedAt = DateTime.UtcNow,
+            Status = string.IsNullOrEmpty(request.Status) ? "Pending" : request.Status,
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
             EvidenceImages = "[\"https://picsum.photos/400/300?random=1\", \"https://picsum.photos/400/300?random=2\"]",
             ShopSolution = "Seller has not proposed a solution yet."
         };
+
+        // Scenario logic based on status
+        if (returnRequest.Status == "ReturnLabelProvided")
+        {
+            returnRequest.ReturnLabelUrl = "https://www.ups.com/assets/resources/media/en_US/sample_shipping_label.pdf";
+        }
+        
+        if (returnRequest.Status == "Approved" || returnRequest.Status == "Completed")
+        {
+            order.Status = "Refunded";
+            returnRequest.ResolvedAt = DateTime.UtcNow;
+            returnRequest.ResolutionAction = "RefundWithoutReturn";
+        }
 
         _context.ReturnRequests.Add(returnRequest);
 

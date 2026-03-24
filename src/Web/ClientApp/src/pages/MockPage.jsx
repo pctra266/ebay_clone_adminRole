@@ -27,7 +27,11 @@ export function MockPage() {
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [defectData, setDefectData] = useState({ sellerId: '' });
     const [defectLoading, setDefectLoading] = useState(false);
-    const [returnRequestData, setReturnRequestData] = useState({ sellerId: '', reason: 'Item defective - screen won\'t turn on' });
+    const [returnRequestData, setReturnRequestData] = useState({ 
+        sellerId: '', 
+        reason: 'Item defective - screen won\'t turn on',
+        status: 'Pending'
+    });
     const [returnRequestLoading, setReturnRequestLoading] = useState(false);
     const [evalLoading, setEvalLoading] = useState(false);
     const [evalSeconds, setEvalSeconds] = useState(60);
@@ -115,10 +119,11 @@ export function MockPage() {
                 method: 'POST',
                 body: { 
                     sellerId: parseInt(returnRequestData.sellerId, 10),
-                    reason: returnRequestData.reason
+                    reason: returnRequestData.reason,
+                    status: returnRequestData.status
                 },
             });
-            setToast({ message: "Mock return request generated! The seller now has a Pending return request.", type: 'warning' });
+            setToast({ message: `Mock return request (${returnRequestData.status}) generated!`, type: 'warning' });
             setReturnRequestData({ ...returnRequestData, sellerId: '' });
         } catch (err) {
             setToast({ message: err.message || "Failed to generate return request.", type: 'error' });
@@ -327,6 +332,24 @@ export function MockPage() {
                             <div className="pe-input-group">
                                 <label className="pe-input-label">Seller ID</label>
                                 <input type="number" className="pe-form-control" name="sellerId" value={returnRequestData.sellerId} onChange={(e) => setReturnRequestData({ ...returnRequestData, sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Status Scenario</label>
+                                <select 
+                                    className="pe-form-control pe-select" 
+                                    name="status" 
+                                    value={returnRequestData.status} 
+                                    onChange={(e) => setReturnRequestData({ ...returnRequestData, status: e.target.value })}
+                                >
+                                    <option value="Pending">Pending Review</option>
+                                    <option value="Escalated">Escalated (Dispute)</option>
+                                    <option value="WaitingForReturnLabel">Waiting for Return Label</option>
+                                    <option value="ReturnLabelProvided">Return Label Provided</option>
+                                    <option value="AwaitingShipment">Awaiting Shipment</option>
+                                    <option value="InTransit">In Transit</option>
+                                    <option value="Delivered">Delivered (Item Received)</option>
+                                    <option value="Completed">Completed (Refunded)</option>
+                                </select>
                             </div>
                             <div className="pe-input-group">
                                 <label className="pe-input-label">Reason</label>
