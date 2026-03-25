@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import EbayHeader from '../components/EbayHeader';
 import EbayFooter from '../components/EbayFooter';
 import { productService } from '../services/productService';
 import { reviewsService } from '../services/reviewsService';
 import { useAuth } from '../services/useAuth';
+import { useNotificationHub } from '../hooks/useNotificationHub';
 import '../components/EbayProductDetail.css';
 
 const EbayProductDetail = () => {
@@ -26,12 +27,32 @@ const EbayProductDetail = () => {
     const [reportReason, setReportReason] = useState('Other');
     const [reportDescription, setReportDescription] = useState('');
 
+    // States for Product Report
+    const [showReportProduct, setShowReportProduct] = useState(false);
+    const [productReportReason, setProductReportReason] = useState('Counterfeit');
+    const [productReportDescription, setProductReportDescription] = useState('');
+    const [productReportSubmitting, setProductReportSubmitting] = useState(false);
+
+    // State for real-time product banned
+    const [productBanned, setProductBanned] = useState(false);
+    const [bannedReason, setBannedReason] = useState('');
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 setLoading(true);
                 const data = await productService.getProductById(id);
                 setProduct(data);
+
+                // Check if product is already banned/hidden
+                if (data && (data.status === 'Banned' || data.status === 'Hidden')) {
+                    setProductBanned(true);
+                    setBannedReason(
+                        data.status === 'Banned'
+                            ? 'This product has been removed due to policy violation.'
+                            : 'This product has been temporarily hidden for review.'
+                    );
+                }
                 
                 // Initialize active image
                 if (data && data.images) {
@@ -57,6 +78,16 @@ const EbayProductDetail = () => {
             fetchProduct();
         }
     }, [id]);
+
+    // Listen for real-time ProductBanned event via SignalR
+    const handleProductBanned = useCallback((data) => {
+        if (data && String(data.productId) === String(id)) {
+            setProductBanned(true);
+            setBannedReason(data.reason || 'This product is no longer available.');
+        }
+    }, [id]);
+
+    useNotificationHub('ProductBanned', handleProductBanned);
 
     const formatPrice = (price) => {
         return price ? `$${price.toFixed(2)}` : 'N/A';
@@ -117,9 +148,36 @@ const EbayProductDetail = () => {
             setReportingReview(null);
             setReportReason('Other');
             setReportDescription('');
-            // Optional: refresh or just keep as is since it's a report
         } catch (error) {
             alert("Error while reporting.");
+        }
+    };
+
+    const handleReportProduct = async (e) => {
+        e.preventDefault();
+        if (!isAuth) {
+            alert("Please login to report this product.");
+            return;
+        }
+        setProductReportSubmitting(true);
+        try {
+            await productService.reportProduct(id, {
+                productId: parseInt(id),
+                reporterUserId: user.userId,
+                reporterType: "User",
+                reason: productReportReason,
+                description: productReportDescription,
+                status: "Pending",
+                priority: "Low"
+            });
+            alert("Your report has been submitted. Our team will review it shortly.");
+            setShowReportProduct(false);
+            setProductReportReason('Counterfeit');
+            setProductReportDescription('');
+        } catch (error) {
+            alert(error.response?.data || "An error occurred while submitting your report.");
+        } finally {
+            setProductReportSubmitting(false);
         }
     };
 
@@ -147,13 +205,30 @@ const EbayProductDetail = () => {
     const primaryImage = activeImage || images[0] || '/images/default-product.png';
 
     const averageRating = product.reviews && product.reviews.length > 0
-        ? Math.round(product.reviews.reduce((acc, curr) => acc + curr.rating, 0) / product.reviews.length)
+        ? (product.reviews.reduce((acc, curr) => acc + curr.rating, 0) / product.reviews.length)
         : 0;
+    const fullStars = Math.floor(averageRating);
+    const hasHalfStar = (averageRating - fullStars) >= 0.5;
 
     return (
         <div className="ebay-container ebay-product-page">
             <EbayHeader />
-            <main className="ebay-product-main">
+
+            {/* Real-time Product Unavailable Overlay */}
+            {productBanned && (
+                <div className="product-banned-overlay">
+                    <div className="product-banned-card">
+                        <div className="product-banned-icon">
+                            <i className="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <h2>Product Unavailable</h2>
+                        <p>{bannedReason}</p>
+                        <Link to="/home" className="btn-back-home">Back to Home</Link>
+                    </div>
+                </div>
+            )}
+
+            <main className="ebay-product-main" style={productBanned ? { filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
                 <nav className="ebay-breadcrumbs" aria-label="breadcrumb">
                     <ol>
                         <li><Link to="/home">Home</Link></li>
@@ -196,7 +271,8 @@ const EbayProductDetail = () => {
                         <h1 className="ebay-product-title">{product.title}</h1>
                         <div className="ebay-product-rating-overview">
                             <span className="stars">
-                                {'★'.repeat(averageRating)}{'☆'.repeat(5 - averageRating)}{' '}
+                                {'★'.repeat(fullStars)}{hasHalfStar ? '⯨' : ''}{'☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0))}{' '}
+                                <span className="rating-number">{averageRating.toFixed(1)}</span>
                                 <span className="review-count">({product.reviews?.length || 0} product ratings)</span>
                             </span>
                         </div>
@@ -253,6 +329,66 @@ const EbayProductDetail = () => {
                                 <button className="btn-visit-store">Visit store</button>
                                 <button className="btn-see-other-items">See other items</button>
                             </div>
+                        </div>
+
+                        {/* Report Product */}
+                        <div className="report-product-box">
+                            <button 
+                                className="btn-report-product"
+                                onClick={() => {
+                                    if (!isAuth) {
+                                        alert("Please login to report this product.");
+                                        return;
+                                    }
+                                    if (user.userId === product.sellerId) {
+                                        alert("You cannot report your own product.");
+                                        return;
+                                    }
+                                    setShowReportProduct(!showReportProduct);
+                                }}
+                            >
+                                <i className="bi bi-flag"></i> {showReportProduct ? 'Cancel Report' : 'Report this item'}
+                            </button>
+
+                            {showReportProduct && (
+                                <form className="report-product-form" onSubmit={handleReportProduct}>
+                                    <p className="report-form-title">Report this product</p>
+                                    <p className="report-form-subtitle">Help us keep eBay safe. Tell us why you think this listing violates our policies.</p>
+                                    
+                                    <div className="report-field">
+                                        <label>Reason:</label>
+                                        <select 
+                                            value={productReportReason} 
+                                            onChange={(e) => setProductReportReason(e.target.value)}
+                                        >
+                                            <option value="Counterfeit">Counterfeit or fake item</option>
+                                            <option value="Prohibited">Prohibited or restricted item</option>
+                                            <option value="Misleading">Misleading or inaccurate listing</option>
+                                            <option value="Stolen">Stolen property</option>
+                                            <option value="Inappropriate">Inappropriate content</option>
+                                            <option value="Copyright">Copyright or trademark infringement</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="report-field">
+                                        <label>Description (optional):</label>
+                                        <textarea 
+                                            className="ebay-textarea"
+                                            value={productReportDescription}
+                                            onChange={(e) => setProductReportDescription(e.target.value)}
+                                            placeholder="Provide additional details about why you are reporting this product..."
+                                        ></textarea>
+                                    </div>
+
+                                    <div className="report-form-actions">
+                                        <button type="submit" className="btn-submit-product-report" disabled={productReportSubmitting}>
+                                            {productReportSubmitting ? 'Submitting...' : 'Submit Report'}
+                                        </button>
+                                        <button type="button" className="btn-cancel" onClick={() => setShowReportProduct(false)}>Cancel</button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>

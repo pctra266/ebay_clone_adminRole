@@ -407,3 +407,183 @@
     font-size: 14px;
     resize: vertical;
 }
+
+/* Report Product */
+.report-product-box {
+    margin-top: 15px;
+}
+
+.btn-report-product {
+    background: none;
+    border: 1px solid #e53238;
+    color: #e53238;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-report-product:hover {
+    background-color: #fef2f2;
+}
+
+.report-product-form {
+    margin-top: 12px;
+    padding: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fcfcfc;
+}
+
+.report-form-title {
+    font-weight: bold;
+    font-size: 15px;
+    margin: 0 0 5px 0;
+    color: #111;
+}
+
+.report-form-subtitle {
+    font-size: 12px;
+    color: #767676;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+}
+
+.report-field {
+    margin-bottom: 12px;
+}
+
+.report-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.report-field select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    background: #fff;
+}
+
+.report-field textarea {
+    width: 100%;
+    height: 70px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.report-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-submit-product-report {
+    background-color: #e53238;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-submit-product-report:hover {
+    background-color: #cc2b30;
+}
+
+.btn-submit-product-report:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Product Banned / Unavailable Overlay */
+.product-banned-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInOverlay 0.4s ease;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.product-banned-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px 50px;
+    text-align: center;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    animation: slideUpCard 0.4s ease;
+}
+
+@keyframes slideUpCard {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.product-banned-icon {
+    font-size: 56px;
+    color: #e53238;
+    margin-bottom: 15px;
+}
+
+.product-banned-card h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #111;
+    margin: 0 0 10px 0;
+}
+
+.product-banned-card p {
+    font-size: 15px;
+    color: #555;
+    margin: 0 0 25px 0;
+    line-height: 1.5;
+}
+
+.btn-back-home {
+    display: inline-block;
+    background-color: #3665f3;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 24px;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-back-home:hover {
+    background-color: #2752c4;
+    color: #fff;
+}
