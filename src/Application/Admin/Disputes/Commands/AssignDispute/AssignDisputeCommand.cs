@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Constants;
 using EbayClone.Domain.Entities;
@@ -53,15 +54,29 @@ public class AssignDisputeCommandHandler : IRequestHandler<AssignDisputeCommand,
             throw new ValidationException("Admin ID could not be determined.");
         }
 
+        var before = new
+        {
+            dispute.AssignedTo,
+            dispute.AssignedAt,
+            dispute.Status
+        };
+
         // Update assignment
         dispute.AssignedTo = adminId.Value;
         dispute.AssignedAt = DateTime.UtcNow;
-        
+
         // Update status if escalated
         if (dispute.Status == DisputeStatuses.Escalated)
         {
             dispute.Status = DisputeStatuses.AssignedToAdmin;
         }
+
+        var after = new
+        {
+            dispute.AssignedTo,
+            dispute.AssignedAt,
+            dispute.Status
+        };
 
         // Create system message
         var systemMessage = new DisputeMessage
@@ -83,7 +98,12 @@ public class AssignDisputeCommandHandler : IRequestHandler<AssignDisputeCommand,
             Action = "AssignDispute",
             TargetType = "Dispute",
             TargetId = dispute.Id,
-            Details = $"Assigned dispute {dispute.CaseId} to admin {adminId}",
+            Details = JsonSerializer.Serialize(new
+            {
+                caseId = dispute.CaseId,
+                before,
+                after
+            }),
             CreatedAt = DateTime.UtcNow
         };
         _context.AdminActions.Add(adminAction);

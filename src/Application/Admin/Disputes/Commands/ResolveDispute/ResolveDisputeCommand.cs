@@ -147,6 +147,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             Details = $"Resolved dispute {dispute.CaseId} in favor of {request.Winner}. Refund: ${request.RefundAmount}",
             CreatedAt = DateTime.UtcNow
         };
+        _context.AdminActions.Add(adminAction);
 
         await _context.SaveChangesAsync(cancellationToken);
 

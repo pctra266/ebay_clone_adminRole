@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Constants;
 using EbayClone.Domain.Entities;
@@ -60,7 +61,12 @@ public class UpdateDisputePriorityCommandHandler : IRequestHandler<UpdateDispute
             Action = "UpdateDisputePriority",
             TargetType = "Dispute",
             TargetId = dispute.Id,
-            Details = $"Changed priority of {dispute.CaseId} from {oldPriority} to {request.Priority}",
+            Details = JsonSerializer.Serialize(new
+            {
+                caseId = dispute.CaseId,
+                before = new { priority = oldPriority },
+                after  = new { priority = request.Priority }
+            }),
             CreatedAt = DateTime.UtcNow
         };
         _context.AdminActions.Add(adminAction);
