@@ -255,6 +255,9 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         if (dispute.Order != null)
         {
             dispute.Order.Status = "Refunded";
+            
+            // Adjust earnings so the settlement engine (SettlePendingFundsCommand) accurately registers the deduction
+            dispute.Order.SellerEarnings = Math.Max(0, (dispute.Order.SellerEarnings ?? 0) - refundAmount);
         }
 
         // Update seller wallet
