@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EbayClone.Application.Common.Interfaces;
 using EbayClone.Domain.Constants;
 using EbayClone.Domain.Entities;
@@ -98,6 +99,19 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             adminId = fallbackAdmin?.Id ?? 1; // Default to 1 if no user found
         }
 
+        // Capture before state
+        var before = new
+        {
+            dispute.Status,
+            dispute.Winner,
+            dispute.ResolvedBy,
+            dispute.ResolvedAt,
+            dispute.AdminNotes,
+            dispute.RefundAmount,
+            dispute.RefundMethod,
+            dispute.RequiresReturn
+        };
+
         // Update dispute resolution
         dispute.Status = DisputeStatuses.Resolved;
         dispute.Winner = request.Winner;
@@ -118,7 +132,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         {
             sellerWallet = await _context.SellerWallets
                 .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
-            frozenAmount = dispute.Amount ?? 0; // The amount that was originally frozen for the dispute
+            frozenAmount = dispute.Amount ?? 0;
         }
 
         // Determine the actual refund amount based on the request
@@ -148,6 +162,19 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             }
         }
 
+        // Capture after state
+        var after = new
+        {
+            dispute.Status,
+            dispute.Winner,
+            dispute.ResolvedBy,
+            dispute.ResolvedAt,
+            dispute.AdminNotes,
+            dispute.RefundAmount,
+            dispute.RefundMethod,
+            dispute.RequiresReturn
+        };
+
         // Create system message
         var systemMessage = new DisputeMessage
         {
@@ -168,7 +195,15 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             Action = "ResolveDispute",
             TargetType = "Dispute",
             TargetId = dispute.Id,
-            Details = $"Resolved dispute {dispute.CaseId} in favor of {request.Winner}. Refund: ${request.RefundAmount}",
+            Details = JsonSerializer.Serialize(new
+            {
+                caseId = dispute.CaseId,
+                adminNotes = request.AdminNotes,
+                addSellerViolation = request.AddSellerViolation,
+                requireReturn = request.RequireReturn,
+                before,
+                after
+            }),
             CreatedAt = DateTime.UtcNow
         };
         _context.AdminActions.Add(adminAction);
