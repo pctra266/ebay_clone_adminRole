@@ -35,6 +35,22 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
             return false;
         }
 
+        // Check if user has any active (non-terminal) transactions
+        var terminalStatuses = new[] { "Completed", "Refunded", "FundsCleared", "Cancelled", "PartiallyRefunded" };
+
+        var hasActiveOrders = await _context.OrderTables.AnyAsync(o =>
+            (o.BuyerId == request.UserId ||
+             o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == request.UserId))
+            && (o.Status == null || !terminalStatuses.Contains(o.Status)),
+            cancellationToken);
+
+        if (hasActiveOrders)
+        {
+            throw new InvalidOperationException(
+                "Cannot ban this user because they are currently involved in active transactions. " +
+                "Please wait until all orders are completed, refunded, or cancelled before banning.");
+        }
+
         var before = new
         {
             user.Status,
