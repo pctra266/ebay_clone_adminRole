@@ -28,8 +28,8 @@ import SellerProductManagementPage from "./pages/SellerProductManagementPage";
 import { MockPage } from "./pages/MockPage";
 import { SellerPendingFundsPage } from "./pages/SellerPendingFundsPage";
 import PayoutEnginePage from "./pages/PayoutEnginePage";
-import ActiveConnectionsPage from "./pages/ActiveConnectionsPage";
-import OrdersPage from "./pages/OrdersPage";
+import ActiveConnectionsPage from "./pages/ActiveConnectionsPage.jsx";
+import OrdersPage from "./pages/OrdersPage.jsx";
 
 // Helper cho gọn
 const protect = (element, allowedRoles = []) => (

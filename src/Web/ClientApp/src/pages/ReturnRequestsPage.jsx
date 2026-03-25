@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import returnRequestService from '../services/returnRequestService';
-import { useNotificationHub } from '../hooks/useNotificationHub';
+import { useNotificationHub } from '../hooks/useNotificationHub.js';
 
 const STATUS_TABS = [
   { key: 'NeedAction', label: 'Need Action',  color: '#ef4444' }, // Pending + Escalated
