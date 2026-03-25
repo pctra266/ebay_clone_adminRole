@@ -338,7 +338,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         if (dispute.Order != null)
         {
             // Restore order status to its pre-dispute state or generic "Delivered"
-            dispute.Order.Status = "Delivered"; 
+            dispute.Order.Status = "Delivered";
         }
 
         // Update seller wallet
@@ -368,6 +368,9 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         if (dispute.Order != null)
         {
             dispute.Order.Status = "PartiallyRefunded";
+            
+            // naturally transfers the correct exact amount to AvailableBalance 
+            dispute.Order.SellerEarnings = sellerKeeps;
         }
 
         // Update seller wallet
