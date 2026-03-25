@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 using EbayClone.Web.Hubs;
 
 namespace EbayClone.Web.Infrastructure;
@@ -14,17 +15,23 @@ public class ActiveConnection
 {
     public string IpAddress { get; set; } = string.Empty;
     public DateTime LastSeen { get; set; }
+    public bool IsWhitelisted { get; set; }
 }
 
 public class ActiveConnectionTracker : IActiveConnectionTracker
 {
     private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly IConfiguration _configuration;
+    private readonly string[] _allowedIps;
+    
     // A thread-safe dictionary to maintain the IP addresses and latest timestamps
     private readonly ConcurrentDictionary<string, DateTime> _activeIps = new();
 
-    public ActiveConnectionTracker(IHubContext<NotificationHub> hubContext)
+    public ActiveConnectionTracker(IHubContext<NotificationHub> hubContext, IConfiguration configuration)
     {
         _hubContext = hubContext;
+        _configuration = configuration;
+        _allowedIps = _configuration.GetSection("InternalIps").Get<string[]>() ?? new[] { "127.0.0.1", "::1" };
     }
 
     public void RecordActivity(string ipAddress)
@@ -53,8 +60,25 @@ public class ActiveConnectionTracker : IActiveConnectionTracker
         var cutoff = DateTime.UtcNow.Subtract(timeframe);
         return _activeIps
             .Where(x => x.Value >= cutoff)
-            .Select(x => new ActiveConnection { IpAddress = x.Key, LastSeen = x.Value })
+            .Select(x => new ActiveConnection 
+            { 
+                IpAddress = x.Key, 
+                LastSeen = x.Value,
+                IsWhitelisted = IsIpWhitelisted(x.Key)
+            })
             .OrderByDescending(x => x.LastSeen);
+    }
+
+    private bool IsIpWhitelisted(string ipAddress)
+    {
+        foreach (var ip in _allowedIps)
+        {
+            if (ipAddress == ip || (ip.EndsWith(".*") && ipAddress.StartsWith(ip.Replace(".*", ""))))
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     private void CleanupOldRecords()
