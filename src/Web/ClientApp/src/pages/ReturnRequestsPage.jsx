@@ -4,7 +4,7 @@ import returnRequestService from '../services/returnRequestService';
 import { useNotificationHub } from '../hooks/useNotificationHub';
 
 const STATUS_TABS = [
-  { key: 'NeedAction', label: 'Need Action',  color: '#ef4444' }, // Pending + Escalated
+  { key: 'NeedAction', label: 'Need Action',  color: '#ef4444' }, // Pending + Escalated + Frozen
   { key: 'InProgress', label: 'In Progress',  color: '#6366f1' }, // WaitingLabel, Provided, Awaiting, Transit
   { key: 'Approved',   label: 'Refunded',     color: '#10b981' },
   { key: 'Rejected',   label: 'Rejected',     color: '#94a3b8' },
@@ -22,6 +22,7 @@ const statusBadge = {
   InTransit:             { bg: '#faf5ff', color: '#7e22ce', text: 'In Transit'        },
   Delivered:             { bg: '#ecfdf5', color: '#047857', text: 'Delivered'         },
   Completed:             { bg: '#f9fafb', color: '#111827', text: 'Completed'         },
+  Frozen:                { bg: '#f1f5f9', color: '#475569', text: 'Frozen / Investigation' },
 };
 
 export default function ReturnRequestsPage() {
@@ -62,7 +63,7 @@ export default function ReturnRequestsPage() {
 
   // Derived Statistics
   const totalCount = requests.length;
-  const pendingCount = requests.filter(r => r.status === 'Pending' || r.status === 'Escalated').length;
+  const pendingCount = requests.filter(r => r.status === 'Pending' || r.status === 'Escalated' || r.status === 'Frozen').length;
   const inProgressCount = requests.filter(r => 
     ['WaitingForReturnLabel', 'ReturnLabelProvided', 'AwaitingShipment', 'InTransit', 'Delivered'].includes(r.status)
   ).length;
@@ -70,7 +71,7 @@ export default function ReturnRequestsPage() {
 
   const getRequestsForTab = () => {
     if (activeTab === 'NeedAction') {
-      return requests.filter(r => r.status === 'Pending' || r.status === 'Escalated');
+      return requests.filter(r => r.status === 'Pending' || r.status === 'Escalated' || r.status === 'Frozen');
     }
     if (activeTab === 'InProgress') {
       return requests.filter(r => ['WaitingForReturnLabel', 'ReturnLabelProvided', 'AwaitingShipment', 'InTransit', 'Delivered'].includes(r.status));
@@ -96,6 +97,26 @@ export default function ReturnRequestsPage() {
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: b.color }}></span>
         <span style={{ color: '#1e293b' }}>{b.text?.toUpperCase()}</span>
       </span>
+    );
+  };
+
+  const getEscalationTimer = (status, createdAt) => {
+    if (status !== 'Pending' || !createdAt) return null;
+    const createdDate = new Date(createdAt);
+    const escalationDate = new Date(createdDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const diff = escalationDate - now;
+
+    if (diff <= 0) return <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2" style={{ fontSize: '0.65rem' }}>DUE TO ESCALATE</span>;
+
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    
+    return (
+      <div className="d-flex align-items-center gap-1 text-warning mt-1" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+        <i className="bi bi-hourglass-split"></i>
+        <span>{days}d {hours}h left</span>
+      </div>
     );
   };
 
@@ -226,7 +247,8 @@ export default function ReturnRequestsPage() {
                           <span className="fw-bold text-dark">{r.totalPrice ? `$${Number(r.totalPrice).toLocaleString('en-US')}` : '—'}</span>
                         </td>
                         <td className="text-secondary small">
-                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                          <div>{r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</div>
+                          {getEscalationTimer(r.status, r.createdAt)}
                         </td>
                         <td className="pe-4 text-end">
                           {badge(r.status)}

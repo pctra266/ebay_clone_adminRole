@@ -12,4 +12,5 @@ public static class ReturnStatuses
     public const string Escalated = "Escalated";
     public const string WaitingForReturnLabel = "WaitingForReturnLabel";
     public const string ReturnLabelProvided = "ReturnLabelProvided";
+    public const string Frozen = "Frozen";
 }
