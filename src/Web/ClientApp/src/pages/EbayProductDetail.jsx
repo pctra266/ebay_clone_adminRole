@@ -146,6 +146,10 @@ const EbayProductDetail = () => {
     const images = parseImages(product.images || product.image);
     const primaryImage = activeImage || images[0] || '/images/default-product.png';
 
+    const averageRating = product.reviews && product.reviews.length > 0
+        ? Math.round(product.reviews.reduce((acc, curr) => acc + curr.rating, 0) / product.reviews.length)
+        : 0;
+
     return (
         <div className="ebay-container ebay-product-page">
             <EbayHeader />
@@ -192,7 +196,7 @@ const EbayProductDetail = () => {
                         <h1 className="ebay-product-title">{product.title}</h1>
                         <div className="ebay-product-rating-overview">
                             <span className="stars">
-                                {'★'.repeat(5)}{' '}
+                                {'★'.repeat(averageRating)}{'☆'.repeat(5 - averageRating)}{' '}
                                 <span className="review-count">({product.reviews?.length || 0} product ratings)</span>
                             </span>
                         </div>

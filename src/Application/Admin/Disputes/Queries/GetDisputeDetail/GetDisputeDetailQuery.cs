@@ -193,6 +193,8 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
         };
     }
 
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
     private List<EvidenceDto> ParseEvidence(string? evidenceJson)
     {
         if (string.IsNullOrEmpty(evidenceJson))
@@ -200,7 +202,7 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
 
         try
         {
-            return JsonSerializer.Deserialize<List<EvidenceDto>>(evidenceJson) 
+            return JsonSerializer.Deserialize<List<EvidenceDto>>(evidenceJson, _jsonOptions) 
                    ?? new List<EvidenceDto>();
         }
         catch
@@ -216,7 +218,7 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
 
         try
         {
-            return JsonSerializer.Deserialize<List<OfferDto>>(offerHistoryJson) 
+            return JsonSerializer.Deserialize<List<OfferDto>>(offerHistoryJson, _jsonOptions) 
                    ?? new List<OfferDto>();
         }
         catch

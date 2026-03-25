@@ -51,17 +51,20 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
     private readonly IUser _currentUser;
     private readonly ILogger<ResolveDisputeCommandHandler> _logger;
     private readonly IDisputeNotifier _disputeNotifier;
+    private readonly IEmailService _emailService;
 
     public ResolveDisputeCommandHandler(
         IApplicationDbContext context,
         IUser currentUser,
         ILogger<ResolveDisputeCommandHandler> logger,
-        IDisputeNotifier disputeNotifier)
+        IDisputeNotifier disputeNotifier,
+        IEmailService emailService)
     {
         _context = context;
         _currentUser = currentUser;
         _logger = logger;
         _disputeNotifier = disputeNotifier;
+        _emailService = emailService;
     }
 
     public async Task<int> Handle(ResolveDisputeCommand request, CancellationToken cancellationToken)
@@ -103,6 +106,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         dispute.AdminNotes = request.AdminNotes;
         dispute.RefundAmount = request.RefundAmount ?? 0;
         dispute.RefundMethod = "OriginalPayment";
+        dispute.RequiresReturn = request.RequireReturn;
 
         // Get seller ID from order
         var sellerId = dispute.Order?.OrderItems.FirstOrDefault()?.Product?.SellerId;
@@ -132,6 +136,16 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         else if (request.Winner == DisputeWinners.Split)
         {
             await ProcessSplitDecision(dispute, sellerWallet?.SellerId, refundAmount, frozenAmount, cancellationToken);
+        }
+
+        // Apply violation globally if checked, and the winner wasn't solely the buyer (which already applies it)
+        if (request.AddSellerViolation && request.Winner != DisputeWinners.Buyer && sellerId.HasValue)
+        {
+            var sellerToViolate = await _context.Users.FindAsync(new object[] { sellerId.Value }, cancellationToken);
+            if (sellerToViolate != null)
+            {
+                sellerToViolate.ViolationCount++;
+            }
         }
 
         // Create system message
@@ -175,10 +189,26 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             adminId ?? 0,
             cancellationToken);
 
-        // TODO: Send notifications (email/SMS) - Phase 3
+        // Send notifications (email/SMS)
         if (request.SendNotifications)
         {
-            // Placeholder for notification service
+            var buyer = dispute.RaisedByNavigation;
+            var sellerForEmail = await _context.Users.FindAsync(new object[] { sellerId ?? 0 }, cancellationToken);
+
+            var subject = $"Dispute Resolution: Case {dispute.CaseId}";
+            var body = $"Your dispute {dispute.CaseId} has been resolved by an Admin.\nDecision: {request.Winner}\nAdmin Notes: {request.AdminNotes}\nRequires Return: {(request.RequireReturn ? "Yes" : "No")}\nRefund Amount: ${request.RefundAmount ?? 0}";
+
+            if (buyer != null && !string.IsNullOrEmpty(buyer.Email))
+            {
+                await _emailService.SendEmailAsync(buyer.Email, subject, body);
+            }
+
+            if (sellerForEmail != null && !string.IsNullOrEmpty(sellerForEmail.Email))
+            {
+                await _emailService.SendEmailAsync(sellerForEmail.Email, subject, body);
+            }
+            
+            _logger.LogInformation("Sent resolution emails to involved parties.");
         }
 
         return dispute.Id;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getActiveBroadcasts, markNotificationAsRead } from '../services/broadcastService';
-import { useNotificationHub } from '../hooks/useNotificationHub';
+import { useNotificationHub } from '../hooks/useNotificationHub.js';
 
 export const AdminNotifications = () => {
     const { user } = useAuth();
