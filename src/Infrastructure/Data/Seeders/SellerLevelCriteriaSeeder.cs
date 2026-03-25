@@ -35,6 +35,7 @@ public class SellerLevelCriteriaSeeder : ISeeder
             TopRatedMaxUnresolvedCases = 2,
             TopRatedMaxDefectRate = 0.005,
             TopRatedMaxLateRate = 0.03,
+            AboveStandardMinDays = 30,
             AboveStandardMaxDefectRate = 0.02,
             AboveStandardMaxUnresolvedCases = 2,
             AboveStandardMaxUnresolvedRate = 0.003,

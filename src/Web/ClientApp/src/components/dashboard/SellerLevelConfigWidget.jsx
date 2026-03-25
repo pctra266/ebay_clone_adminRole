@@ -10,6 +10,7 @@ export const SellerLevelConfigWidget = () => {
         topRatedMaxUnresolvedCases: 2,
         topRatedMaxDefectRate: 0.005,
         topRatedMaxLateRate: 0.03,
+        aboveStandardMinDays: 30,
         aboveStandardMaxDefectRate: 0.02,
         aboveStandardMaxUnresolvedCases: 2,
         aboveStandardMaxUnresolvedRate: 0.003
@@ -101,11 +102,15 @@ export const SellerLevelConfigWidget = () => {
                         </div>
 
                         <div className="col-12 mt-3"><small className="text-primary fw-bold uppercase">Above Standard Rules</small></div>
-                        <div className="col-6">
+                        <div className="col-4">
+                            <label className="pe-input-label small mb-1">Min Days</label>
+                            <input type="number" className="pe-form-control pe-form-control-sm" name="aboveStandardMinDays" value={criteria.aboveStandardMinDays} onChange={handleChange} required />
+                        </div>
+                        <div className="col-4">
                             <label className="pe-input-label small mb-1">Defect Max (%)</label>
                             <input type="number" step="0.001" className="pe-form-control pe-form-control-sm" name="aboveStandardMaxDefectRate" value={criteria.aboveStandardMaxDefectRate} onChange={handleChange} required />
                         </div>
-                        <div className="col-6">
+                        <div className="col-4">
                             <label className="pe-input-label small mb-1">Max Cases</label>
                             <input type="number" className="pe-form-control pe-form-control-sm" name="aboveStandardMaxUnresolvedCases" value={criteria.aboveStandardMaxUnresolvedCases} onChange={handleChange} required />
                         </div>

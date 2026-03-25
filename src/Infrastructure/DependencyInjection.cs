@@ -83,6 +83,7 @@ public static class DependencyInjection
         builder.Services.AddHttpClient<IContentModerationService, OpenAiModerationService>();
 
         builder.Services.AddHostedService<AutoReviewUsersService>();
+        builder.Services.AddHostedService<ReturnRequestEscalationService>();
 
         // Payout Engine
         builder.Services.AddScoped<IMockPaymentGateway, MockPaymentGatewayService>();

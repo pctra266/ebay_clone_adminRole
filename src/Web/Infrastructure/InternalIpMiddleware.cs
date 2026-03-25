@@ -38,12 +38,28 @@ public class InternalIpMiddleware
 
         bool isAllowed = false;
         var remoteIpString = remoteIp.ToString();
-        
-        _logger.LogInformation("Incoming request from IP: {RemoteIp}", remoteIpString);
+        var path = context.Request.Path.Value ?? "";
+
+        // Chỉ log IP cho các request API thực tế, bỏ qua log cho SignalR (vì nó spam rất nhiều)
+        if (!path.StartsWith("/hubs/"))
+        {
+            _logger.LogInformation("Incoming request from IP: {RemoteIp} to {Path}", remoteIpString, path);
+        }
+
+        /* Tắt log header để tránh spam console
+        foreach (var header in context.Request.Headers)
+        {
+            _logger.LogInformation("Header: {Key} = {Value}", header.Key, header.Value);
+        }
+        */
 
         // Tracker the connection
-        var tracker = context.RequestServices.GetService<IActiveConnectionTracker>();
-        tracker?.RecordActivity(remoteIpString);
+        // TRÁNH INFINITE LOOP: Không ghi nhận activity cho chính request lấy danh sách IP
+        if (!path.Equals("/api/SystemAdmin/active-ips", StringComparison.OrdinalIgnoreCase))
+        {
+            var tracker = context.RequestServices.GetService<IActiveConnectionTracker>();
+            tracker?.RecordActivity(remoteIpString);
+        }
 
         // Check against exact matches or subnets (simple prefix check for this example)
         foreach (var ip in _allowedIps)

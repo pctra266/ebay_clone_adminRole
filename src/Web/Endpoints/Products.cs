@@ -10,8 +10,7 @@ using EbayClone.Application.Products.Queries.GetProducts;
 using EbayClone.Application.Products.Queries.GetProductById;
 using EbayClone.Application.Products.Queries.GetSellerProducts;
 using EbayClone.Application.Products.Queries.GetViolationDetails;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
+using EbayClone.Web.Infrastructure;
 
 namespace EbayClone.Web.Endpoints;
 
@@ -20,6 +19,8 @@ public class Products : EndpointGroupBase
     public override void Map(RouteGroupBuilder group)
     {
         // 'group' ở đây chính là nhóm route "/api/products" đã được hệ thống tạo sẵn
+        // Áp dụng Standard Policy (60 req/min) cho toàn bộ group này
+        group.RequireRateLimiting(RateLimitingExtensions.StandardPolicy);
 
         // Chỉ cần khai báo các hành động cụ thể vào group này
         group.MapGet(GetProducts);              // Tự động thành: GET /api/products

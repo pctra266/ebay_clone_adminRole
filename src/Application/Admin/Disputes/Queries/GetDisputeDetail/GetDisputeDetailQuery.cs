@@ -47,7 +47,8 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
         var timeline = BuildTimeline(dispute);
 
         // Get buyer stats
-        var buyerStats = await GetPartyStats(dispute.RaisedBy, true, cancellationToken);
+        var buyerId = dispute.Order?.BuyerId ?? dispute.RaisedBy;
+        var buyerStats = await GetPartyStats(buyerId, true, cancellationToken);
         
         // Get seller (from first order item)
         var sellerId = dispute.Order?.OrderItems.FirstOrDefault()?.Product?.SellerId;
@@ -192,6 +193,8 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
         };
     }
 
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
     private List<EvidenceDto> ParseEvidence(string? evidenceJson)
     {
         if (string.IsNullOrEmpty(evidenceJson))
@@ -199,7 +202,7 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
 
         try
         {
-            return JsonSerializer.Deserialize<List<EvidenceDto>>(evidenceJson) 
+            return JsonSerializer.Deserialize<List<EvidenceDto>>(evidenceJson, _jsonOptions) 
                    ?? new List<EvidenceDto>();
         }
         catch
@@ -215,7 +218,7 @@ public class GetDisputeDetailQueryHandler : IRequestHandler<GetDisputeDetailQuer
 
         try
         {
-            return JsonSerializer.Deserialize<List<OfferDto>>(offerHistoryJson) 
+            return JsonSerializer.Deserialize<List<OfferDto>>(offerHistoryJson, _jsonOptions) 
                    ?? new List<OfferDto>();
         }
         catch

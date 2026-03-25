@@ -25,11 +25,13 @@ public class ResolveProductViolationCommandHandler : IRequestHandler<ResolveProd
 {
     private readonly IApplicationDbContext _context;
     private readonly IEmailService _emailService;
+    private readonly INotificationNotifier _notifier;
 
-    public ResolveProductViolationCommandHandler(IApplicationDbContext context, IEmailService emailService)
+    public ResolveProductViolationCommandHandler(IApplicationDbContext context, IEmailService emailService, INotificationNotifier notifier)
     {
         _context = context;
         _emailService = emailService;
+        _notifier = notifier;
     }
 
     public async Task Handle(ResolveProductViolationCommand request, CancellationToken cancellationToken)
@@ -129,6 +131,15 @@ public class ResolveProductViolationCommandHandler : IRequestHandler<ResolveProd
         product.ModerationNotes = request.AdminNote;
         product.ReportCount = 0;
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Broadcast real-time notification when product is banned/hidden
+        if (request.Action == ViolationResolutionAction.DeleteAndWarn || request.Action == ViolationResolutionAction.Hide)
+        {
+            var reason = request.Action == ViolationResolutionAction.DeleteAndWarn
+                ? "This product has been removed due to policy violation."
+                : "This product has been temporarily hidden for review.";
+            await _notifier.NotifyProductBannedAsync(request.ProductId, reason, cancellationToken);
+        }
     }
 
     private void MarkReportsAs(IEnumerable<ProductReport> reports, string status)

@@ -24,4 +24,9 @@ public class SellerHubService : ISellerHubService
             totalWithdrawn
         });
     }
+
+    public async Task BroadcastSellerMetricsUpdate(EbayClone.Application.Sellers.Queries.GetSellerPerformanceMetrics.SellerPerformanceMetricsDto metrics)
+    {
+        await _hubContext.Clients.Group(AdminGroup).SendAsync("UpdateSellerMetrics", metrics);
+    }
 }

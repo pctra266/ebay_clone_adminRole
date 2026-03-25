@@ -59,19 +59,22 @@ public class Verify2FATests
     }
 
     [Test]
-    public void Handle_InvalidCode_ShouldThrowException()
+    public async Task Handle_InvalidCode_ShouldReturnFailure()
     {
         // Arrange
         var secret = "JBSWY3DPEHPK3PXP";
         var user = new User { Id = 2, TwoFactorSecret = secret };
         _context.Users.Add(user);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         var handler = new Verify2FACommandHandler(_context, _jwtMock.Object);
         var command = new Verify2FACommand(2, "000000");
 
-        // Act & Assert
-        Should.ThrowAsync<Exception>(() => handler.Handle(command, CancellationToken.None))
-            .Result.Message.ShouldBe("Invalid 2FA code");
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Success.ShouldBeFalse();
+        result.ErrorMessage.ShouldBe("Mã 2FA không đúng hoặc đã hết hạn");
     }
 }

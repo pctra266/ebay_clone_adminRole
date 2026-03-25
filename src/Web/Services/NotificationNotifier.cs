@@ -65,4 +65,19 @@ public class NotificationNotifier : INotificationNotifier
             await _hubContext.Clients.All.SendAsync("NewNotification", payload, cancellationToken);
         }
     }
+
+    public async Task NotifyReturnRequestUpdatedAsync(int requestId, string status, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients.Group("Admins").SendAsync("ReturnRequestUpdated", new { requestId, status }, cancellationToken);
+    }
+
+    public async Task NotifyReturnRequestCreatedAsync(int requestId, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients.Group("Admins").SendAsync("ReturnRequestCreated", new { requestId }, cancellationToken);
+    }
+
+    public async Task NotifyProductBannedAsync(int productId, string reason, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients.All.SendAsync("ProductBanned", new { productId, reason }, cancellationToken);
+    }
 }

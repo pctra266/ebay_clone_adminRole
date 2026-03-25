@@ -121,24 +121,31 @@ public class Users : EndpointGroupBase
         }
     }
 
-    public async Task<Results<Ok, NotFound>> BanUser(
+    public async Task<Results<Ok, NotFound, BadRequest<string>>> BanUser(
         ISender sender,
         int id,
         [FromBody] BanUserRequest request)
     {
-        var result = await sender.Send(new BanUserCommand
+        try
         {
-            UserId = id,
-            Reason = request.Reason,
-            AdminId = request.AdminId
-        });
+            var result = await sender.Send(new BanUserCommand
+            {
+                UserId = id,
+                Reason = request.Reason,
+                AdminId = request.AdminId
+            });
 
-        if (!result)
-        {
-            return TypedResults.NotFound();
+            if (!result)
+            {
+                return TypedResults.NotFound();
+            }
+
+            return TypedResults.Ok();
         }
-
-        return TypedResults.Ok();
+        catch (InvalidOperationException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
     }
 
     public async Task<Results<Ok, NotFound>> UnbanUser(
