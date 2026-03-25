@@ -77,3 +77,10 @@ export function updateUserStatus(userId, status, adminId) {
     body: { status, adminId },
   });
 }
+
+export function generateMockUsers() {
+  return apiRequest(`/api/Mocking/generate-mock-users`, {
+    method: "POST",
+    body: {}
+  });
+}

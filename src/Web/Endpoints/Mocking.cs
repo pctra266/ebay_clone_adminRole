@@ -20,6 +20,7 @@ public class Mocking : EndpointGroupBase
         group.MapPost("generate-mock-return-request", GenerateMockReturnRequest);
         group.MapPost("accelerate-settlement", AccelerateSettlement);
         group.MapPost("push-payout", PushPayout);
+        group.MapPost("generate-mock-users", GenerateMockUsers);
     }
 
     public async Task<IResult> GenerateMockReturnRequest(ISender sender, [FromBody] EbayClone.Application.Sellers.Commands.GenerateMockReturnRequest.GenerateMockReturnRequestCommand command)
@@ -78,5 +79,11 @@ public class Mocking : EndpointGroupBase
         {
             return TypedResults.BadRequest(ex.Message);
         }
+    }
+
+    public async Task<IResult> GenerateMockUsers(ISender sender, [FromBody] EbayClone.Application.Users.Commands.GenerateMockUsers.GenerateMockUsersCommand command)
+    {
+         var result = await sender.Send(command);
+         return TypedResults.Ok(new { success = result, message = "Mock users generated successfully." });
     }
 }

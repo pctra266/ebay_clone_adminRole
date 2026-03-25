@@ -6,7 +6,7 @@ public class BroadcastDto
     public string Title { get; set; } = string.Empty;
     public string? Content { get; set; }
     public string? UserRole { get; set; } // Target audience: All, Buyer, Seller
-    public string Type { get; set; } = "InApp"; // Email, InApp, SMS
+    public string Type { get; set; } = "InApp"; // Email, InApp
     public string Status { get; set; } = "Pending";
     public DateTime? ScheduledAt { get; set; }
     public DateTime? SentAt { get; set; }

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
 import { getCurrentAdminId } from "../services/adminSession";
-import { approveUser, banUser, getUsers, rejectUser, unbanUser } from "../services/userService";
+import { approveUser, banUser, getUsers, rejectUser, unbanUser, generateMockUsers } from "../services/userService";
 
 const tabDefinitions = [
   { label: "All Users", value: "All" },
@@ -19,6 +19,8 @@ export function UsersPage() {
   const [usersData, setUsersData] = useState({ items: [], totalCount: 0, totalPages: 0 });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "success" });
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, type: "", userId: null });
+  const [reasonInput, setReasonInput] = useState("");
 
   const adminId = useMemo(() => getCurrentAdminId(), []);
 
@@ -58,26 +60,42 @@ export function UsersPage() {
   const handleApprove = (userId) =>
     runAction(() => approveUser(userId, adminId));
 
-  const handleReject = (userId) => {
-    const reason = window.prompt("Reject reason:");
-    if (!reason) {
-      return;
-    }
-
-    runAction(() => rejectUser(userId, reason, adminId));
+  const openModal = (type, userId) => {
+    setModalConfig({ isOpen: true, type, userId });
+    setReasonInput("");
   };
 
-  const handleBan = (userId) => {
-    const reason = window.prompt("Ban reason:");
-    if (!reason) {
-      return;
-    }
+  const closeModal = () => setModalConfig({ isOpen: false, type: "", userId: null });
 
-    runAction(() => banUser(userId, reason, adminId));
+  const submitModalContent = () => {
+    if (!reasonInput.trim()) return;
+    if (modalConfig.type === "reject") {
+      runAction(() => rejectUser(modalConfig.userId, reasonInput, adminId));
+    } else if (modalConfig.type === "ban") {
+      runAction(() => banUser(modalConfig.userId, reasonInput, adminId));
+    }
+    closeModal();
   };
+
+  const handleReject = (userId) => openModal("reject", userId);
+
+  const handleBan = (userId) => openModal("ban", userId);
 
   const handleUnban = (userId) =>
     runAction(() => unbanUser(userId, adminId));
+
+  const handleGenerateMockUsers = async () => {
+    setLoading(true);
+    try {
+      await generateMockUsers();
+      setToast({ message: "Mock users generated successfully.", type: "success" });
+      await loadUsers();
+    } catch (error) {
+      setToast({ message: error.message, type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const bannedCount = (usersData.items || []).filter(u => u.status === "Banned").length;
   const pendingCount = (usersData.items || []).filter(u => u.approvalStatus === "PendingApproval").length;
@@ -126,17 +144,26 @@ export function UsersPage() {
             {/* ── Enhanced Toolbar ── */}
             <div className="px-4 py-3 bg-light border-bottom">
               <div className="d-sm-flex align-items-center justify-content-between gap-3">
-                <div className="d-flex flex-wrap gap-1 p-1 bg-white border rounded-pill shadow-sm mb-3 mb-sm-0">
-                  {tabDefinitions.map((tabItem) => (
-                    <button
-                      key={tabItem.value}
-                      onClick={() => { setTab(tabItem.value); setPageNumber(1); }}
-                      className={`btn btn-sm rounded-pill px-4 py-1 fw-bold transition-all ${tab === tabItem.value ? 'btn-primary shadow-sm' : 'btn-link text-secondary text-decoration-none'}`}
-                      style={{ fontSize: '0.75rem' }}
-                    >
-                      {tabItem.label}
-                    </button>
-                  ))}
+                <div className="d-flex align-items-center gap-2 mb-3 mb-sm-0">
+                  <div className="d-flex flex-wrap gap-1 p-1 bg-white border rounded-pill shadow-sm">
+                    {tabDefinitions.map((tabItem) => (
+                      <button
+                        key={tabItem.value}
+                        onClick={() => { setTab(tabItem.value); setPageNumber(1); }}
+                        className={`btn btn-sm rounded-pill px-4 py-1 fw-bold transition-all ${tab === tabItem.value ? 'btn-primary shadow-sm' : 'btn-link text-secondary text-decoration-none'}`}
+                        style={{ fontSize: '0.75rem' }}
+                      >
+                        {tabItem.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button 
+                    className="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold d-none d-md-flex align-items-center gap-1 shadow-sm border-2" 
+                    onClick={handleGenerateMockUsers}
+                    style={{ fontSize: '0.75rem' }}
+                  >
+                    <i className="bi bi-database-fill-add"></i> Fake Data
+                  </button>
                 </div>
 
                 <div className="d-flex gap-2 flex-grow-1" style={{ maxWidth: '450px' }}>
@@ -217,24 +244,32 @@ export function UsersPage() {
                           </td>
                           <td className="pe-4 text-end">
                             <div className="d-flex justify-content-end gap-1">
-                              {user.approvalStatus !== "Approved" && (
-                                <>
-                                  <button type="button" className="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleApprove(user.id)} style={{ fontSize: '0.7rem' }}>
-                                    Approve
-                                  </button>
-                                  <button type="button" className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onClick={() => handleReject(user.id)} style={{ fontSize: '0.7rem' }}>
-                                    Reject
-                                  </button>
-                                </>
-                              )}
-                              {user.status === "Banned" ? (
-                                <button type="button" className="btn btn-sm btn-warning rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleUnban(user.id)} style={{ fontSize: '0.7rem' }}>
-                                  Unban
-                                </button>
+                              {user.approvalStatus === "Rejected" ? (
+                                <span className="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2 fw-bold d-flex align-items-center me-2" style={{ fontSize: '0.7rem' }}>
+                                  REJECTED
+                                </span>
                               ) : (
-                                <button type="button" className="btn btn-sm btn-danger rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleBan(user.id)} style={{ fontSize: '0.7rem' }}>
-                                  Ban
-                                </button>
+                                <>
+                                  {user.approvalStatus !== "Approved" && (
+                                    <>
+                                      <button type="button" className="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleApprove(user.id)} style={{ fontSize: '0.7rem' }}>
+                                        Approve
+                                      </button>
+                                      <button type="button" className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onClick={() => handleReject(user.id)} style={{ fontSize: '0.7rem' }}>
+                                        Reject
+                                      </button>
+                                    </>
+                                  )}
+                                  {user.status === "Banned" ? (
+                                    <button type="button" className="btn btn-sm btn-warning rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleUnban(user.id)} style={{ fontSize: '0.7rem' }}>
+                                      Unban
+                                    </button>
+                                  ) : (
+                                    <button type="button" className="btn btn-sm btn-danger rounded-pill px-3 fw-bold shadow-sm" onClick={() => handleBan(user.id)} style={{ fontSize: '0.7rem' }}>
+                                      Ban
+                                    </button>
+                                  )}
+                                </>
                               )}
                               <Link to={`/users/${user.id}`} className="btn btn-sm btn-light rounded-pill px-3 fw-bold ms-1" style={{ fontSize: '0.7rem' }}>
                                 View
@@ -281,6 +316,47 @@ export function UsersPage() {
           <small className="text-muted">Managed by Administrator Session ID: <strong className="text-primary">#{adminId}</strong></small>
         </div>
       </div>
+
+      {/* Reason Modal */}
+      {modalConfig.isOpen && (
+        <>
+          <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+          <div className="modal fade show d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content border-0 shadow rounded-4">
+                <div className="modal-header border-bottom-0 pb-0">
+                  <h5 className="modal-title fw-bold">
+                    {modalConfig.type === "reject" ? "Reject User Account" : "Ban User Account"}
+                  </h5>
+                  <button type="button" className="btn-close shadow-none" onClick={closeModal}></button>
+                </div>
+                <div className="modal-body">
+                  <label className="form-label text-secondary small fw-bold mb-2">Reason for action</label>
+                  <textarea
+                    className="form-control border shadow-none bg-light bg-opacity-25 rounded-3 px-3 py-3"
+                    rows="3"
+                    value={reasonInput}
+                    onChange={(e) => setReasonInput(e.target.value)}
+                    placeholder="Provide a clear reason..."
+                    autoFocus
+                  ></textarea>
+                </div>
+                <div className="modal-footer border-top-0 pt-0">
+                  <button type="button" className="btn btn-light rounded-pill px-4" onClick={closeModal}>Cancel</button>
+                  <button 
+                    type="button" 
+                    className={`btn ${modalConfig.type === "reject" ? "btn-danger" : "btn-dark"} rounded-pill px-4 fw-bold`} 
+                    onClick={submitModalContent}
+                    disabled={!reasonInput.trim()}
+                  >
+                    Confirm Action
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

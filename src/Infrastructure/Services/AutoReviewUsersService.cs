@@ -34,7 +34,7 @@ public class AutoReviewUsersService : BackgroundService
             }
 
             // Chạy định kỳ mỗi 5 phút (Batch Processing)
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
         }
 
         _logger.LogInformation("AutoReviewUsersService stopping.");

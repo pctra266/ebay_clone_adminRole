@@ -4,7 +4,7 @@ import { ToastMessage } from "../components/ToastMessage";
 import { getCurrentAdminId } from "../services/adminSession";
 import { getBroadcasts, scheduleBroadcast, sendBroadcast } from "../services/broadcastService";
 
-const channelOptions = ["Email", "InApp", "SMS"];
+const channelOptions = ["Email", "InApp"];
 const audienceOptions = ["All", "Seller", "Buyer", "Group"];
 
 function formatDate(value) {
