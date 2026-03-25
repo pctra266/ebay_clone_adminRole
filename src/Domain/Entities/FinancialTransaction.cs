@@ -17,6 +17,7 @@ public partial class FinancialTransaction
     public decimal BalanceAfter { get; set; }
 
     public int? OrderId { get; set; }
+    public int? WithdrawalId { get; set; }
 
     public string? Description { get; set; }
 
@@ -32,4 +33,7 @@ public partial class FinancialTransaction
 
     [ForeignKey(nameof(OrderId))]
     public virtual OrderTable? Order { get; set; }
+
+    [ForeignKey(nameof(WithdrawalId))]
+    public virtual WithdrawalRequest? Withdrawal { get; set; }
 }

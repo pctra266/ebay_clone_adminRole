@@ -7,6 +7,7 @@ using EbayClone.Infrastructure.Services;
 using EbayClone.Web.Hubs;
 using EbayClone.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
@@ -20,7 +21,16 @@ public static class DependencyInjection
     {
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All;
+            options.ForwardLimit = null; // Trust all proxies (loopback by default is trusted)
+            options.KnownProxies.Clear();
+            options.KnownIPNetworks.Clear();
+        });
+
         builder.Services.AddScoped<IUser, CurrentUser>();
+        builder.Services.AddSingleton<IActiveConnectionTracker, ActiveConnectionTracker>(); // added for IP tracking
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks()
@@ -145,6 +155,7 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<ISellerHubService, SellerHubService>();
         builder.Services.AddScoped<IDisputeNotifier, DisputeNotifier>();
+        builder.Services.AddScoped<INotificationNotifier, NotificationNotifier>();
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

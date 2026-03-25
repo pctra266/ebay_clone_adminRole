@@ -550,6 +550,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("WithdrawalId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
@@ -557,6 +560,8 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.HasIndex("SellerId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("WithdrawalId");
 
                     b.ToTable("FinancialTransactions", (string)null);
                 });
@@ -641,6 +646,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ScheduledAt")
                         .HasColumnType("datetime2");
@@ -1283,6 +1291,9 @@ namespace EbayClone.Infrastructure.Data.Migrations
                     b.Property<double>("AboveStandardMaxUnresolvedRate")
                         .HasColumnType("float");
 
+                    b.Property<int>("AboveStandardMinDays")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("NextEvaluationDate")
                         .HasColumnType("datetime2");
 
@@ -1562,6 +1573,90 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .HasFilter("[email] IS NOT NULL");
 
                     b.ToTable("User", (string)null);
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.UserNotificationRead", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserNotificationReads");
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.WithdrawalRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BankAccountName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("BankAccountNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ProcessedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedBy");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("WithdrawalRequests", (string)null);
                 });
 
             modelBuilder.Entity("EbayClone.Infrastructure.Identity.ApplicationUser", b =>
@@ -1900,11 +1995,18 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("EbayClone.Domain.Entities.WithdrawalRequest", "Withdrawal")
+                        .WithMany()
+                        .HasForeignKey("WithdrawalId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Order");
 
                     b.Navigation("Seller");
 
                     b.Navigation("User");
+
+                    b.Navigation("Withdrawal");
                 });
 
             modelBuilder.Entity("EbayClone.Domain.Entities.Inventory", b =>
@@ -2139,6 +2241,43 @@ namespace EbayClone.Infrastructure.Data.Migrations
                         .WithMany("Stores")
                         .HasForeignKey("SellerId")
                         .HasConstraintName("FK__Store__sellerId__6D0D32F4");
+
+                    b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.UserNotificationRead", b =>
+                {
+                    b.HasOne("EbayClone.Domain.Entities.Notification", "Notification")
+                        .WithMany()
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EbayClone.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EbayClone.Domain.Entities.WithdrawalRequest", b =>
+                {
+                    b.HasOne("EbayClone.Domain.Entities.User", "Processor")
+                        .WithMany()
+                        .HasForeignKey("ProcessedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("EbayClone.Domain.Entities.User", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Processor");
 
                     b.Navigation("Seller");
                 });

@@ -14,10 +14,14 @@ public record ApproveUserCommand : IRequest<bool>
 public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, bool>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISellerHubService _sellerHubService;
+    private readonly ISender _sender;
 
-    public ApproveUserCommandHandler(IApplicationDbContext context)
+    public ApproveUserCommandHandler(IApplicationDbContext context, ISellerHubService sellerHubService, ISender sender)
     {
         _context = context;
+        _sellerHubService = sellerHubService;
+        _sender = sender;
     }
 
     public async Task<bool> Handle(ApproveUserCommand request, CancellationToken cancellationToken)
@@ -85,6 +89,16 @@ public class ApproveUserCommandHandler : IRequestHandler<ApproveUserCommand, boo
         });
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (user.Role == "Seller" || await _context.Stores.AnyAsync(s => s.SellerId == user.Id, cancellationToken))
+        {
+            var metricsList = await _sender.Send(new EbayClone.Application.Sellers.Queries.GetSellerPerformanceMetrics.GetSellerPerformanceMetricsQuery(), cancellationToken);
+            var metric = metricsList.FirstOrDefault(m => m.Id == user.Id);
+            if (metric != null)
+            {
+                await _sellerHubService.BroadcastSellerMetricsUpdate(metric);
+            }
+        }
 
         return true;
     }

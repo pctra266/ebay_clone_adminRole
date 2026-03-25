@@ -3,8 +3,8 @@ import { apiRequest } from './httpClient';
 const BASE = '/api/adminreturnrequests';
 
 const returnRequestService = {
-  // Màn hình 6.1 - Bước 1: Lấy danh sách theo status
-  getReturnRequests: (status = 'Pending') =>
+  // Màn hình 6.1 - Lấy danh sách nhưng cho phép lấy tất cả (truyền rỗng)
+  getReturnRequests: (status = '') =>
     apiRequest(`${BASE}?status=${status}`),
 
   // Màn hình 6.1 - Bước 3: Lấy chi tiết 1 yêu cầu
@@ -15,33 +15,33 @@ const returnRequestService = {
   approveReturnRequest: (id, adminNote = '') =>
     apiRequest(`${BASE}/${id}/approve`, {
       method: 'POST',
-      body: JSON.stringify({ returnRequestId: id, adminNote }),
+      body: { returnRequestId: id, adminNote },
     }),
 
   // Màn hình 6.1 - Bước 4: Từ chối hoàn tiền
   rejectReturnRequest: (id, adminNote) =>
     apiRequest(`${BASE}/${id}/reject`, {
       method: 'POST',
-      body: JSON.stringify({ returnRequestId: id, adminNote }),
+      body: { returnRequestId: id, adminNote },
     }),
 
   // Phán quyết từ Admin (Adjudication)
   adjudicateReturnRequest: (id, data) =>
     apiRequest(`${BASE}/${id}/adjudicate`, {
       method: 'POST',
-      body: JSON.stringify({
+      body: {
         returnRequestId: id,
         adminNote: data.adminNote,
         resolutionAction: data.resolutionAction, // "RequireReturn", "KeepItem", "RefundWithoutReturn"
         isRefundedByEbayFund: data.isRefundedByEbayFund,
-      }),
+      },
     }),
 
   // Cấp mã vận đơn trả hàng (Return Facilitation)
   provideReturnLabel: (id, returnLabelUrl) =>
     apiRequest(`${BASE}/${id}/return-label`, {
       method: 'POST',
-      body: JSON.stringify({ returnRequestId: id, returnLabelUrl }),
+      body: { returnRequestId: id, returnLabelUrl },
     }),
 
   // Lấy tin nhắn làm bằng chứng (Evidence)

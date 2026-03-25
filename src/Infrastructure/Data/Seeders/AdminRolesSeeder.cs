@@ -23,21 +23,21 @@ public class AdminRolesSeeder : ISeeder
             new AdminRole
             {
                 RoleName = "SuperAdmin",
-                Description = "Full system access - Can manage everything",
+                Description = "Full system access - Internal system administrator",
                 Permissions = "[\"*\"]",
                 CreatedAt = DateTime.UtcNow
             },
             new AdminRole
             {
                 RoleName = "Monitor",
-                Description = "Read-only access to dashboard and reports",
+                Description = "Monitor role - View only for Dashboard and Reports/Stats",
                 Permissions = "[\"ViewDashboard\",\"ViewReports\"]",
                 CreatedAt = DateTime.UtcNow
             },
             new AdminRole
             {
                 RoleName = "Support",
-                Description = "Customer support - manage users/orders/disputes/reviews and broadcast",
+                Description = "Customer support - Manage Users, Products, Orders, Disputes, Reviews and Broadcast",
                 Permissions = "[\"ViewDashboard\",\"ManageUsers\",\"ManageProducts\",\"ManageOrders\",\"ManageDisputes\",\"ModerateReviews\",\"ManageBroadcasts\"]",
                 CreatedAt = DateTime.UtcNow
             }

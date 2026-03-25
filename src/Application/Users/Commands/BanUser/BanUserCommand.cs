@@ -15,10 +15,14 @@ public record BanUserCommand : IRequest<bool>
 public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISellerHubService _sellerHubService;
+    private readonly ISender _sender;
 
-    public BanUserCommandHandler(IApplicationDbContext context)
+    public BanUserCommandHandler(IApplicationDbContext context, ISellerHubService sellerHubService, ISender sender)
     {
         _context = context;
+        _sellerHubService = sellerHubService;
+        _sender = sender;
     }
 
     public async Task<bool> Handle(BanUserCommand request, CancellationToken cancellationToken)
@@ -93,6 +97,16 @@ public class BanUserCommandHandler : IRequestHandler<BanUserCommand, bool>
         });
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (user.Role == "Seller" || await _context.Stores.AnyAsync(s => s.SellerId == user.Id, cancellationToken))
+        {
+            var metricsList = await _sender.Send(new EbayClone.Application.Sellers.Queries.GetSellerPerformanceMetrics.GetSellerPerformanceMetricsQuery(), cancellationToken);
+            var metric = metricsList.FirstOrDefault(m => m.Id == user.Id);
+            if (metric != null)
+            {
+                await _sellerHubService.BroadcastSellerMetricsUpdate(metric);
+            }
+        }
 
         return true;
     }

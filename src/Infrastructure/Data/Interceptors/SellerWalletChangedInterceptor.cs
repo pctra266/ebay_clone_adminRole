@@ -14,10 +14,23 @@ namespace EbayClone.Infrastructure.Data.Interceptors;
 public class SellerWalletChangedInterceptor : SaveChangesInterceptor
 {
     private readonly ISellerHubService _sellerHubService;
+    private readonly AsyncLocal<List<SellerWallet>?> _changedWallets = new();
 
     public SellerWalletChangedInterceptor(ISellerHubService sellerHubService)
     {
         _sellerHubService = sellerHubService;
+    }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    {
+        CaptureWalletChanges(eventData.Context);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    {
+        CaptureWalletChanges(eventData.Context);
+        return base.SavingChanges(eventData, result);
     }
 
     public override async ValueTask<int> SavedChangesAsync(
@@ -25,28 +38,37 @@ public class SellerWalletChangedInterceptor : SaveChangesInterceptor
         int result,
         CancellationToken cancellationToken = default)
     {
-        await BroadcastWalletChanges(eventData.Context);
+        await BroadcastWalletChanges();
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
-        BroadcastWalletChanges(eventData.Context).GetAwaiter().GetResult();
+        BroadcastWalletChanges().GetAwaiter().GetResult();
         return base.SavedChanges(eventData, result);
     }
 
-    private async Task BroadcastWalletChanges(DbContext? context)
+    private void CaptureWalletChanges(DbContext? context)
     {
         if (context == null) return;
 
         var changedWallets = context.ChangeTracker
             .Entries<SellerWallet>()
-            .Where(e => e.State == EntityState.Modified
-                     || e.State == EntityState.Added)
+            .Where(e => e.State == EntityState.Modified || e.State == EntityState.Added)
             .Select(e => e.Entity)
             .ToList();
 
-        foreach (var wallet in changedWallets)
+        // Create detached clones or just keep references. Since we don't need navigation properties, references are fine
+        // as long as their properties have the new values.
+        _changedWallets.Value = changedWallets;
+    }
+
+    private async Task BroadcastWalletChanges()
+    {
+        var walletsToBroadcast = _changedWallets.Value;
+        if (walletsToBroadcast == null || !walletsToBroadcast.Any()) return;
+
+        foreach (var wallet in walletsToBroadcast)
         {
             try
             {
@@ -61,5 +83,7 @@ public class SellerWalletChangedInterceptor : SaveChangesInterceptor
                 // Never let SignalR failures affect the main transaction
             }
         }
+
+        _changedWallets.Value = null; // Clean up
     }
 }

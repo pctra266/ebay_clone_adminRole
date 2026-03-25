@@ -8,6 +8,7 @@ const endpoints = {
     wallets: `${API_BASE}/Wallets`,
     financials: `${API_BASE}/Financials`,
     categories: `${API_BASE}/Categories`,
+    orders: `${API_BASE}/Orders`,
 };
 
 export default endpoints;
@@ -15,6 +16,10 @@ export default endpoints;
 // src/constants/endpoints.js
 
 export const ENDPOINTS = {
+    ORDERS: {
+        BASE: "/api/orders",
+        DETAIL: (id) => `/api/orders/${id}`,
+    },
     PRODUCTS: {
         BASE: "/api/products",
         MANAGED: "/api/products/managed",

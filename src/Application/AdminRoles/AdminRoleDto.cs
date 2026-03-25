@@ -20,5 +20,5 @@ public class AdminUserRoleDto
     public string RoleName { get; set; } = string.Empty;
     public int? AssignedBy { get; set; }
     public string? AssignedByUsername { get; set; }
-    public DateTime AssignedAt { get; set; }
+    public DateTime? AssignedAt { get; set; }
 }

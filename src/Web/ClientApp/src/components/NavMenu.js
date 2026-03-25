@@ -40,7 +40,7 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
             <span className="fw-bold" style={{ color: '#0064d2' }}>b</span>
             <span className="fw-bold" style={{ color: '#f5af02' }}>a</span>
             <span className="fw-bold" style={{ color: '#86b817' }}>y</span>
-            <span className="ms-1 text-dark small fw-semibold">Admin</span>
+            <span className="ms-1 text-dark small fw-semibold">{user?.role === 'Seller' ? 'Seller' : 'Admin'}</span>
           </Link>
           <button 
             className="btn btn-link text-dark p-0 border-0 fs-4 d-flex align-items-center justify-content-center" 
@@ -52,33 +52,44 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
         </div>
         <div className="sidebar-menu">
           <ul className="navbar-nav w-100" onClick={() => { if(window.innerWidth < 992) closeSidebar(); }}>
-            <SidebarLink to="/dashboard" icon="bi bi-speedometer2">Dashboard</SidebarLink>
+            {user?.role !== 'Seller' && <SidebarLink to="/dashboard" icon="bi bi-speedometer2">Dashboard</SidebarLink>}
             
+            {user?.role === 'Seller' && (
+              <SidebarLink to="/seller-products" icon="bi bi-box-seam">Your products</SidebarLink>
+            )}
+
             {(user?.role === 'SuperAdmin' || user?.role === 'Support' || user?.roles?.includes('SuperAdmin') || user?.roles?.includes('Support')) && (
               <>
+                <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
                 <SidebarLink to="/products" icon="bi bi-box-seam">Products</SidebarLink>
+                <SidebarLink to="/orders" icon="bi bi-cart">Orders</SidebarLink>
                 <SidebarLink to="/review-monitoring" icon="bi bi-chat-left-text">Reviews</SidebarLink>
+
                 <SidebarLink to="/disputes" icon="bi bi-shield-exclamation">Disputes</SidebarLink>
                 <SidebarLink to="/return-requests" icon="bi bi-cart">Return Requests</SidebarLink>
               </>
             )}
 
+
+
             {(user?.role === 'SuperAdmin' || user?.roles?.includes('SuperAdmin')) && (
               <>
-                <SidebarLink to="/users" icon="bi bi-people">Users</SidebarLink>
                 <SidebarLink to="/sellers" icon="bi bi-person-badge">Sellers Overview</SidebarLink>
                 <SidebarLink to="/payout-engine" icon="bi bi-lightning-charge">Payout Engine</SidebarLink>
+
+
                 <SidebarLink to="/audit-logs" icon="bi bi-bar-chart-line">Audit Logs</SidebarLink>
                 <SidebarLink to="/broadcasts" icon="bi bi-megaphone">Broadcasts</SidebarLink>
                 <SidebarLink to="/admin-roles" icon="bi bi-gear">Admin Roles</SidebarLink>
+                <SidebarLink to="/active-connections" icon="bi bi-hdd-network">Active Connections</SidebarLink>
               </>
             )}
           </ul>
         </div>
-        <div className="sidebar-footer mt-auto border-top pt-2">
+        <div className="sidebar-footer mt-auto border-top pt-2 px-3 pb-3">
           <ul className="navbar-nav w-100">
             {user && (
-              <li className="nav-item px-3 py-2 d-flex align-items-center mb-1">
+              <li className="nav-item d-flex align-items-center mb-1">
                 <div 
                   className="rounded-circle text-white d-flex justify-content-center align-items-center shadow-sm"
                   style={{ width: '36px', height: '36px', fontSize: '1rem', backgroundColor: '#0064d2', flexShrink: 0 }}
@@ -86,8 +97,8 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
                   {user.email ? user.email.charAt(0).toUpperCase() : <i className="bi bi-person"></i>}
                 </div>
                 <div className="ms-3 overflow-hidden w-100">
-                  <div className="fw-semibold text-truncate text-dark" title={user.fullName || user.userName || user.email || 'Admin'} style={{ fontSize: '0.9rem' }}>
-                    {user.fullName || user.userName || 'Admin'}
+                  <div className="fw-semibold text-truncate text-dark" title={user.fullName || user.userName || user.email || (user?.role === 'Seller' ? 'Seller' : 'Admin')} style={{ fontSize: '0.9rem' }}>
+                    {user.fullName || user.userName || (user?.role === 'Seller' ? 'Seller' : 'Admin')}
                   </div>
                   <div className="text-secondary text-truncate" title={user.email} style={{ fontSize: '0.8rem' }}>
                     {user.email}
@@ -96,16 +107,16 @@ export const NavMenu = ({ isOpen, toggleSidebar, closeSidebar }) => {
               </li>
             )}
             
-            <NavItem>
+            <li className="nav-item mt-2">
               <button 
-                className="sidebar-link border-0 w-100 text-start bg-transparent text-danger fw-medium" 
+                className="btn btn-link sidebar-link border-0 w-100 text-start p-0 bg-transparent text-danger fw-medium" 
                 onClick={handleLogout}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', textDecoration: 'none' }}
               >
-                <i className="bi bi-box-arrow-left"></i>
-                <span>Logout</span>
+                <i className="bi bi-box-arrow-right"></i>
+                <span className="ms-2">Logout</span>
               </button>
-            </NavItem>
+            </li>
           </ul>
         </div>
       </nav>

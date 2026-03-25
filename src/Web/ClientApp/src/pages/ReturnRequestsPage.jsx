@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import returnRequestService from '../services/returnRequestService';
+import { useNotificationHub } from '../hooks/useNotificationHub';
 
 const STATUS_TABS = [
-  { key: 'Pending',   label: 'Pending Review', color: '#f59e0b' },
-  { key: 'Escalated', label: 'Escalated',      color: '#6366f1' },
-  { key: 'Approved',  label: 'Refunded',       color: '#10b981' },
-  { key: 'Rejected',  label: 'Rejected',       color: '#ef4444' },
+  { key: 'NeedAction', label: 'Need Action',  color: '#ef4444' }, // Pending + Escalated
+  { key: 'InProgress', label: 'In Progress',  color: '#6366f1' }, // WaitingLabel, Provided, Awaiting, Transit
+  { key: 'Approved',   label: 'Refunded',     color: '#10b981' },
+  { key: 'Rejected',   label: 'Rejected',     color: '#94a3b8' },
 ];
 
 const statusBadge = {
@@ -14,24 +15,30 @@ const statusBadge = {
   Approved:              { bg: '#d1fae5', color: '#065f46', text: 'Refunded'         },
   Rejected:              { bg: '#fee2e2', color: '#991b1b', text: 'Rejected'         },
   WaitingForReturnLabel: { bg: '#e0e7ff', color: '#3730a3', text: 'Waiting for Label' },
-  ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', text: 'Label Provided'  },
-  Returned:              { bg: '#fef9c3', color: '#854d0e', text: 'Item Returned'   },
-  Escalated:             { bg: '#ffedd5', color: '#9a3412', text: 'Escalated'        },
+  ReturnLabelProvided:   { bg: '#dcfce7', color: '#166534', text: 'Label Provided'   },
+  Returned:              { bg: '#fef9c3', color: '#854d0e', text: 'Item Returned'     },
+  Escalated:             { bg: '#ffedd5', color: '#9a3412', text: 'Escalated'       },
+  AwaitingShipment:      { bg: '#e0f2fe', color: '#0369a1', text: 'Awaiting Shipment' },
+  InTransit:             { bg: '#faf5ff', color: '#7e22ce', text: 'In Transit'        },
+  Delivered:             { bg: '#ecfdf5', color: '#047857', text: 'Delivered'         },
+  Completed:             { bg: '#f9fafb', color: '#111827', text: 'Completed'         },
 };
 
 export default function ReturnRequestsPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Pending');
+  const [activeTab, setActiveTab] = useState('NeedAction');
+  const [currentPage, setCurrentPage] = useState(1);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [error, setError] = useState('');
+  const PAGE_SIZE = 7;
 
-  const fetchData = useCallback(async (status) => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await returnRequestService.getReturnRequests(status);
+      const data = await returnRequestService.getReturnRequests(''); // Fetch all requests
       setRequests(data);
     } catch {
       setError('Could not load requests. Please try again.');
@@ -41,12 +48,46 @@ export default function ReturnRequestsPage() {
   }, []);
 
   useEffect(() => {
-    fetchData(activeTab);
-  }, [activeTab, fetchData]);
+    fetchData(); // Sẽ chỉ fetch 1 lần khi load (bỏ activeTab ra khỏi dependency)
+  }, [fetchData]);
 
-  const filtered = requests.filter((r) =>
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchId]);
+
+  useNotificationHub(['ReturnRequestCreated', 'ReturnRequestUpdated'], useCallback(() => {
+      // Re-fetch data when a return request is created or updated
+      fetchData();
+  }, [fetchData]));
+
+  // Derived Statistics
+  const totalCount = requests.length;
+  const pendingCount = requests.filter(r => r.status === 'Pending' || r.status === 'Escalated').length;
+  const inProgressCount = requests.filter(r => 
+    ['WaitingForReturnLabel', 'ReturnLabelProvided', 'AwaitingShipment', 'InTransit', 'Delivered'].includes(r.status)
+  ).length;
+  const approvedCount = requests.filter(r => r.status === 'Approved' || r.status === 'Completed').length;
+
+  const getRequestsForTab = () => {
+    if (activeTab === 'NeedAction') {
+      return requests.filter(r => r.status === 'Pending' || r.status === 'Escalated');
+    }
+    if (activeTab === 'InProgress') {
+      return requests.filter(r => ['WaitingForReturnLabel', 'ReturnLabelProvided', 'AwaitingShipment', 'InTransit', 'Delivered'].includes(r.status));
+    }
+    return requests.filter((r) => r.status === activeTab);
+  };
+
+  const requestsForTab = getRequestsForTab();
+  const filtered = requestsForTab.filter((r) =>
     searchId ? String(r.orderId).includes(searchId.trim()) : true
   );
+
+  // Pagination Logic
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedItems = filtered.slice(startIndex, startIndex + PAGE_SIZE);
 
   const badge = (status) => {
     const b = statusBadge[status] || { color: '#64748b', text: status };
@@ -72,10 +113,10 @@ export default function ReturnRequestsPage() {
         {/* ── Quick Stats Grid ── */}
         <div className="row g-3 mb-5 justify-content-center">
           {[
-            { label: 'Total in View', value: requests.length, icon: 'bi-box-seam', color: 'primary' },
-            { label: 'Pending Review', value: activeTab === 'Pending' ? requests.length : '—', icon: 'bi-clock-history', color: 'warning' },
-            { label: 'Escalated Cases', value: activeTab === 'Escalated' ? requests.length : '—', icon: 'bi-exclamation-triangle', color: 'danger' },
-            { label: 'Refunded (Success)', value: activeTab === 'Approved' ? requests.length : '—', icon: 'bi-check-circle-fill', color: 'success' },
+            { label: 'Total Requests', value: totalCount, icon: 'bi-box-seam', color: 'primary' },
+            { label: 'Need Action', value: pendingCount, icon: 'bi-exclamation-octagon', color: 'danger' },
+            { label: 'In Progress', value: inProgressCount, icon: 'bi-arrow-repeat', color: 'info' },
+            { label: 'Refunded / Finished', value: approvedCount, icon: 'bi-check-circle-fill', color: 'success' },
           ].map((stat, idx) => (
             <div key={idx} className="col-12 col-sm-6 col-lg-3">
               <div className="bg-white border rounded-4 p-3 shadow-sm d-flex align-items-center gap-3 h-100 transition-all">
@@ -106,8 +147,8 @@ export default function ReturnRequestsPage() {
                         style={{ fontSize: '0.75rem' }}
                       >
                         {tab.label}
-                        {activeTab === tab.key && requests.length > 0 && (
-                          <span className="badge bg-white text-primary ms-2 rounded-pill px-2">{requests.length}</span>
+                        {activeTab === tab.key && requestsForTab.length > 0 && (
+                          <span className="badge bg-white text-primary ms-2 rounded-pill px-2">{requestsForTab.length}</span>
                         )}
                       </button>
                     ))}
@@ -159,7 +200,7 @@ export default function ReturnRequestsPage() {
                       </td>
                     </tr>
                   ) : (
-                    filtered.map(r => (
+                    paginatedItems.map(r => (
                       <tr key={r.id} onClick={() => navigate(`/return-requests/${r.id}`)} style={{ cursor: 'pointer' }} className="transition-all">
                         <td className="ps-4 py-3 text-secondary fw-medium">#{r.id}</td>
                         <td>
@@ -196,6 +237,36 @@ export default function ReturnRequestsPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* ── Pagination Controls ── */}
+            {totalPages > 1 && (
+              <div className="px-4 py-3 bg-white border-top d-flex align-items-center justify-content-between">
+                <div className="text-secondary small">
+                  Showing <span className="fw-bold text-dark">{startIndex + 1}</span> to <span className="fw-bold text-dark">{Math.min(startIndex + PAGE_SIZE, totalItems)}</span> of <span className="fw-bold text-dark">{totalItems}</span> results
+                </div>
+                <nav>
+                  <ul className="pagination pagination-sm mb-0 gap-1">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button className="page-link rounded-pill border-0 px-3" onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>
+                        <i className="bi bi-chevron-left"></i>
+                      </button>
+                    </li>
+                    {[...Array(totalPages)].map((_, i) => (
+                      <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                        <button className="page-link rounded-pill border-0 px-3 fw-bold" onClick={() => setCurrentPage(i + 1)}>
+                          {i + 1}
+                        </button>
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button className="page-link rounded-pill border-0 px-3" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>
+                        <i className="bi bi-chevron-right"></i>
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            )}
           </div>
         </div>
       </div>

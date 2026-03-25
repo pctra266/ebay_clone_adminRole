@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // ✅ import từ Context, không phải services/useAuth.js
 
-export default function ProtectedRoute({ children, skip2FACheck = false }) {
+export default function ProtectedRoute({ children, skip2FACheck = false, allowedRoles = [] }) {
   const { user, loading, isAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -16,12 +16,29 @@ export default function ProtectedRoute({ children, skip2FACheck = false }) {
 
     if (!skip2FACheck && !user?.twoFactorEnabled) {
       navigate("/enable2FA", { replace: true });
+      return;
     }
-  }, [loading, isAuth, user, skip2FACheck, navigate]);
+
+    // Role-based authorization
+    if (allowedRoles.length > 0) {
+      const userRole = user?.role;
+      const hasRequiredRole = allowedRoles.includes(userRole);
+
+      if (!hasRequiredRole) {
+        console.warn(`Access denied for role: ${userRole}. Required: ${allowedRoles.join(", ")}`);
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [loading, isAuth, user, skip2FACheck, allowedRoles, navigate]);
 
   if (loading) return <LoadingScreen />;
   if (!isAuth) return null;
   if (!skip2FACheck && !user?.twoFactorEnabled) return null;
+
+  // Final role check for rendering
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return null;
+  }
 
   return children;
 }

@@ -10,10 +10,14 @@ public record EvaluateSellerLevelsCommand : IRequest<int>;
 public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSellerLevelsCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISellerHubService _sellerHubService;
+    private readonly ISender _sender;
 
-    public EvaluateSellerLevelsCommandHandler(IApplicationDbContext context)
+    public EvaluateSellerLevelsCommandHandler(IApplicationDbContext context, ISellerHubService sellerHubService, ISender sender)
     {
         _context = context;
+        _sellerHubService = sellerHubService;
+        _sender = sender;
     }
 
     public async Task<int> Handle(EvaluateSellerLevelsCommand request, CancellationToken cancellationToken)
@@ -30,6 +34,8 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
         {
             criteria = new SellerLevelCriteria(); // Use defaults if not found
         }
+
+        var updatedSellerIds = new List<int>();
 
         foreach (var seller in sellers)
         {
@@ -84,6 +90,20 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
             double lateRate = transactionCount > 0 ? (double)lateShipments / transactionCount : 0;
 
             // Evaluate Level using dynamic criteria
+            // Calculate days since first successful order
+            var firstOrder = await _context.OrderTables
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == seller.Id) && o.Status == "Completed")
+                .OrderBy(o => o.OrderDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            int daysSinceFirstOrder = 0;
+            if (firstOrder?.OrderDate != null)
+            {
+                daysSinceFirstOrder = (int)(now - firstOrder.OrderDate.Value).TotalDays;
+            }
+
             string newLevel = "BelowStandard";
 
             // Is Top Rated?
@@ -96,6 +116,8 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
 
             // Is Above Standard?
             bool isAboveStandard = !isTopRated && 
+                                   transactionCount > 0 && 
+                                   daysSinceFirstOrder >= criteria.AboveStandardMinDays &&
                                    defectRate <= criteria.AboveStandardMaxDefectRate && 
                                    (unresolvedCases <= criteria.AboveStandardMaxUnresolvedCases || unresolvedRate <= criteria.AboveStandardMaxUnresolvedRate);
 
@@ -105,6 +127,7 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
             if (seller.SellerLevel != newLevel)
             {
                 seller.SellerLevel = newLevel;
+                updatedSellerIds.Add(seller.Id);
                 updatedCount++;
             }
         }
@@ -112,6 +135,13 @@ public class EvaluateSellerLevelsCommandHandler : IRequestHandler<EvaluateSeller
         if (updatedCount > 0)
         {
             await _context.SaveChangesAsync(cancellationToken);
+
+            var metricsList = await _sender.Send(new EbayClone.Application.Sellers.Queries.GetSellerPerformanceMetrics.GetSellerPerformanceMetricsQuery(), cancellationToken);
+            var updatedMetrics = metricsList.Where(m => updatedSellerIds.Contains(m.Id));
+            foreach(var metric in updatedMetrics)
+            {
+                await _sellerHubService.BroadcastSellerMetricsUpdate(metric);
+            }
         }
 
         return updatedCount;

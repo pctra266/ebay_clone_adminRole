@@ -42,6 +42,7 @@ public interface IApplicationDbContext
     DbSet<PlatformFee> PlatformFees { get; }
     DbSet<AdminAction> AdminActions { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<UserNotificationRead> UserNotificationReads { get; }
     DbSet<AdminRole> AdminRoles { get; }
     DbSet<AdminUserRole> AdminUserRoles { get; }
     DbSet<FinancialTransaction> FinancialTransactions { get; }
@@ -49,6 +50,7 @@ public interface IApplicationDbContext
     DbSet<PayoutConfig> PayoutConfigs { get; }
     DbSet<PayoutTransaction> PayoutTransactions { get; }
     DbSet<SellerLevelCriteria> SellerLevelCriteria { get; }
+    DbSet<WithdrawalRequest> WithdrawalRequests { get; }
 
 
     // 2. Hàm lưu thay đổi (Quan trọng nhất)

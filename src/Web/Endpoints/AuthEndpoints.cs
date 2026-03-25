@@ -72,7 +72,7 @@ public class Auth : EndpointGroupBase
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
 
-        return Results.Ok(new { success = true });
+        return Results.Ok(result);
     }
 
     public IResult Logout(HttpContext http)

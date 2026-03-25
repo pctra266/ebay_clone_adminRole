@@ -42,6 +42,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<PlatformFee> PlatformFees { get; set; }
     public virtual DbSet<AdminAction> AdminActions { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<UserNotificationRead> UserNotificationReads { get; set; }
     public virtual DbSet<AdminRole> AdminRoles { get; set; }
     public virtual DbSet<AdminUserRole> AdminUserRoles { get; set; }
     public virtual DbSet<FinancialTransaction> FinancialTransactions { get; set; }
@@ -51,6 +52,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
     public virtual DbSet<PayoutConfig> PayoutConfigs { get; set; }
     public virtual DbSet<PayoutTransaction> PayoutTransactions { get; set; }
     public virtual DbSet<SellerLevelCriteria> SellerLevelCriteria { get; set; }
+    public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
 
     public new Task<int> SaveChangesAsync(CancellationToken cancellationToken)
@@ -488,6 +490,27 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>, 
                 .WithMany()
                 .HasForeignKey(e => e.OrderId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(e => e.Withdrawal)
+                .WithMany()
+                .HasForeignKey(e => e.WithdrawalId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<UserNotificationRead>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(d => d.Notification).WithMany().HasForeignKey(d => d.NotificationId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
+        });
+
+        modelBuilder.Entity<WithdrawalRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.Status).HasMaxLength(50).HasConversion<string>();
+            entity.HasOne(e => e.Seller).WithMany().HasForeignKey(e => e.SellerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Processor).WithMany().HasForeignKey(e => e.ProcessedBy).OnDelete(DeleteBehavior.SetNull);
         });
 
         // NEW: Apply configurations from assembly for new entities

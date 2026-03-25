@@ -44,7 +44,7 @@ namespace EbayClone.Application.Authentication.Commands.Verify2FA
 
             // Nếu hợp lệ → tạo JWT
             var token = _jwtService.GenerateToken(user);
-            return new Verify2FAResponse { Success = true, Token = token };
+            return new Verify2FAResponse { Success = true, Token = token, Role = user.Role };
         }
     }
 }

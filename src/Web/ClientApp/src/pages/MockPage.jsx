@@ -13,13 +13,13 @@ export function MockPage() {
     const [purchaseData, setPurchaseData] = useState({
         sellerId: '',
         orderType: 'Normal',
-        amount: 500000,
+        amount: 50.00,
         settleImmediately: true,
         ensureBankLinked: true
     });
     const [payoutData, setPayoutData] = useState({
         sellerId: '',
-        amount: 50000
+        amount: 10.00
     });
     const [loading, setLoading] = useState(false);
     const [payoutLoading, setPayoutLoading] = useState(false);
@@ -27,6 +27,12 @@ export function MockPage() {
     const [toast, setToast] = useState({ message: '', type: 'success' });
     const [defectData, setDefectData] = useState({ sellerId: '' });
     const [defectLoading, setDefectLoading] = useState(false);
+    const [returnRequestData, setReturnRequestData] = useState({ 
+        sellerId: '', 
+        reason: 'Item defective - screen won\'t turn on',
+        status: 'Pending'
+    });
+    const [returnRequestLoading, setReturnRequestLoading] = useState(false);
     const [evalLoading, setEvalLoading] = useState(false);
     const [evalSeconds, setEvalSeconds] = useState(60);
     
@@ -102,6 +108,27 @@ export function MockPage() {
             setToast({ message: err.message || "Failed to generate defect.", type: 'error' });
         } finally {
             setDefectLoading(false);
+        }
+    };
+
+    const handleReturnRequestSubmit = async (e) => {
+        e.preventDefault();
+        setReturnRequestLoading(true);
+        try {
+            await apiRequest('/api/Mocking/generate-mock-return-request', {
+                method: 'POST',
+                body: { 
+                    sellerId: parseInt(returnRequestData.sellerId, 10),
+                    reason: returnRequestData.reason,
+                    status: returnRequestData.status
+                },
+            });
+            setToast({ message: `Mock return request (${returnRequestData.status}) generated!`, type: 'warning' });
+            setReturnRequestData({ ...returnRequestData, sellerId: '' });
+        } catch (err) {
+            setToast({ message: err.message || "Failed to generate return request.", type: 'error' });
+        } finally {
+            setReturnRequestLoading(false);
         }
     };
 
@@ -188,8 +215,8 @@ export function MockPage() {
                             </div>
 
                             <div className="pe-input-group">
-                                <label className="pe-input-label">Amount (VND)</label>
-                                <input type="number" className="pe-form-control" name="amount" value={purchaseData.amount} onChange={handlePurchaseChange} min="1000" required />
+                                <label className="pe-input-label">Amount (USD)</label>
+                                <input type="number" className="pe-form-control" name="amount" value={purchaseData.amount} onChange={handlePurchaseChange} step="0.01" min="0.01" required />
                             </div>
 
                             <div className="bg-light p-3 rounded-3">
@@ -227,8 +254,8 @@ export function MockPage() {
                             </div>
 
                             <div className="pe-input-group">
-                                <label className="pe-input-label">Withdrawal Amount (VND)</label>
-                                <input type="number" className="pe-form-control" name="amount" value={payoutData.amount} onChange={handlePayoutChange} min="1000" required />
+                                <label className="pe-input-label">Withdrawal Amount (USD)</label>
+                                <input type="number" className="pe-form-control" name="amount" value={payoutData.amount} onChange={handlePayoutChange} step="0.01" min="0.01" required />
                             </div>
 
                             <button type="submit" className="btn btn-outline-primary rounded-pill mt-4" disabled={payoutLoading}>
@@ -291,11 +318,56 @@ export function MockPage() {
                     </GlassCard>
                 </div>
 
+                {/* Return Request Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-3-5" className="h-100 border-warning" style={{ borderTop: '4px solid var(--bs-warning)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-warning">4. Generate Return Request</h5>
+                            <p className="text-muted small">
+                                Simulate a buyer opening a <strong>Return Request</strong> for an order.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleReturnRequestSubmit} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" name="sellerId" value={returnRequestData.sellerId} onChange={(e) => setReturnRequestData({ ...returnRequestData, sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Status Scenario</label>
+                                <select 
+                                    className="pe-form-control pe-select" 
+                                    name="status" 
+                                    value={returnRequestData.status} 
+                                    onChange={(e) => setReturnRequestData({ ...returnRequestData, status: e.target.value })}
+                                >
+                                    <option value="Pending">Pending Review</option>
+                                    <option value="Escalated">Escalated (Dispute)</option>
+                                    <option value="WaitingForReturnLabel">Waiting for Return Label</option>
+                                    <option value="ReturnLabelProvided">Return Label Provided</option>
+                                    <option value="AwaitingShipment">Awaiting Shipment</option>
+                                    <option value="InTransit">In Transit</option>
+                                    <option value="Delivered">Delivered (Item Received)</option>
+                                    <option value="Completed">Completed (Refunded)</option>
+                                </select>
+                            </div>
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Reason</label>
+                                <input type="text" className="pe-form-control" name="reason" value={returnRequestData.reason} onChange={(e) => setReturnRequestData({ ...returnRequestData, reason: e.target.value })} placeholder="Reason (e.g., Damaged item)" required />
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-warning rounded-pill mt-4" disabled={returnRequestLoading}>
+                                {returnRequestLoading ? "Generating..." : "Inject Return Request"}
+                            </button>
+                        </form>
+                    </GlassCard>
+                </div>
+
                 {/* Schedule Column */}
                 <div className="col-lg-4">
                     <GlassCard stagger="stagger-4" className="h-100 border-info" style={{ borderTop: '4px solid var(--bs-info)' }}>
                         <div className="mb-4">
-                            <h5 className="fw-bold mb-2 text-info">4. Schedule Auto-Evaluation</h5>
+                            <h5 className="fw-bold mb-2 text-info">5. Schedule Auto-Evaluation</h5>
                             <p className="text-muted small">
                                 Override the Background Service's target schedule (normally runs the 20th of the month) to demo mass dynamic evaluation.
                             </p>
@@ -335,7 +407,7 @@ export function MockPage() {
                 <div className="col-lg-4">
                     <GlassCard stagger="stagger-5" className="h-100 border-success" style={{ borderTop: '4px solid var(--bs-success)' }}>
                         <div className="mb-4">
-                            <h5 className="fw-bold mb-2 text-success">5. Accelerate Settlements</h5>
+                            <h5 className="fw-bold mb-2 text-success">6. Accelerate Settlements</h5>
                             <p className="text-muted small">
                                 Instantly fast-forward the Estimated Settlement Date of <strong>all pending orders</strong> for a given seller to clear in N minutes.
                             </p>

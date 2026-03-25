@@ -23,3 +23,9 @@ export function scheduleBroadcast(payload) {
   });
 }
 
+export function markNotificationAsRead(id) {
+  return apiRequest(`${endpoints.broadcasts}/active/${id}/read`, {
+    method: "POST",
+  });
+}
+

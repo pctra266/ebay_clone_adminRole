@@ -107,21 +107,31 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         // Get seller ID from order
         var sellerId = dispute.Order?.OrderItems.FirstOrDefault()?.Product?.SellerId;
 
-        // PROCESS BASED ON DECISION
+        // Retrieve seller wallet and calculate frozen amount
+        SellerWallet? sellerWallet = null;
+        decimal frozenAmount = 0;
+        if (sellerId.HasValue)
+        {
+            sellerWallet = await _context.SellerWallets
+                .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
+            frozenAmount = dispute.Amount ?? 0; // The amount that was originally frozen for the dispute
+        }
+
+        // Determine the actual refund amount based on the request
+        var refundAmount = request.RefundAmount ?? 0;
+
+        // Perform resolution logic based on winner
         if (request.Winner == DisputeWinners.Buyer)
         {
-            // Buyer wins - Full refund
-            await ProcessBuyerWins(dispute, sellerId, request.AddSellerViolation, cancellationToken);
+            await ProcessBuyerWins(dispute, sellerWallet?.SellerId, refundAmount, frozenAmount, request.AddSellerViolation, cancellationToken);
         }
         else if (request.Winner == DisputeWinners.Seller)
         {
-            // Seller wins - No refund, release funds
-            await ProcessSellerWins(dispute, sellerId, cancellationToken);
+            await ProcessSellerWins(dispute, sellerWallet?.SellerId, frozenAmount, cancellationToken);
         }
         else if (request.Winner == DisputeWinners.Split)
         {
-            // Split decision - Partial refund
-            await ProcessSplitDecision(dispute, sellerId, request.RefundAmount!.Value, cancellationToken);
+            await ProcessSplitDecision(dispute, sellerWallet?.SellerId, refundAmount, frozenAmount, cancellationToken);
         }
 
         // Create system message
@@ -147,6 +157,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
             Details = $"Resolved dispute {dispute.CaseId} in favor of {request.Winner}. Refund: ${request.RefundAmount}",
             CreatedAt = DateTime.UtcNow
         };
+        _context.AdminActions.Add(adminAction);
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -173,10 +184,8 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         return dispute.Id;
     }
 
-    private async Task ProcessBuyerWins(Dispute dispute, int? sellerId, bool addViolation, CancellationToken cancellationToken)
+    private async Task ProcessBuyerWins(Dispute dispute, int? sellerId, decimal refundAmount, decimal frozenAmount, bool addViolation, CancellationToken cancellationToken)
     {
-        var refundAmount = dispute.Amount ?? 0;
-
         // Update order status
         if (dispute.Order != null)
         {
@@ -188,13 +197,43 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         {
             var sellerWallet = await _context.SellerWallets
                 .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
-
             if (sellerWallet != null)
             {
-                // Move money: DisputedBalance -> Refunded
-                // Ensure DisputedBalance doesn't go negative if it wasn't tracked properly before
-                var amountToDeduct = Math.Min(sellerWallet.DisputedBalance, refundAmount);
-                sellerWallet.DisputedBalance -= amountToDeduct;
+                var remainingToDeduct = refundAmount;
+
+                // 1. Release as much as we can from DisputedBalance
+                var fromDisputed = Math.Min(sellerWallet.DisputedBalance, remainingToDeduct);
+                sellerWallet.DisputedBalance -= fromDisputed;
+                remainingToDeduct -= fromDisputed;
+
+                // 2. Cascade logic for remaining debt
+                if (remainingToDeduct > 0)
+                {
+                    if (sellerWallet.PendingBalance >= remainingToDeduct)
+                    {
+                        sellerWallet.PendingBalance -= remainingToDeduct;
+                    }
+                    else
+                    {
+                        var fromPending = Math.Max(0, sellerWallet.PendingBalance);
+                        sellerWallet.PendingBalance -= fromPending;
+                        var stillNeed = remainingToDeduct - fromPending;
+                        
+                        // Remaining debt hits AvailableBalance (can go negative)
+                        sellerWallet.AvailableBalance -= stillNeed;
+                    }
+                }
+
+                // Wait, what if frozenAmount > refundAmount? (e.g. system over-froze)
+                // Any excess frozenAmount should be returned to PendingBalance
+                if (frozenAmount > refundAmount)
+                {
+                    var excess = frozenAmount - refundAmount;
+                    var actualExcessReleased = Math.Min(sellerWallet.DisputedBalance, excess); // Only release what's still in disputed
+                    sellerWallet.DisputedBalance -= actualExcessReleased;
+                    sellerWallet.PendingBalance += actualExcessReleased;
+                }
+
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
@@ -228,23 +267,26 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         dispute.RefundTransactionId = Guid.NewGuid().ToString(); // Simulated payment gateway ID
     }
 
-    private async Task ProcessSellerWins(Dispute dispute, int? sellerId, CancellationToken cancellationToken)
+    private async Task ProcessSellerWins(Dispute dispute, int? sellerId, decimal frozenAmount, CancellationToken cancellationToken)
     {
-        // Seller wins - Release frozen funds back to available
-        if (sellerId.HasValue)
+        // Update order status
+        if (dispute.Order != null)
+        {
+            // Restore order status to its pre-dispute state or generic "Delivered"
+            dispute.Order.Status = "Delivered"; 
+        }
+
+        // Update seller wallet
+        if (sellerId.HasValue && frozenAmount > 0)
         {
             var sellerWallet = await _context.SellerWallets
                 .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
-
             if (sellerWallet != null)
             {
-                var frozenAmount = dispute.Amount ?? 0;
-                
-                // Move money: DisputedBalance -> AvailableBalance
+                // Release ALL frozen funds back to PendingBalance
                 var amountToRestore = Math.Min(sellerWallet.DisputedBalance, frozenAmount);
                 sellerWallet.DisputedBalance -= amountToRestore;
-
-                sellerWallet.CreditAvailable(frozenAmount);
+                sellerWallet.PendingBalance += amountToRestore;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
         }
@@ -252,10 +294,10 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         dispute.RefundAmount = 0;
     }
 
-    private async Task ProcessSplitDecision(Dispute dispute, int? sellerId, decimal refundAmount, CancellationToken cancellationToken)
+    private async Task ProcessSplitDecision(Dispute dispute, int? sellerId, decimal refundAmount, decimal frozenAmount, CancellationToken cancellationToken)
     {
-        var disputedAmount = dispute.Amount ?? 0;
-        var sellerKeeps = disputedAmount - refundAmount;
+        var disputedAmount = Math.Max(dispute.Amount ?? 0, frozenAmount);
+        var sellerKeeps = Math.Max(0, disputedAmount - refundAmount);
 
         // Update order status
         if (dispute.Order != null)
@@ -271,11 +313,36 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
 
             if (sellerWallet != null)
             {
-                // Seller keeps part, refunds part
-                var amountToDeductFromDispute = Math.Min(sellerWallet.DisputedBalance, disputedAmount);
-                sellerWallet.DisputedBalance -= amountToDeductFromDispute;
+                var remainingToDeduct = refundAmount;
 
-                sellerWallet.CreditAvailable(sellerKeeps);
+                // 1. Release as much as we can from DisputedBalance to cover the buyer's refund
+                var fromDisputed = Math.Min(sellerWallet.DisputedBalance, remainingToDeduct);
+                sellerWallet.DisputedBalance -= fromDisputed;
+                remainingToDeduct -= fromDisputed;
+
+                // 2. Cascade logic for remaining refund debt
+                if (remainingToDeduct > 0)
+                {
+                    if (sellerWallet.PendingBalance >= remainingToDeduct)
+                    {
+                        sellerWallet.PendingBalance -= remainingToDeduct;
+                    }
+                    else
+                    {
+                        var fromPending = Math.Max(0, sellerWallet.PendingBalance);
+                        sellerWallet.PendingBalance -= fromPending;
+                        sellerWallet.AvailableBalance -= (remainingToDeduct - fromPending);
+                    }
+                }
+
+                // 3. Return the remainder of the frozen funds back to the Seller's PendingBalance
+                if (sellerKeeps > 0)
+                {
+                    var actualKeptRelease = Math.Min(sellerWallet.DisputedBalance, sellerKeeps);
+                    sellerWallet.DisputedBalance -= actualKeptRelease;
+                    sellerWallet.PendingBalance += actualKeptRelease;
+                }
+
                 sellerWallet.TotalRefunded += refundAmount;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
             }
