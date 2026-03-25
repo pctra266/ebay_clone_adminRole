@@ -33,6 +33,10 @@ export function MockPage() {
         status: 'Pending'
     });
     const [returnRequestLoading, setReturnRequestLoading] = useState(false);
+    
+    // States for Mock Dispute
+    const [disputeData, setDisputeData] = useState({ sellerId: '' });
+    const [disputeLoading, setDisputeLoading] = useState(false);
     const [evalLoading, setEvalLoading] = useState(false);
     const [evalSeconds, setEvalSeconds] = useState(60);
     
@@ -129,6 +133,23 @@ export function MockPage() {
             setToast({ message: err.message || "Failed to generate return request.", type: 'error' });
         } finally {
             setReturnRequestLoading(false);
+        }
+    };
+
+    const handleDisputeSubmit = async (e) => {
+        e.preventDefault();
+        setDisputeLoading(true);
+        try {
+            await apiRequest('/api/Mocking/generate-mock-dispute', {
+                method: 'POST',
+                body: { sellerId: parseInt(disputeData.sellerId, 10) },
+            });
+            setToast({ message: "Mock Open Dispute generated successfully!", type: 'warning' });
+            setDisputeData({ sellerId: '' });
+        } catch (err) {
+            setToast({ message: err.message || "Failed to generate dispute.", type: 'error' });
+        } finally {
+            setDisputeLoading(false);
         }
     };
 
@@ -363,11 +384,34 @@ export function MockPage() {
                     </GlassCard>
                 </div>
 
+                {/* Dispute Column */}
+                <div className="col-lg-4">
+                    <GlassCard stagger="stagger-3-7" className="h-100 border-secondary" style={{ borderTop: '4px solid var(--bs-secondary)' }}>
+                        <div className="mb-4">
+                            <h5 className="fw-bold mb-2 text-secondary">5. Generate Open Dispute</h5>
+                            <p className="text-muted small">
+                                Simulate an <strong>OPEN dispute</strong> directly for testing the Resolution Flow. This will automatically deduct funds from Pending and move them to DisputedBalance.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleDisputeSubmit} className="d-flex flex-column gap-3">
+                            <div className="pe-input-group">
+                                <label className="pe-input-label">Seller ID</label>
+                                <input type="number" className="pe-form-control" name="sellerId" value={disputeData.sellerId} onChange={(e) => setDisputeData({ sellerId: e.target.value })} placeholder="Enter Seller ID" min="1" required />
+                            </div>
+
+                            <button type="submit" className="btn btn-outline-secondary rounded-pill mt-4" disabled={disputeLoading}>
+                                {disputeLoading ? "Generating..." : "Inject Open Dispute"}
+                            </button>
+                        </form>
+                    </GlassCard>
+                </div>
+
                 {/* Schedule Column */}
                 <div className="col-lg-4">
                     <GlassCard stagger="stagger-4" className="h-100 border-info" style={{ borderTop: '4px solid var(--bs-info)' }}>
                         <div className="mb-4">
-                            <h5 className="fw-bold mb-2 text-info">5. Schedule Auto-Evaluation</h5>
+                            <h5 className="fw-bold mb-2 text-info">6. Schedule Auto-Evaluation</h5>
                             <p className="text-muted small">
                                 Override the Background Service's target schedule (normally runs the 20th of the month) to demo mass dynamic evaluation.
                             </p>
@@ -407,7 +451,7 @@ export function MockPage() {
                 <div className="col-lg-4">
                     <GlassCard stagger="stagger-5" className="h-100 border-success" style={{ borderTop: '4px solid var(--bs-success)' }}>
                         <div className="mb-4">
-                            <h5 className="fw-bold mb-2 text-success">6. Accelerate Settlements</h5>
+                            <h5 className="fw-bold mb-2 text-success">7. Accelerate Settlements</h5>
                             <p className="text-muted small">
                                 Instantly fast-forward the Estimated Settlement Date of <strong>all pending orders</strong> for a given seller to clear in N minutes.
                             </p>

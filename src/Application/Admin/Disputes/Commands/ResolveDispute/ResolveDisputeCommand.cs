@@ -255,6 +255,9 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         if (dispute.Order != null)
         {
             dispute.Order.Status = "Refunded";
+            
+            // Adjust earnings so the settlement engine (SettlePendingFundsCommand) accurately registers the deduction
+            dispute.Order.SellerEarnings = Math.Max(0, (dispute.Order.SellerEarnings ?? 0) - refundAmount);
         }
 
         // Update seller wallet
@@ -338,7 +341,7 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
         if (dispute.Order != null)
         {
             // Restore order status to its pre-dispute state or generic "Delivered"
-            dispute.Order.Status = "Delivered"; 
+            dispute.Order.Status = "Delivered";
         }
 
         // Update seller wallet
@@ -348,8 +351,9 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
                 .FirstOrDefaultAsync(w => w.SellerId == sellerId.Value, cancellationToken);
             if (sellerWallet != null)
             {
-                // Release ALL frozen funds back to PendingBalance
-                var amountToRestore = Math.Min(sellerWallet.DisputedBalance, frozenAmount);
+                // Release frozen funds back to PendingBalance, capped at actual SellerEarnings (excluding platform fee)
+                var sellerShare = dispute.Order?.SellerEarnings ?? frozenAmount;
+                var amountToRestore = Math.Min(sellerWallet.DisputedBalance, sellerShare);
                 sellerWallet.DisputedBalance -= amountToRestore;
                 sellerWallet.PendingBalance += amountToRestore;
                 sellerWallet.UpdatedAt = DateTime.UtcNow;
@@ -361,13 +365,17 @@ public class ResolveDisputeCommandHandler : IRequestHandler<ResolveDisputeComman
 
     private async Task ProcessSplitDecision(Dispute dispute, int? sellerId, decimal refundAmount, decimal frozenAmount, CancellationToken cancellationToken)
     {
-        var disputedAmount = Math.Max(dispute.Amount ?? 0, frozenAmount);
-        var sellerKeeps = Math.Max(0, disputedAmount - refundAmount);
+        // The seller's max possible kept amount is their actual earnings (excluding platform fee)
+        var sellerShare = dispute.Order?.SellerEarnings ?? Math.Max(dispute.Amount ?? 0, frozenAmount);
+        var sellerKeeps = Math.Max(0, sellerShare - refundAmount);
 
         // Update order status
         if (dispute.Order != null)
         {
             dispute.Order.Status = "PartiallyRefunded";
+            
+            // naturally transfers the correct exact amount to AvailableBalance 
+            dispute.Order.SellerEarnings = sellerKeeps;
         }
 
         // Update seller wallet

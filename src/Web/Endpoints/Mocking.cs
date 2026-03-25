@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using EbayClone.Application.Sellers.Commands.GenerateMockOrder;
+using EbayClone.Application.Sellers.Commands.GenerateMockDispute;
 using EbayClone.Application.Sellers.Commands.PushPayout;
 using EbayClone.Application.Payouts.Commands.RunPayoutEngine;
 
@@ -18,6 +19,7 @@ public class Mocking : EndpointGroupBase
         group.MapPost("generate-seller-order", GenerateSellerOrder);
         group.MapPost("generate-mock-defect", GenerateMockDefect);
         group.MapPost("generate-mock-return-request", GenerateMockReturnRequest);
+        group.MapPost("generate-mock-dispute", GenerateMockDispute);
         group.MapPost("accelerate-settlement", AccelerateSettlement);
         group.MapPost("push-payout", PushPayout);
         group.MapPost("generate-mock-users", GenerateMockUsers);
@@ -48,6 +50,19 @@ public class Mocking : EndpointGroupBase
         {
             var result = await sender.Send(command);
             return TypedResults.Ok(new { success = result, message = "Mock defect generated successfully." });
+        }
+        catch (ArgumentException ex)
+        {
+            return TypedResults.BadRequest(ex.Message);
+        }
+    }
+
+    public async Task<IResult> GenerateMockDispute(ISender sender, [FromBody] GenerateMockDisputeCommand command)
+    {
+        try
+        {
+            var result = await sender.Send(command);
+            return TypedResults.Ok(new { success = result, message = "Mock dispute generated successfully." });
         }
         catch (ArgumentException ex)
         {
