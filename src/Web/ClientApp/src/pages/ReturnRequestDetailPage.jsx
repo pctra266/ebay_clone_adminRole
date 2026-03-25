@@ -13,7 +13,7 @@ export default function ReturnRequestDetailPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
 
   // Modal state
-  const [modal, setModal] = useState(null); // 'approve' | 'reject' | 'adjudicate' | 'provideLabel' | null
+  const [modal, setModal] = useState(null); // 'approve' | 'reject' | 'adjudicate' | 'provideLabel' | 'freeze' | null
   const [adminNote, setAdminNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -45,7 +45,7 @@ export default function ReturnRequestDetailPage() {
   }, [id]);
 
   const handleAction = async () => {
-    if ((modal === 'reject' || modal === 'adjudicate') && !adminNote.trim()) {
+    if ((modal === 'reject' || modal === 'adjudicate' || modal === 'freeze') && !adminNote.trim()) {
       setSubmitError('Please enter a note/reason.');
       return;
     }
@@ -69,11 +69,14 @@ export default function ReturnRequestDetailPage() {
         });
       } else if (modal === 'provideLabel') {
         await returnRequestService.provideReturnLabel(Number(id), returnLabelUrl);
+      } else if (modal === 'freeze') {
+        await returnRequestService.freezeReturnRequest(Number(id), adminNote);
       }
       
       const successMsg = modal === 'approve' ? 'Accepted!' 
                          : modal === 'reject' ? 'Rejected!' 
                          : modal === 'adjudicate' ? 'Adjudicated!' 
+                         : modal === 'freeze' ? 'Frozen for investigation!'
                          : 'Return label provided!';
 
       navigate('/return-requests', { state: { toast: successMsg } });
@@ -118,6 +121,25 @@ export default function ReturnRequestDetailPage() {
   const images = parseImages(detail.evidenceImages);
   const isPending = detail.status === 'Pending';
 
+  const getEscalationTimer = () => {
+    if (detail.status !== 'Pending' || !detail.createdAt) return null;
+    const createdDate = new Date(detail.createdAt);
+    const escalationDate = new Date(createdDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const diff = escalationDate - now;
+
+    if (diff <= 0) return <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 11, background: '#fee2e2', padding: '2px 8px', borderRadius: 4 }}>DUE TO ESCALATE</span>;
+
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    
+    return (
+      <span style={{ color: '#d97706', fontWeight: 600, fontSize: 11, background: '#fef3c7', padding: '2px 8px', borderRadius: 4 }}>
+         ⌛ Escalates in {days}d {hours}h
+      </span>
+    );
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -135,8 +157,9 @@ export default function ReturnRequestDetailPage() {
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#111827' }}>
               Return Request Details #{detail.id}
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9ca3af' }}>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 10 }}>
               Order #{detail.orderId} · Created at {detail.createdAt ? new Date(detail.createdAt).toLocaleString('en-US') : '—'}
+              {getEscalationTimer()}
             </p>
           </div>
         </div>
@@ -341,7 +364,7 @@ export default function ReturnRequestDetailPage() {
           )}
 
           {/* ACTION PANEL */}
-          {(isPending || detail.status === 'Escalated') && (
+          {(isPending || detail.status === 'Escalated' || detail.status === 'Frozen') && (
             <div style={{
               background: '#fff', borderRadius: 14, padding: 24,
               border: '1px solid #e5e7eb', boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
@@ -391,6 +414,22 @@ export default function ReturnRequestDetailPage() {
                   ❌ Reject
                 </button>
               </div>
+
+              {detail.status !== 'Frozen' && (
+                <button
+                  onClick={() => { setModal('freeze'); setAdminNote(''); setSubmitError(''); }}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: 10,
+                    background: '#f8fafc', color: '#475569',
+                    border: '1.5px solid #e2e8f0',
+                    fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                    marginTop: 10, transition: 'all 0.2s',
+                  }}
+                >
+                  ❄️ Freeze Request
+                </button>
+              )}
             </div>
           )}
 
@@ -470,13 +509,14 @@ export default function ReturnRequestDetailPage() {
               {modal === 'approve' ? '✅' : modal === 'reject' ? '❌' : '⚖️'}
             </div>
             <h2 style={{ margin: '0 0 6px', textAlign: 'center', fontSize: 18, fontWeight: 700, color: '#111827' }}>
-              {modal === 'approve' ? 'Confirm Approval' : modal === 'reject' ? 'Confirm Rejection' : modal === 'adjudicate' ? 'Adjudicate Request' : 'Provide Shipping Label'}
+              {modal === 'approve' ? 'Confirm Approval' : modal === 'reject' ? 'Confirm Rejection' : modal === 'adjudicate' ? 'Adjudicate Request' : modal === 'freeze' ? 'Freeze Request' : 'Provide Shipping Label'}
             </h2>
             <p style={{ margin: '0 0 20px', textAlign: 'center', color: '#6b7280', fontSize: 13 }}>
               {modal === 'approve'
                 ? `Refund $${detail.totalPrice ? Number(detail.totalPrice).toLocaleString('en-US') : ''} to customer ${detail.buyerUsername || ''}.`
                 : modal === 'reject' ? 'The request will be rejected and the customer will be notified.'
                 : modal === 'adjudicate' ? 'Decide the final outcome for this return request.'
+                : modal === 'freeze' ? 'Freeze this request to hold auto-processes during investigation. Admin note is required.'
                 : 'Enter the URL where the customer can download the shipping label.'}
             </p>
 
@@ -530,7 +570,7 @@ export default function ReturnRequestDetailPage() {
             ) : (
               <>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-                  Admin Note {(modal === 'reject' || modal === 'adjudicate') && <span style={{ color: '#ef4444' }}>*</span>}
+                  Admin Note {(modal === 'reject' || modal === 'adjudicate' || modal === 'freeze') && <span style={{ color: '#ef4444' }}>*</span>}
                 </label>
                 <textarea
                   placeholder={modal === 'approve' ? 'Enter a note (optional)...' : 'Enter a reason/note (required)...'}
@@ -582,7 +622,8 @@ export default function ReturnRequestDetailPage() {
                 {submitting ? 'Processing...' : 
                  (modal === 'approve' ? 'Confirm Approval' : 
                   modal === 'reject' ? 'Confirm Rejection' :
-                  modal === 'adjudicate' ? 'Confirm Adjudication' : 'Send Shipping Label')}
+                  modal === 'adjudicate' ? 'Confirm Adjudication' :
+                  modal === 'freeze' ? 'Confirm Freeze' : 'Send Shipping Label')}
               </button>
             </div>
           </div>
@@ -653,6 +694,7 @@ function StatusChip({ status }) {
     InTransit:             { bg: '#faf5ff', color: '#7e22ce', label: '✈️ In Transit'        },
     Delivered:             { bg: '#ecfdf5', color: '#047857', label: '🏁 Delivered'         },
     Completed:             { bg: '#f9fafb', color: '#111827', label: '🏁 Completed'         },
+    Frozen:                { bg: '#f1f5f9', color: '#475569', label: '❄️ Frozen'      },
   };
   const s = map[status] || { bg: '#f3f4f6', color: '#374151', label: status };
   return (

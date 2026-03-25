@@ -31,6 +31,9 @@ public class AdminReturnRequests : EndpointGroupBase
 
         // POST /api/adminreturnrequests/{id}/reject   → Bước 4: Từ chối hoàn tiền
         group.MapPost("{id}/reject", RejectReturnRequest);
+
+        // POST /api/adminreturnrequests/{id}/freeze   → Mới: Đóng băng yêu cầu
+        group.MapPost("{id}/freeze", FreezeReturnRequest);
     }
 
     // Bước 1: Danh sách — dùng [AsParameters] để map query string ?status=Pending
@@ -91,6 +94,17 @@ public class AdminReturnRequests : EndpointGroupBase
         ISender sender,
         int id,
         ProcessReturnLabelCommand command)
+    {
+        if (id != command.ReturnRequestId) return Results.BadRequest();
+        await sender.Send(command);
+        return Results.NoContent();
+    }
+
+    // Đóng băng yêu cầu hoàn trả (Fraud Prevention)
+    public async Task<IResult> FreezeReturnRequest(
+        ISender sender,
+        int id,
+        EbayClone.Application.ReturRequests.Commands.FreezeReturnRequest.FreezeReturnRequestCommand command)
     {
         if (id != command.ReturnRequestId) return Results.BadRequest();
         await sender.Send(command);

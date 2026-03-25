@@ -20,11 +20,11 @@ const ActiveConnectionsPage = () => {
         },
         credentials: 'include'
       });
-      
+
       if (!response.ok) {
-        throw new Error('Bạn không có quyền truy cập hoặc có lỗi xảy ra.');
+        throw new Error('You have no permission to access this page.');
       }
-      
+
       const data = await response.json();
       setConnections(data);
       setError(null);
@@ -44,14 +44,14 @@ const ActiveConnectionsPage = () => {
     // Note: The data structure depends on what we broadcast in backend
     // Backend broadcasts "ConnectionUpdated" with { IpAddress, Timestamp, ActiveCount }
     // Or we could just re-fetch to be safe and simple, or update state manually.
-    
+
     // To be most accurate, let's re-fetch the full list when a change occurs
     // to ensure we have the correct "lastSeen" for everyone and the list is sorted.
     fetchConnections();
   }, [fetchConnections]));
 
   const activeCount = connections.length;
-  
+
   // Calculate newly seen IPs (within last 5 mins)
   const fiveMinsAgo = new Date(Date.now() - 5 * 60000);
   const newlySeenCount = connections.filter(c => new Date(c.lastSeen) >= fiveMinsAgo).length;
@@ -68,10 +68,10 @@ const ActiveConnectionsPage = () => {
         </div>
 
         {error && (
-            <div className="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
-                <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                {error}
-            </div>
+          <div className="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {error}
+          </div>
         )}
 
         {/* ── Quick Stats Grid ── */}
@@ -141,18 +141,25 @@ const ActiveConnectionsPage = () => {
                           </td>
                           <td className="fw-bold text-dark">
                             <div className="d-flex align-items-center gap-2">
-                                <i className="bi bi-router text-primary opacity-75"></i>
-                                {conn.ipAddress}
+                              <i className="bi bi-router text-primary opacity-75"></i>
+                              {conn.ipAddress}
                             </div>
                           </td>
                           <td className="text-secondary small">
                             {new Date(conn.lastSeen).toLocaleString()}
                           </td>
                           <td className="pe-4 text-end">
-                             <div className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1" style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+                            {conn.isWhitelisted ? (
+                              <div className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1" style={{ fontSize: '0.7rem', fontWeight: 700 }}>
                                 <span className="status-dot status-dot--active me-2" style={{ width: 6, height: 6, display: 'inline-block', borderRadius: '50%', backgroundColor: '#198754' }}></span>
                                 SECURED
-                             </div>
+                              </div>
+                            ) : (
+                              <div className="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1" style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+                                <span className="status-dot status-dot--active me-2" style={{ width: 6, height: 6, display: 'inline-block', borderRadius: '50%', backgroundColor: '#dc3545' }}></span>
+                                UNTRUSTED
+                              </div>
+                            )}
                           </td>
                         </tr>
                       ))
