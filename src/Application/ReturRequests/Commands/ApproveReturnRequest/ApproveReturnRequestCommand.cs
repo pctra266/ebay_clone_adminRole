@@ -18,11 +18,13 @@ public class ApproveReturnRequestCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly INotificationNotifier _notifier;
+    private readonly IUser _user;
 
-    public ApproveReturnRequestCommandHandler(IApplicationDbContext context, INotificationNotifier notifier)
+    public ApproveReturnRequestCommandHandler(IApplicationDbContext context, INotificationNotifier notifier, IUser user)
     {
         _context = context;
         _notifier = notifier;
+        _user = user;
     }
 
     public async Task<Unit> Handle(
@@ -39,13 +41,17 @@ public class ApproveReturnRequestCommandHandler
         if (returnRequest == null)
             throw new NotFoundException(nameof(ReturnRequest), $"{request.ReturnRequestId}");
 
-        if (returnRequest.Status != ReturnStatuses.Pending && returnRequest.Status != ReturnStatuses.Escalated)
+        if (returnRequest.Status != ReturnStatuses.Pending && returnRequest.Status != ReturnStatuses.Escalated && returnRequest.Status != ReturnStatuses.Frozen)
             throw new InvalidOperationException(
                 $"Yêu cầu hoàn trả #{request.ReturnRequestId} không ở trạng thái hợp lệ để approve (Status: {returnRequest.Status}).");
 
         // Cập nhật ReturnRequest
         returnRequest.AdminNote = request.AdminNote;
         returnRequest.ResolvedAt = DateTime.UtcNow;
+        if (int.TryParse(_user.Id, out int adminId))
+        {
+            returnRequest.ResolvedByAdminId = adminId;
+        }
         returnRequest.ResolutionAction = request.ResolutionAction;
         returnRequest.IsRefundedByEbayFund = request.IsRefundedByEbayFund;
 
@@ -106,6 +112,7 @@ public class ApproveReturnRequestCommandHandler
                 // Ghi log Admin Action
                 var adminAction = new AdminAction
                 {
+                    AdminId = int.Parse(_user.Id ?? "0"),
                     Action = "ApproveReturnRequest",
                     TargetType = "ReturnRequest",
                     TargetId = returnRequest.Id,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { ToastMessage } from "../components/ToastMessage";
@@ -14,6 +14,7 @@ export function DisputeDetailPage() {
   const [resolving, setResolving] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "success" });
   const [showResolveModal, setShowResolveModal] = useState(false);
+  const justResolvedRef = useRef(false); // Track if the current admin just resolved
   const [resolveForm, setResolveForm] = useState({
     winner: "Buyer",
     refundAmount: "",
@@ -33,11 +34,15 @@ export function DisputeDetailPage() {
   // Redis backplane đảm bảo nhận được dù admin đó ở pod nào
   const handleDisputeResolved = useCallback((data) => {
     if (String(data.disputeId) === String(id)) {
+      // If THIS admin just resolved it, skip the duplicate reload triggered by their own SignalR event
+      if (justResolvedRef.current) {
+        justResolvedRef.current = false;
+        return;
+      }
       setToast({
-        message: `⚖️ Case ${data.caseId} đã được resolve! Winner: ${data.winner}. Đang tải lại...`,
-        type: "success"
+        message: `⚖️ Case ${data.caseId} resolved by another admin. Winner: ${data.winner}. Refreshing...`,
+        type: "info"
       });
-      // Tự động reload chi tiết để phản ánh trạng thái mới
       loadDisputeDetail();
     }
   }, [id]);
@@ -96,10 +101,11 @@ export function DisputeDetailPage() {
         sendNotifications: resolveForm.sendNotifications
       };
 
+      justResolvedRef.current = true; // Set flag BEFORE calling API — SignalR may fire before API returns
       await disputeService.resolveDispute(id, payload);
-      setToast({ message: "Dispute resolved successfully!", type: "success" });
+      setToast({ message: "✅ Dispute resolved successfully!", type: "success" });
       setShowResolveModal(false);
-      await loadDisputeDetail(); // Refresh
+      await loadDisputeDetail(); // Refresh once
     } catch (error) {
       // Handle validation errors or problem details returned by problem details middleware
       let errorMsg = "Failed to resolve dispute";
@@ -342,7 +348,7 @@ export function DisputeDetailPage() {
                     </tr>
                     <tr>
                       <td className="text-muted">Total Amount:</td>
-                      <td className="fw-bold">${dispute.order.totalAmount?.toFixed(2)}</td>
+                      <td className="fw-bold">${dispute.order.totalPrice?.toFixed(2) ?? '—'}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -389,25 +395,60 @@ export function DisputeDetailPage() {
               <h5 className="card-title mb-0">Evidence</h5>
             </div>
             <div className="card-body">
-              {dispute.buyerEvidence && (
-                <div className="mb-3">
-                  <strong>Buyer Evidence:</strong>
-                  <p className="mt-1">{dispute.buyerEvidence}</p>
+              {[
+                { label: "Buyer Evidence", items: dispute.buyerEvidences },
+                { label: "Seller Evidence", items: dispute.sellerEvidences }
+              ].map(({ label, items }) => items && items.length > 0 && (
+                <div className="mb-4" key={label}>
+                  <strong className="d-block mb-2">{label}:</strong>
+                  <div className="d-flex flex-wrap gap-3">
+                    {items.map((e, i) => (
+                      <div key={i} style={{width: '160px'}}>
+                        {e.type === 'image' ? (
+                          <a href={e.url} target="_blank" rel="noopener noreferrer">
+                            <img
+                              src={e.url}
+                              alt={e.description}
+                              className="rounded border"
+                              style={{width:'160px', height:'110px', objectFit:'cover', cursor:'pointer'}}
+                              onError={(ev) => { ev.target.style.display='none'; ev.target.nextSibling.style.display='flex'; }}
+                            />
+                            <div className="rounded border bg-light d-none align-items-center justify-content-center"
+                              style={{width:'160px', height:'110px'}}>
+                              <i className="fas fa-image fa-2x text-muted"></i>
+                            </div>
+                          </a>
+                        ) : e.type === 'video' ? (
+                          <a href={e.url} target="_blank" rel="noopener noreferrer"
+                            className="rounded border bg-dark d-flex align-items-center justify-content-center text-decoration-none"
+                            style={{width:'160px', height:'110px'}}>
+                            <i className="fas fa-play-circle fa-3x text-white opacity-75"></i>
+                          </a>
+                        ) : (
+                          <a href={e.url} target="_blank" rel="noopener noreferrer"
+                            className="rounded border bg-light d-flex align-items-center justify-content-center text-decoration-none gap-2"
+                            style={{width:'160px', height:'110px'}}>
+                            <i className="fas fa-file-pdf fa-2x text-danger"></i>
+                          </a>
+                        )}
+                        <div className="mt-1">
+                          <span className="badge bg-secondary text-uppercase me-1" style={{fontSize:'0.6rem'}}>{e.type}</span>
+                          <small className="text-muted" style={{fontSize:'0.7rem'}}>{e.description}</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-              {dispute.sellerEvidence && (
-                <div>
-                  <strong>Seller Evidence:</strong>
-                  <p className="mt-1">{dispute.sellerEvidence}</p>
-                </div>
-              )}
-              {!dispute.buyerEvidence && !dispute.sellerEvidence && (
+              ))}
+              {(!dispute.buyerEvidences || dispute.buyerEvidences.length === 0) &&
+               (!dispute.sellerEvidences || dispute.sellerEvidences.length === 0) && (
                 <span className="text-muted">No evidence provided</span>
               )}
             </div>
           </div>
         </div>
       </div>
+
 
       {/* Timeline */}
       {dispute.timeline && dispute.timeline.length > 0 && (

@@ -47,6 +47,13 @@ const returnRequestService = {
   // Lấy tin nhắn làm bằng chứng (Evidence)
   getReturnRequestMessages: (id) =>
     apiRequest(`${BASE}/${id}/messages`),
+
+  // Đóng băng yêu cầu (Fraud Prevention)
+  freezeReturnRequest: (id, adminNote = '') =>
+    apiRequest(`${BASE}/${id}/freeze`, {
+      method: 'POST',
+      body: { returnRequestId: id, adminNote },
+    }),
 };
 
 export default returnRequestService;
