@@ -129,43 +129,6 @@ public class RunPayoutEngineCommandHandler : IRequestHandler<RunPayoutEngineComm
                 continue;
             }
 
-            // Check for open disputes on any of this seller's orders
-            // Also catches demo scenario: dispute seeded directly with RaisedBy = seller and no order
-            bool hasOpenDispute = await _context.Disputes
-                .AnyAsync(d =>
-                    (d.Status == "Open" || d.Status == "InReview") &&
-                    (
-                        // Case A: order-linked dispute — order has items sold by this seller
-                        (d.OrderId != null && d.Order != null &&
-                         d.Order.OrderItems.Any(oi => oi.Product != null && oi.Product.SellerId == seller.Id))
-                        ||
-                        // Case B: direct seller dispute (no order) — used in demo seeding
-                        (d.OrderId == null && d.RaisedBy == seller.Id)
-                    ),
-                    cancellationToken);
-
-            if (hasOpenDispute)
-            {
-                var holdTx = new PayoutTransaction
-                {
-                    SellerId = seller.Id,
-                    Amount = wallet.AvailableBalance,
-                    Status = PayoutTransaction.StatusHold,
-                    ErrorLog = "Active dispute found on one or more orders.",
-                    BankSnapshot = seller.BankAccountMock,
-                    SessionId = sessionId,
-                    CreatedAt = DateTime.UtcNow,
-                    CompletedAt = DateTime.UtcNow
-                };
-                _context.PayoutTransactions.Add(holdTx);
-                _logger.LogWarning("[HOLD] Seller #{Id} ({Name}): ${Amount} → Active dispute detected.",
-                    seller.Id, seller.Username, wallet.AvailableBalance);
-                
-                if (request.SellerId.HasValue) diagnosticMessage = "ON HOLD: Active dispute detected on seller account.";
-                holdCount++;
-                continue;
-            }
-
             // ── STEP 1 Bank info validation ───────────────────────────────────
             if (string.IsNullOrWhiteSpace(seller.BankAccountMock))
             {

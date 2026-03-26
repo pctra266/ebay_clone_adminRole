@@ -79,23 +79,22 @@ export default function PayoutEnginePage() {
     const totalDisbursed = history.reduce((s, r) => s + (r.totalAmount || 0), 0);
     const totalTx = history.reduce((s, r) => s + (r.count || 0), 0);
     const exFailed = exceptions.filter(e => e.status === 'Failed').length;
-    const exHold = exceptions.filter(e => e.status === 'Hold').length;
 
     // ── Handlers ──────────────────────────────────────────────────────────────
-    const handleForceRun = async () => {
-        setIsRunning(true);
-        setRunResult(null);
-        try {
-            const res = await financeService.runPayoutEngine();
-            setRunResult(res);
-            showToast(`Run complete: ${res.success} Success | ${res.failed} Failed | ${res.onHold} Hold`, 'success');
-            await loadData();
-        } catch {
-            showToast('Payout engine run failed.', 'error');
-        } finally {
-            setIsRunning(false);
-        }
-    };
+    // const handleForceRun = async () => {
+    //     setIsRunning(true);
+    //     setRunResult(null);
+    //     try {
+    //         const res = await financeService.runPayoutEngine();
+    //         setRunResult(res);
+    //         showToast(`Run complete: ${res.success} Success | ${res.failed} Failed | ${res.onHold} Hold`, 'success');
+    //         await loadData();
+    //     } catch {
+    //         showToast('Payout engine run failed.', 'error');
+    //     } finally {
+    //         setIsRunning(false);
+    //     }
+    // };
 
     const handleRelease = async (id) => {
         setReleasingId(id);
@@ -140,7 +139,7 @@ export default function PayoutEnginePage() {
                     </div>
                 </div>
 
-                <div className="d-flex gap-2">
+                {/* <div className="d-flex gap-2">
                     <button
                         className="btn btn-primary shadow-sm"
                         onClick={handleForceRun}
@@ -152,7 +151,7 @@ export default function PayoutEnginePage() {
                             <><i className="bi bi-play-circle me-2"></i> Force Engine Run</>
                         )}
                     </button>
-                </div>
+                </div> */}
             </div>
 
             <div className="p-3 bg-light rounded-4">
@@ -172,14 +171,6 @@ export default function PayoutEnginePage() {
                                 <span className="pe-run-num">{runResult.failed}</span>
                                 <span className="pe-run-label">Failed</span>
                             </div>
-                            <div className="pe-run-stat pe-run-stat--hold">
-                                <span className="pe-run-num">{runResult.onHold}</span>
-                                <span className="pe-run-label">Holds</span>
-                            </div>
-                            <div className="pe-run-stat pe-run-stat--skip">
-                                <span className="pe-run-num">{runResult.skipped}</span>
-                                <span className="pe-run-label">Skipped</span>
-                            </div>
                             <div className="pe-run-stat pe-run-stat--disburse">
                                 <span className="pe-run-num text-primary">{fmtCurrency(runResult.totalDisbursed)}</span>
                                 <span className="pe-run-label">Total Outflow</span>
@@ -190,7 +181,7 @@ export default function PayoutEnginePage() {
 
                 {/* KPI Metrics Row */}
                 <div className="row g-4 mb-4">
-                    <div className="col-md-3">
+                    <div className="col-md-4">
                         <MetricTile
                             label="Total Disbursed"
                             value={totalDisbursed}
@@ -200,7 +191,7 @@ export default function PayoutEnginePage() {
                             currency
                         />
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-4">
                         <MetricTile
                             label="Successful Payouts"
                             value={totalTx}
@@ -209,22 +200,13 @@ export default function PayoutEnginePage() {
                             stagger="stagger-2"
                         />
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-4">
                         <MetricTile
                             label="Unresolved Errors"
                             value={exFailed}
                             icon="bi bi-exclamation-octagon"
                             gradient="bg-gradient-red"
                             stagger="stagger-3"
-                        />
-                    </div>
-                    <div className="col-md-3">
-                        <MetricTile
-                            label="On-Hold (Disputes)"
-                            value={exHold}
-                            icon="bi bi-pause-circle"
-                            gradient="bg-gradient-yellow"
-                            stagger="stagger-4"
                         />
                     </div>
                 </div>
@@ -366,7 +348,7 @@ export default function PayoutEnginePage() {
                                                     <td className="text-secondary small">#{ex.id}</td>
                                                     <td>
                                                         <div className="fw-bold">{ex.sellerUsername || 'Unknown'}</div>
-                                                        <div className="text-secondary x-small">ID: {ex.sellerId }</div>
+                                                        <div className="text-secondary x-small">ID: {ex.sellerId}</div>
                                                     </td>
                                                     <td className="fw-bold text-blue">{fmtCurrency(ex.amount)}</td>
                                                     <td><StatusBadge status={ex.status} /></td>
@@ -377,7 +359,7 @@ export default function PayoutEnginePage() {
                                                         {new Date(ex.createdAt).toLocaleDateString()}
                                                     </td>
                                                     <td className="text-end">
-                                                        {(ex.status === 'Hold' || ex.status === 'Failed') && (
+                                                        {(ex.status === 'Failed') && (
                                                             <button
                                                                 className="btn btn-sm btn-outline-success rounded-pill px-3"
                                                                 onClick={() => handleRelease(ex.id)}

@@ -40,7 +40,6 @@ export function MockPage() {
     const [evalLoading, setEvalLoading] = useState(false);
     const [evalSeconds, setEvalSeconds] = useState(60);
     
-    // States for Accelerate Settlements
     const [settleData, setSettleData] = useState({ sellerId: '', seconds: 60 });
     const [settleLoading, setSettleLoading] = useState(false);
 
